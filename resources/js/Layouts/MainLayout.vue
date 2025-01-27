@@ -1,11 +1,9 @@
 <template>
     <div class="flex">
-      <!-- Sidebar na komputerach -->
+        
       <Sidebar />
   
-      <!-- Główna sekcja strony -->
       <div class="flex-1 ml-64 md:ml-0">
-        <!-- Navbar na telefonach -->
         <Navbar />
         <slot />
       </div>
