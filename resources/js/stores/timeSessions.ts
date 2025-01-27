@@ -25,11 +25,12 @@ export const useTimeSessionsStore = defineStore('timeSessions', {
   }),
 
   actions: {
-    async fetchSessions() {
+    async fetchSessions(): Promise<TimeSession[]> {
       const response = await axios.get<TimeSession[]>('/time-sessions', {
-        headers: { 'Accept': 'application/json' }
-      })
-      this.sessions = response.data
+        headers: { Accept: 'application/json' },
+      });
+      this.sessions = response.data;
+      return this.sessions;
     },
 
     async createTimeSession(task_id: number, start_time: string, end_time?: string) {

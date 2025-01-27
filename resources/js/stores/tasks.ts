@@ -2,16 +2,18 @@ import { defineStore } from 'pinia'
 import axios from 'axios'
 
 export interface Task {
-  id: number
-  title: string
-  project_id: number
-  created_at?: string
-  updated_at?: string
+  id: number;
+  title: string;
+  project_id: number;
+  created_at?: string;
+  updated_at?: string;
   project?: {
-    id: number
-    name: string
-  }
-  time_sessions?: any[] 
+    id: number;
+    name: string;
+  };
+  time_sessions?: any[];
+  timer?: string;
+  isRunning?: boolean; 
 }
 
 interface TasksState {

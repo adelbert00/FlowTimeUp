@@ -21,7 +21,14 @@
         "vue-tsc": "^2.2.0"
     },
     "dependencies": {
+        "class-variance-authority": "^0.7.1",
+        "clsx": "^2.1.1",
         "dayjs": "^1.11.13",
-        "pinia": "^2.3.1"
+        "lucide-vue-next": "^0.474.0",
+        "pinia": "^2.3.1",
+        "radix-vue": "^1.9.12",
+        "shadcn-vue": "^0.11.3",
+        "tailwind-merge": "^2.6.0",
+        "tailwindcss-animate": "^1.0.7"
     }
 }
