@@ -32,7 +32,11 @@ class ProjectController extends Controller
             'name' => 'required|string|max:255',
         ]);
 
-        Project::create($validated);
+        $project = Project::create($validated);
+
+        if ($request->wantsJson()) {
+            return response()->json($project, 201);
+        }
 
         return redirect()->route('projects.index')->with('success', 'Project created!');
     }

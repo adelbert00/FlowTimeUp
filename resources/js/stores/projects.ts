@@ -29,9 +29,18 @@ export const useProjectsStore = defineStore('projects', {
       this.projects = response.data
     },
 
-    async createProject(name: string) {
-      await axios.post('/projects', { name })
-      this.fetchProjects()
+    async createProject(name: string): Promise<Project|undefined> {
+      try {
+        const response = await axios.post<Project>('/projects', { name }, {
+          headers: { 'Accept': 'application/json' }
+        })
+        const createdProject = response.data
+        this.projects.push(createdProject)
+        return createdProject
+      } catch (error) {
+        console.error('Error creating project:', error)
+        return undefined
+      }
     },
 
     async deleteProject(id: number) {

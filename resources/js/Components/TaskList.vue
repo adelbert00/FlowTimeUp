@@ -1,48 +1,34 @@
 <template>
-    <div class="border p-4">
-      <h2 class="font-semibold mb-2">Your tasks</h2>
-      <ul>
-        <li
-          v-for="task in tasksStore.tasks"
-          :key="task.id"
-          class="border-b py-2"
-        >
-          <div class="flex justify-between items-center">
-            <div>
-              <strong>{{ task.title }}</strong>
-              <span v-if="task.project"> [{{ task.project.name }}]</span>
-            </div>
-            <div>
-              <button
-                @click="deleteTask(task.id)"
-                class="text-red-500 text-sm"
-              >
-                Delete
-              </button>
-            </div>
-          </div>
-        </li>
-      </ul>
+    <div>
+      <h2 class="text-xl font-bold mb-4">Tasks</h2>
+  
+      <div v-for="task in tasksStore.tasks" :key="task.id" class="mb-2 border-b pb-2">
+
+        <TimeTracker :task="task" />
+      </div>
     </div>
   </template>
   
   <script lang="ts">
-  import { defineComponent } from 'vue'
+  import { defineComponent, onMounted } from 'vue'
   import { useTasksStore } from '@/stores/tasks'
+  import TimeTracker from '@/Components/TimeTracker.vue'
   
   export default defineComponent({
+    name: 'TaskList',
+    components: {
+      TimeTracker
+    },
     setup() {
       const tasksStore = useTasksStore()
   
-      const deleteTask = async (id: number) => {
-        await tasksStore.deleteTask(id)
-      }
+      onMounted(() => {
+        tasksStore.fetchTasks()
+      })
   
       return {
-        tasksStore,
-        deleteTask
+        tasksStore
       }
     }
   })
   </script>
-  
