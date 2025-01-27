@@ -1,7 +1,7 @@
 <template>
     <div class="flex">
-        
-      <Sidebar />
+
+      <Main_Sidebar />
   
       <div class="flex-1 ml-64 md:ml-0">
         <Navbar />
@@ -11,12 +11,12 @@
   </template>
   
   <script lang="ts">
-  import Sidebar from "@/Components/Sidebar.vue";
+  import Main_Sidebar from "@/Components/Main_Sidebar.vue";
   import Navbar from "@/Components/Navbar.vue";
   
   export default {
     components: {
-      Sidebar,
+      Main_Sidebar,
       Navbar,
     },
   };

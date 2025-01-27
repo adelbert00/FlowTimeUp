@@ -1,6 +1,6 @@
 <template>
   <div>
-    <h2 class="text-xl font-bold mb-4">Tasks</h2>
+    <h2 class="text-2xl font-bold mb-4">Tasks</h2>
 
     <div v-for="task in tasksStore.tasks" :key="task.id" class="mb-4 border rounded p-4">
       <div class="flex justify-between items-center">
@@ -8,9 +8,12 @@
           <strong>{{ task.title }}</strong>
           <span v-if="task.project"> [{{ task.project.name }}]</span>
         </div>
-        <div>
-          Total: {{ calculateTotalTime(task.time_sessions) }}
-        </div>
+        <div class="flex items-center space-x-1">
+        <p>Total:</p>
+        <span class="font-bold">
+          {{ calculateTotalTime(task.time_sessions) }}
+        </span>
+      </div>
       </div>
 
       <div class="flex items-center space-x-4 mt-2">
@@ -18,20 +21,20 @@
           {{ task.timer ?? "00:00:00.000" }}
         </div>
         <div>
-          <button
+          <Button
             v-if="!task.isRunning"
             @click="startTimer(task)"
             class="px-3 py-1 bg-green-500 text-white rounded"
           >
             Start
-          </button>
-          <button
+          </Button>
+          <Button
             v-else
             @click="stopTimer(task)"
             class="px-3 py-1 bg-red-500 text-white rounded"
           >
             Stop
-          </button>
+          </Button>
         </div>
       </div>
 
@@ -70,6 +73,7 @@ import { useTasksStore } from "@/stores/tasks";
 import { useTimeSessionsStore, TimeSession } from "@/stores/timeSessions";
 import dayjs from "dayjs";
 import duration from "dayjs/plugin/duration";
+import Button from "./ui/button/Button.vue";
 
 import Accordion from "./ui/accordion/Accordion.vue";
 import AccordionItem from "./ui/accordion/AccordionItem.vue";
@@ -85,6 +89,7 @@ export default defineComponent({
     AccordionItem,
     AccordionTrigger,
     AccordionContent,
+    Button,
   },
   setup() {
     const tasksStore = useTasksStore();
@@ -154,7 +159,7 @@ export default defineComponent({
         return sum + end.diff(start);
       }, 0);
       const duration = dayjs.duration(totalMilliseconds, "milliseconds");
-      return duration.format("HH:mm:ss.SSS");
+      return duration.format("HH:mm:ss");
     };
 
     onMounted(async () => {

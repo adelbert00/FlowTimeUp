@@ -1,7 +1,7 @@
 <template>
   <MainLayout>
-    <div class="pl-80 p-4">
-      <h1 class="text-xl font-bold mb-4">Tasks</h1>
+    <div class=" p-4">
+      <h1 class="text-2xl font-bold mb-4">Tasks</h1>
 
       <TaskForm />
 
