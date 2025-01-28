@@ -6,22 +6,22 @@ use App\Models\Task;
 use App\Models\Project;
 use Illuminate\Http\Request;
 use Inertia\Inertia;
+use App\Models\Tag;
 
 class TaskController extends Controller
 {
     public function index(Request $request)
     {
-        $tasks = Task::with('project')->get();
-
-        if ($request->wantsJson()) {
+        $tasks = Task::with(['project','tags','timeSessions'])->get();
+    
+        if($request->wantsJson()) {
             return response()->json($tasks);
         }
-
+    
         return Inertia::render('Tasks/Index', [
-            'tasks' => $tasks,
+            'tasks' => $tasks
         ]);
     }
-
     public function create()
     {
         $projects = Project::all();
@@ -36,15 +36,17 @@ class TaskController extends Controller
             'title' => 'required|string|max:255',
             'project_id' => 'required|exists:projects,id',
         ]);
+    
+        $task = Task::create($validated);
 
-        Task::create($validated);
-
-        return redirect()->route('tasks.index')->with('success', 'Task created!');
+        return response()->json($task, 201);
     }
 
     public function show(Task $task, Request $request)
     {
-        $task->load('project', 'timeSessions');
+        $task = Task::with(['project', 'tags', 'timeSessions'])
+        ->orderBy('id', 'desc')
+        ->paginate(10);
 
         if ($request->wantsJson()) {
             return response()->json($task);
@@ -81,5 +83,18 @@ class TaskController extends Controller
     {
         $task->delete();
         return redirect()->route('tasks.index')->with('success', 'Task deleted!');
+    }
+    public function attachTags(Request $request, Task $task)
+{
+    $tagIds = $request->input('tags', []);
+    $task->tags()->syncWithoutDetaching($tagIds);
+
+    return response()->json(['status' => 'ok']);
+}
+    public function detachTag(Task $task, Tag $tag)
+    {
+        $task->tags()->detach($tag->id);
+
+        return response()->json(['status' => 'ok']);
     }
 }

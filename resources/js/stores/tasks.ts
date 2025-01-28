@@ -1,23 +1,28 @@
-import { defineStore } from 'pinia'
-import axios from 'axios'
+import { defineStore } from 'pinia';
+import axios from 'axios';
+import type { Tag } from './tags';
 
 export interface Task {
   id: number;
   title: string;
-  project_id: number;
+  project_id: number | null;
   created_at?: string;
   updated_at?: string;
+
+  tags?: Tag[];
+  time_sessions?: any[];
   project?: {
     id: number;
     name: string;
   };
-  time_sessions?: any[];
+
   timer?: string;
-  isRunning?: boolean; 
+  isRunning?: boolean;
+  startTime?: any;
 }
 
 interface TasksState {
-  tasks: Task[]
+  tasks: Task[];
 }
 
 export const useTasksStore = defineStore('tasks', {
@@ -26,25 +31,26 @@ export const useTasksStore = defineStore('tasks', {
   }),
 
   actions: {
-    setTasks(data: Task[]) {
-      this.tasks = data
-    },
-
     async fetchTasks() {
-      const response = await axios.get<Task[]>('/tasks', {
-        headers: { 'Accept': 'application/json' }
-      })
-      this.tasks = response.data
+      const response = await axios.get('/tasks');
+      this.tasks = response.data;
     },
 
-    async createTask(title: string, project_id: number) {
-      await axios.post('/tasks', { title, project_id })
-      this.fetchTasks()
+    async createTask(title: string, projectId: number | null)  {
+      const res = await axios.post('/tasks', { title, project_id: projectId });
+      const newTask = res.data;
+      return newTask;
+    },    
+
+    async attachTags(taskId: number, tagIds: number[]) {
+      console.log('Calling attachTags with', taskId, tagIds);
+      await axios.post(`/tasks/${taskId}/tags`, { tags: tagIds });
+      await this.fetchTasks();
     },
 
-    async deleteTask(id: number) {
-      await axios.delete(`/tasks/${id}`)
-      this.fetchTasks()
-    }
+    async detachTag(taskId: number, tagId: number) {
+      await axios.delete(`/tasks/${taskId}/tags/${tagId}`);
+      await this.fetchTasks();
+    },
   },
-})
+});

@@ -2,8 +2,8 @@
 
 namespace App\Models;
 
-use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Factories\HasFactory;
 
 class Task extends Model
 {
@@ -16,8 +16,13 @@ class Task extends Model
         return $this->belongsTo(Project::class);
     }
 
-    public function sessions()
+    public function timeSessions()
     {
         return $this->hasMany(TimeSession::class);
+    }
+
+    public function tags()
+    {
+        return $this->belongsToMany(Tag::class, 'tag_task');
     }
 }
