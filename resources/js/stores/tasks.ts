@@ -52,5 +52,16 @@ export const useTasksStore = defineStore('tasks', {
       await axios.delete(`/tasks/${taskId}/tags/${tagId}`);
       await this.fetchTasks();
     },
+
+    async updateTask(taskId: number, payload: { title?: string; project_id?: number | null }) {
+      const response = await axios.patch(`/tasks/${taskId}`, payload);
+      await this.fetchTasks();
+      return response.data; 
+    },
+    async deleteTask(taskId: number) {
+      await axios.delete(`/tasks/${taskId}`);
+      
+      await this.fetchTasks();
+    },
   },
 });

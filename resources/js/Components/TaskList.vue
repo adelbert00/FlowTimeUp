@@ -5,6 +5,7 @@ import { useTimeSessionsStore, TimeSession } from "@/stores/timeSessions";
 import dayjs from "dayjs";
 import duration from "dayjs/plugin/duration";
 import Button from "./ui/button/Button.vue";
+import { useProjectsStore } from "@/stores/projects"; 
 
 import Accordion from "./ui/accordion/Accordion.vue";
 import AccordionItem from "./ui/accordion/AccordionItem.vue";
@@ -13,17 +14,29 @@ import AccordionContent from "./ui/accordion/AccordionContent.vue";
 
 dayjs.extend(duration);
 
+// Inicjujemy store z zadaniami
 const tasksStore = useTasksStore();
-
 const timeSessionsStore = useTimeSessionsStore();
+const projectsStore = useProjectsStore(); // <-- init
 
+// Timery i akordeon
 let intervalId: number | null = null;
-const openAccordion = ref<string[]>([])
+const openAccordion = ref<string[]>([]);
 
+// Zmienne do modala edycji
+const showEditModal = ref(false);
+const editTaskId = ref<number | null>(null);
+const editTitle = ref("");
+// (Opcjonalnie) project dla edycji:
+const editProjectId = ref<number | null>(null);
+
+// Lifecycle
 onMounted(async () => {
   await tasksStore.fetchTasks();
   await timeSessionsStore.fetchSessions();
+  await projectsStore.fetchProjects(); 
 
+  // Przypisz time_sessions do local (opcjonalnie)
   tasksStore.tasks.forEach((task: any) => {
     task.time_sessions = timeSessionsStore.sessions.filter(
       (session: TimeSession) => session.task_id === task.id
@@ -31,11 +44,7 @@ onMounted(async () => {
   });
 });
 
-async function removeTagFromTask(taskId: number, tagId: number) {
-  await tasksStore.detachTag(taskId, tagId);
-
-}
-
+// Timer - start
 function startTimer(task: any) {
   task.isRunning = true;
   task.startTime = dayjs();
@@ -51,17 +60,21 @@ function startTimer(task: any) {
   }, 10);
 }
 
+// Timer - stop
 async function stopTimer(task: any) {
   if (!task.isRunning) return;
-  task.isRunning = false;
 
+  task.isRunning = false;
   const endTime = dayjs();
+
+  // Zapis sesji
   await timeSessionsStore.createTimeSession(
     task.id,
     task.startTime.toISOString(),
     endTime.toISOString()
   );
 
+  // Odśwież sessions
   await timeSessionsStore.fetchSessions();
   task.time_sessions = timeSessionsStore.sessions.filter(
     (session: TimeSession) => session.task_id === task.id
@@ -76,6 +89,7 @@ async function stopTimer(task: any) {
   task.startTime = null;
 }
 
+// Funkcje formatowania
 function formatDate(date: string) {
   return dayjs(date).format("YYYY-MM-DD");
 }
@@ -86,12 +100,51 @@ function formatTimeRange(start: string, end: string) {
 
 function calculateTotalTime(sessions: TimeSession[] = []) {
   const totalMilliseconds = sessions.reduce((sum, session) => {
-    const start = dayjs(session.start_time);
-    const finish = session.end_time ? dayjs(session.end_time) : dayjs();
-    return sum + finish.diff(start);
+    const s = dayjs(session.start_time);
+    const f = session.end_time ? dayjs(session.end_time) : dayjs();
+    return sum + f.diff(s);
   }, 0);
   const durationTime = dayjs.duration(totalMilliseconds, "milliseconds");
   return durationTime.format("HH:mm:ss");
+}
+
+// Kasowanie zadania
+async function deleteTask(taskId: number) {
+  await tasksStore.deleteTask(taskId);
+}
+
+// Otwieranie modala edycji
+function openEditModal(task: any) {
+  showEditModal.value = true;
+  editTaskId.value = task.id;
+  editTitle.value = task.title;
+  // (opcjonalnie) if you have project in the store
+  editProjectId.value = task.project?.id ?? null;
+}
+
+// Zapis edycji
+async function saveEdit() {
+  if (editTaskId.value === null) return;
+
+  await tasksStore.updateTask(editTaskId.value, {
+    title: editTitle.value,
+    project_id: editProjectId.value, // if you want to handle project
+  });
+  showEditModal.value = false;
+}
+
+// Anulowanie edycji
+function cancelEdit() {
+  showEditModal.value = false;
+}
+
+// Accordion
+function toggleAccordion(taskId: string) {
+  if (openAccordion.value.includes(taskId)) {
+    openAccordion.value = openAccordion.value.filter((id) => id !== taskId);
+  } else {
+    openAccordion.value.push(taskId);
+  }
 }
 </script>
 
@@ -109,14 +162,28 @@ function calculateTotalTime(sessions: TimeSession[] = []) {
           <strong>{{ task.title }}</strong>
           <span v-if="task.project"> [{{ task.project.name }}]</span>
         </div>
-        <div class="flex items-center space-x-1">
-          <p>Total:</p>
-          <span class="font-bold">
-            {{ calculateTotalTime(task.time_sessions) }}
-          </span>
+        <div class="flex items-center space-x-2">
+          <p>Total: {{ calculateTotalTime(task.time_sessions) }}</p>
+
+          <!-- Przycisk Edit -->
+          <button
+            class="bg-gray-500 text-white px-2 py-1 rounded"
+            @click="openEditModal(task)"
+          >
+            Edit
+          </button>
+
+          <!-- Przycisk Delete -->
+          <button
+            class="bg-red-500 text-white px-2 py-1 rounded"
+            @click="deleteTask(task.id)"
+          >
+            Delete
+          </button>
         </div>
       </div>
 
+      <!-- Tagi -->
       <div class="mt-2 flex flex-wrap gap-2">
         <span
           v-for="tag in task.tags ?? []"
@@ -124,15 +191,10 @@ function calculateTotalTime(sessions: TimeSession[] = []) {
           class="bg-gray-200 text-gray-700 px-2 py-1 rounded text-sm flex items-center"
         >
           {{ tag.name }}
-          <button
-            class="ml-2 text-red-500"
-            @click="removeTagFromTask(task.id, tag.id)"
-          >
-            x
-          </button>
         </span>
       </div>
 
+      <!-- Timer -->
       <div class="flex items-center space-x-4 mt-2">
         <div class="text-gray-600 font-mono w-[12ch] text-center">
           {{ task.timer ?? "00:00:00.000" }}
@@ -155,6 +217,7 @@ function calculateTotalTime(sessions: TimeSession[] = []) {
         </div>
       </div>
 
+      <!-- Accordion z sesjami -->
       <Accordion v-model="openAccordion" collapsible>
         <AccordionItem :value="`task-${task.id}`">
           <AccordionTrigger>View Sessions</AccordionTrigger>
@@ -177,6 +240,53 @@ function calculateTotalTime(sessions: TimeSession[] = []) {
           </AccordionContent>
         </AccordionItem>
       </Accordion>
+    </div>
+
+    <!-- Modal edycji -->
+    <div
+      v-if="showEditModal"
+      class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center"
+    >
+      <div class="bg-white p-4 rounded shadow w-80">
+        <h3 class="text-lg font-semibold mb-2">Edit Task</h3>
+        <label class="block mb-2 font-medium">Title:</label>
+        <input
+          v-model="editTitle"
+          class="border px-2 py-1 rounded w-full mb-3"
+        />
+
+        <!-- (opcjonalnie) Wybór projektu -->
+        <label class="block mb-2 font-medium">Project:</label>
+        <select
+  v-model.number="editProjectId"
+  class="border px-2 py-1 rounded w-full mb-3"
+>
+  <option :value="null">-- Select project --</option>
+  <option
+    v-for="proj in projectsStore.projects"
+    :key="proj.id"
+    :value="proj.id"
+  >
+    {{ proj.name }}
+  </option>
+</select>
+
+
+        <div class="mt-3 flex justify-end space-x-2">
+          <button
+            class="border px-3 py-1 rounded"
+            @click="cancelEdit"
+          >
+            Cancel
+          </button>
+          <button
+            class="bg-blue-500 text-white px-3 py-1 rounded"
+            @click="saveEdit"
+          >
+            Save
+          </button>
+        </div>
+      </div>
     </div>
   </div>
 </template>

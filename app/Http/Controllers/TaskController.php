@@ -34,11 +34,10 @@ class TaskController extends Controller
     {
         $validated = $request->validate([
             'title' => 'required|string|max:255',
-            'project_id' => 'required|exists:projects,id',
+            'project_id' => 'nullable|exists:projects,id',
         ]);
-    
-        $task = Task::create($validated);
 
+        $task = Task::create($validated);
         return response()->json($task, 201);
     }
 
@@ -70,31 +69,30 @@ class TaskController extends Controller
     public function update(Request $request, Task $task)
     {
         $validated = $request->validate([
-            'title' => 'required|string|max:255',
-            'project_id' => 'required|exists:projects,id',
+            'title' => 'sometimes|string|max:255',
+            'project_id' => 'nullable|exists:projects,id', 
         ]);
 
         $task->update($validated);
-
-        return redirect()->route('tasks.index')->with('success', 'Task updated!');
+        return response()->json($task, 200);
     }
 
-    public function destroy(Task $task)
+        public function destroy(Task $task)
+        {
+            $task->delete();
+            return response()->json(null, 204);
+        }
+        public function attachTags(Request $request, Task $task)
     {
-        $task->delete();
-        return redirect()->route('tasks.index')->with('success', 'Task deleted!');
-    }
-    public function attachTags(Request $request, Task $task)
-{
-    $tagIds = $request->input('tags', []);
-    $task->tags()->syncWithoutDetaching($tagIds);
-
-    return response()->json(['status' => 'ok']);
-}
-    public function detachTag(Task $task, Tag $tag)
-    {
-        $task->tags()->detach($tag->id);
+        $tagIds = $request->input('tags', []);
+        $task->tags()->syncWithoutDetaching($tagIds);
 
         return response()->json(['status' => 'ok']);
     }
+        public function detachTag(Task $task, Tag $tag)
+        {
+            $task->tags()->detach($tag->id);
+
+            return response()->json(['status' => 'ok']);
+        }
 }
