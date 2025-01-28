@@ -14,29 +14,23 @@ import AccordionContent from "./ui/accordion/AccordionContent.vue";
 
 dayjs.extend(duration);
 
-// Inicjujemy store z zadaniami
 const tasksStore = useTasksStore();
 const timeSessionsStore = useTimeSessionsStore();
-const projectsStore = useProjectsStore(); // <-- init
+const projectsStore = useProjectsStore(); 
 
-// Timery i akordeon
 let intervalId: number | null = null;
 const openAccordion = ref<string[]>([]);
 
-// Zmienne do modala edycji
 const showEditModal = ref(false);
 const editTaskId = ref<number | null>(null);
 const editTitle = ref("");
-// (Opcjonalnie) project dla edycji:
 const editProjectId = ref<number | null>(null);
 
-// Lifecycle
 onMounted(async () => {
   await tasksStore.fetchTasks();
   await timeSessionsStore.fetchSessions();
   await projectsStore.fetchProjects(); 
 
-  // Przypisz time_sessions do local (opcjonalnie)
   tasksStore.tasks.forEach((task: any) => {
     task.time_sessions = timeSessionsStore.sessions.filter(
       (session: TimeSession) => session.task_id === task.id
@@ -44,7 +38,6 @@ onMounted(async () => {
   });
 });
 
-// Timer - start
 function startTimer(task: any) {
   task.isRunning = true;
   task.startTime = dayjs();
@@ -60,21 +53,18 @@ function startTimer(task: any) {
   }, 10);
 }
 
-// Timer - stop
 async function stopTimer(task: any) {
   if (!task.isRunning) return;
 
   task.isRunning = false;
   const endTime = dayjs();
 
-  // Zapis sesji
   await timeSessionsStore.createTimeSession(
     task.id,
     task.startTime.toISOString(),
     endTime.toISOString()
   );
 
-  // Odśwież sessions
   await timeSessionsStore.fetchSessions();
   task.time_sessions = timeSessionsStore.sessions.filter(
     (session: TimeSession) => session.task_id === task.id
@@ -89,7 +79,6 @@ async function stopTimer(task: any) {
   task.startTime = null;
 }
 
-// Funkcje formatowania
 function formatDate(date: string) {
   return dayjs(date).format("YYYY-MM-DD");
 }
@@ -108,50 +97,37 @@ function calculateTotalTime(sessions: TimeSession[] = []) {
   return durationTime.format("HH:mm:ss");
 }
 
-// Kasowanie zadania
 async function deleteTask(taskId: number) {
   await tasksStore.deleteTask(taskId);
 }
 
-// Otwieranie modala edycji
 function openEditModal(task: any) {
   showEditModal.value = true;
   editTaskId.value = task.id;
   editTitle.value = task.title;
-  // (opcjonalnie) if you have project in the store
   editProjectId.value = task.project?.id ?? null;
 }
 
-// Zapis edycji
 async function saveEdit() {
   if (editTaskId.value === null) return;
 
   await tasksStore.updateTask(editTaskId.value, {
     title: editTitle.value,
-    project_id: editProjectId.value, // if you want to handle project
+    project_id: editProjectId.value, 
   });
   showEditModal.value = false;
 }
 
-// Anulowanie edycji
 function cancelEdit() {
   showEditModal.value = false;
-}
-
-// Accordion
-function toggleAccordion(taskId: string) {
-  if (openAccordion.value.includes(taskId)) {
-    openAccordion.value = openAccordion.value.filter((id) => id !== taskId);
-  } else {
-    openAccordion.value.push(taskId);
-  }
 }
 </script>
 
 <template>
   <div>
-    <h2 class="text-2xl font-bold mb-4">Tasks</h2>
-
+    <h2 class="text-2xl font-bold mb-4">
+      Task List
+    </h2>
     <div
       v-for="task in tasksStore.tasks"
       :key="task.id"
@@ -165,7 +141,6 @@ function toggleAccordion(taskId: string) {
         <div class="flex items-center space-x-2">
           <p>Total: {{ calculateTotalTime(task.time_sessions) }}</p>
 
-          <!-- Przycisk Edit -->
           <button
             class="bg-gray-500 text-white px-2 py-1 rounded"
             @click="openEditModal(task)"
@@ -173,7 +148,6 @@ function toggleAccordion(taskId: string) {
             Edit
           </button>
 
-          <!-- Przycisk Delete -->
           <button
             class="bg-red-500 text-white px-2 py-1 rounded"
             @click="deleteTask(task.id)"
@@ -183,7 +157,6 @@ function toggleAccordion(taskId: string) {
         </div>
       </div>
 
-      <!-- Tagi -->
       <div class="mt-2 flex flex-wrap gap-2">
         <span
           v-for="tag in task.tags ?? []"
@@ -194,7 +167,6 @@ function toggleAccordion(taskId: string) {
         </span>
       </div>
 
-      <!-- Timer -->
       <div class="flex items-center space-x-4 mt-2">
         <div class="text-gray-600 font-mono w-[12ch] text-center">
           {{ task.timer ?? "00:00:00.000" }}
@@ -217,7 +189,6 @@ function toggleAccordion(taskId: string) {
         </div>
       </div>
 
-      <!-- Accordion z sesjami -->
       <Accordion v-model="openAccordion" collapsible>
         <AccordionItem :value="`task-${task.id}`">
           <AccordionTrigger>View Sessions</AccordionTrigger>
@@ -242,7 +213,6 @@ function toggleAccordion(taskId: string) {
       </Accordion>
     </div>
 
-    <!-- Modal edycji -->
     <div
       v-if="showEditModal"
       class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center"
@@ -255,22 +225,20 @@ function toggleAccordion(taskId: string) {
           class="border px-2 py-1 rounded w-full mb-3"
         />
 
-        <!-- (opcjonalnie) Wybór projektu -->
         <label class="block mb-2 font-medium">Project:</label>
         <select
-  v-model.number="editProjectId"
-  class="border px-2 py-1 rounded w-full mb-3"
->
-  <option :value="null">-- Select project --</option>
-  <option
-    v-for="proj in projectsStore.projects"
-    :key="proj.id"
-    :value="proj.id"
-  >
-    {{ proj.name }}
-  </option>
-</select>
-
+          v-model.number="editProjectId"
+          class="border px-2 py-1 rounded w-full mb-3"
+        >
+          <option :value="null">-- Select project --</option>
+          <option
+            v-for="proj in projectsStore.projects"
+            :key="proj.id"
+            :value="proj.id"
+          >
+            {{ proj.name }}
+          </option>
+        </select>
 
         <div class="mt-3 flex justify-end space-x-2">
           <button

@@ -26,11 +26,14 @@ class TagController extends Controller
     }
 
     public function update(Request $request, Tag $tag)
-    {
-        $request->validate(['name' => 'required|string|max:255']);
-        $tag->update(['name' => $request->name]);
-        return response()->json($tag, 200);
-    }
+{
+    $validated = $request->validate([
+        'name' => 'required|string|max:255',
+    ]);
+
+    $tag->update($validated);
+    return response()->json($tag, 200);
+}
 
     public function destroy(Tag $tag)
     {

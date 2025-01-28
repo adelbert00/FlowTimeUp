@@ -7,7 +7,6 @@ import TaskList from "@/Components/TaskList.vue";
 <template>
   <MainLayout>
     <div class="p-4">
-      <h1 class="text-2xl font-bold mb-4">Tasks</h1>
       <TaskForm />
       <TaskList />
     </div>
