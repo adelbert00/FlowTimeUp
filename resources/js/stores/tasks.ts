@@ -1,6 +1,5 @@
 import { defineStore } from 'pinia';
 import axios from 'axios';
-import type { Tag } from './tags';
 
 export interface Task {
   id: number;
@@ -9,13 +8,12 @@ export interface Task {
   created_at?: string;
   updated_at?: string;
 
-  tags?: Tag[];
+  tags?: any[];
   time_sessions?: any[];
   project?: {
     id: number;
     name: string;
-  };
-
+  }
   timer?: string;
   isRunning?: boolean;
   startTime?: any;
@@ -35,32 +33,35 @@ export const useTasksStore = defineStore('tasks', {
       const response = await axios.get('/tasks');
       this.tasks = response.data;
     },
-
-    async createTask(title: string, projectId: number | null)  {
-      const res = await axios.post('/tasks', { title, project_id: projectId });
-      const newTask = res.data;
-      return newTask;
-    },    
-
-    async attachTags(taskId: number, tagIds: number[]) {
-      console.log('Calling attachTags with', taskId, tagIds);
-      await axios.post(`/tasks/${taskId}/tags`, { tags: tagIds });
-      await this.fetchTasks();
-    },
-
-    async detachTag(taskId: number, tagId: number) {
-      await axios.delete(`/tasks/${taskId}/tags/${tagId}`);
-      await this.fetchTasks();
-    },
-
-    async updateTask(taskId: number, payload: { title?: string; project_id?: number | null }) {
-      const response = await axios.patch(`/tasks/${taskId}`, payload);
-      await this.fetchTasks();
-      return response.data; 
+    async createTask(title: string, projectId?: number | null) {
+      const res = await axios.post('/tasks', {
+        title,
+        project_id: projectId ?? null,
+      });
+      return res.data;
     },
     async deleteTask(taskId: number) {
       await axios.delete(`/tasks/${taskId}`);
-      
+      await this.fetchTasks();
+    },
+    async bulkDeleteTasks(taskIds: number[]) {
+      for (const id of taskIds) {
+        await this.deleteTask(id);
+      }
+    },
+
+    async updateTask(taskId: number, payload: { title?: string; project_id?: number | null }) {
+      await axios.patch(`/tasks/${taskId}`, payload);
+      await this.fetchTasks();
+    },
+
+    async attachTags(taskId: number, tagIds: number[]) {
+      await axios.post(`/tasks/${taskId}/tags`, { tags: tagIds });
+      await this.fetchTasks();
+    },
+    
+    async detachTag(taskId: number, tagId: number) {
+      await axios.delete(`/tasks/${taskId}/tags/${tagId}`);
       await this.fetchTasks();
     },
   },

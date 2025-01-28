@@ -3,6 +3,7 @@ import { ref, onMounted } from "vue";
 import { useProjectsStore } from "@/stores/projects";
 import { useTasksStore } from "@/stores/tasks";
 import { useTagsStore } from "@/stores/tags";
+
 import { Button } from "./ui/button";
 import { Input } from "./ui/input";
 import { Label } from "./ui/label";
@@ -18,6 +19,10 @@ const selectedTags = ref<number[]>([]);
 const showProjectModal = ref(false);
 const newProjectName = ref("");
 
+const showEditProjectModal = ref(false);
+const editProjectId = ref<number | null>(null);
+const editProjectName = ref("");
+
 const showTagModal = ref(false);
 const newTagName = ref("");
 
@@ -32,8 +37,8 @@ onMounted(async () => {
 
 const submitTask = async () => {
   if (!title.value) return;
-
   const createdTask = await tasksStore.createTask(title.value, selectedProjectId.value);
+
   if (createdTask && createdTask.id && selectedTags.value.length > 0) {
     await tasksStore.attachTags(createdTask.id, selectedTags.value);
   }
@@ -52,6 +57,27 @@ const submitNewProject = async () => {
   newProjectName.value = "";
   showProjectModal.value = false;
 };
+
+function openEditProjectModal(projectId: number, currentName: string) {
+  editProjectId.value = projectId;
+  editProjectName.value = currentName;
+  showEditProjectModal.value = true;
+}
+
+async function saveProjectEdit() {
+  if (editProjectId.value === null) return;
+  if (!editProjectName.value) return;
+
+  await projectsStore.updateProject(editProjectId.value, editProjectName.value);
+  showEditProjectModal.value = false;
+}
+
+async function deleteProject(projectId: number) {
+  await projectsStore.deleteProject(projectId);
+  if (selectedProjectId.value === projectId) {
+    selectedProjectId.value = null;
+  }
+}
 
 const submitNewTag = async () => {
   if (!newTagName.value) return;
@@ -72,13 +98,14 @@ function openEditTagModal(tagId: number, currentName: string) {
 async function saveTagEdit() {
   if (editTagId.value === null) return;
   if (!editTagName.value) return;
+
   await tagsStore.updateTag(editTagId.value, editTagName.value);
   showEditTagModal.value = false;
 }
 
 async function deleteTag(tagId: number) {
   await tagsStore.deleteTag(tagId);
-  selectedTags.value = selectedTags.value.filter(id => id !== tagId);
+  selectedTags.value = selectedTags.value.filter((id) => id !== tagId);
 }
 
 const cancelNewProject = () => {
@@ -86,10 +113,14 @@ const cancelNewProject = () => {
   showProjectModal.value = false;
 };
 
-const cancelNewTag = () => {
+function cancelProjectEdit() {
+  showEditProjectModal.value = false;
+}
+
+function cancelNewTag() {
   newTagName.value = "";
   showTagModal.value = false;
-};
+}
 
 function cancelTagEdit() {
   showEditTagModal.value = false;
@@ -123,6 +154,7 @@ function cancelTagEdit() {
           {{ proj.name }}
         </option>
       </select>
+
       <Button
         type="button"
         variant="outline"
@@ -131,6 +163,31 @@ function cancelTagEdit() {
       >
         + Create new project
       </Button>
+
+      <Label class="block font-medium mb-2">Manage Projects:</Label>
+      <div class="flex flex-col gap-2 mb-4">
+        <div
+          v-for="proj in projectsStore.projects"
+          :key="proj.id"
+          class="flex items-center justify-between border-b py-2"
+        >
+          <span>{{ proj.name }}</span>
+          <div class="flex gap-2">
+            <button
+              class="border px-2 py-1 text-sm rounded"
+              @click="openEditProjectModal(proj.id, proj.name)"
+            >
+              Edit
+            </button>
+            <button
+              class="border px-2 py-1 text-sm rounded text-red-500"
+              @click="deleteProject(proj.id)"
+            >
+              Delete
+            </button>
+          </div>
+        </div>
+      </div>
 
       <Label class="block font-medium mb-1">Tags:</Label>
       <div class="flex flex-col gap-2 mb-3">
@@ -149,7 +206,6 @@ function cancelTagEdit() {
             />
             <label :for="'tag-' + tag.id">{{ tag.name }}</label>
           </div>
-
           <div class="flex gap-2">
             <button
               class="border px-2 py-1 rounded text-sm"
@@ -166,6 +222,7 @@ function cancelTagEdit() {
           </div>
         </div>
       </div>
+
       <Button
         type="button"
         class="text-sm mb-4"
@@ -189,12 +246,30 @@ function cancelTagEdit() {
         <h3 class="text-lg font-semibold mb-2">New Project</h3>
         <Input
           v-model="newProjectName"
-          placeholder="Enter project name"
+          placeholder="Project name"
           class="w-full mb-3"
         />
         <div class="mt-3 flex justify-end space-x-2">
           <Button variant="outline" @click="cancelNewProject">Cancel</Button>
           <Button @click="submitNewProject">Create</Button>
+        </div>
+      </div>
+    </div>
+
+    <div
+      v-if="showEditProjectModal"
+      class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center"
+    >
+      <div class="bg-white p-4 rounded shadow w-80">
+        <h3 class="text-lg font-semibold mb-2">Edit Project</h3>
+        <Input
+          v-model="editProjectName"
+          placeholder="New project name"
+          class="w-full mb-3"
+        />
+        <div class="mt-3 flex justify-end space-x-2">
+          <Button variant="outline" @click="cancelProjectEdit">Cancel</Button>
+          <Button @click="saveProjectEdit">Save</Button>
         </div>
       </div>
     </div>
@@ -207,7 +282,7 @@ function cancelTagEdit() {
         <h3 class="text-lg font-semibold mb-2">New Tag</h3>
         <Input
           v-model="newTagName"
-          placeholder="Enter tag name"
+          placeholder="Tag name"
           class="w-full mb-3"
         />
         <div class="mt-3 flex justify-end space-x-2">

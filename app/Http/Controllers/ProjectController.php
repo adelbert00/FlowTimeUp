@@ -67,12 +67,20 @@ class ProjectController extends Controller
 
         $project->update($validated);
 
+        if ($request->wantsJson()) {
+            return response()->json($project, 200);
+        }
+
         return redirect()->route('projects.index')->with('success', 'Project updated!');
     }
 
-    public function destroy(Project $project)
+    public function destroy(Project $project, Request $request)
     {
         $project->delete();
+
+        if ($request->wantsJson()) {
+            return response()->json(null, 204);
+        }
 
         return redirect()->route('projects.index')->with('success', 'Project deleted!');
     }
