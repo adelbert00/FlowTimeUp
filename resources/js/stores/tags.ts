@@ -34,7 +34,7 @@ export const useTagsStore = defineStore('tags', {
       const response = await axios.patch(`/tags/${tagId}`, { name: newName });
       const updatedTag = response.data as Tag;
 
-      const index = this.tags.findIndex(t => t.id === tagId);
+      const index = this.tags.findIndex((t) => t.id === tagId);
       if (index !== -1) {
         this.tags[index] = updatedTag;
       }
@@ -43,7 +43,7 @@ export const useTagsStore = defineStore('tags', {
 
     async deleteTag(tagId: number) {
       await axios.delete(`/tags/${tagId}`);
-      this.tags = this.tags.filter(t => t.id !== tagId);
+      this.tags = this.tags.filter((t) => t.id !== tagId);
     },
   },
 });

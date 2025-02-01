@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import { computed, ref, onBeforeUnmount } from 'vue';
-import { defineProps } from 'vue'; 
+import { defineProps } from 'vue';
 import { Task } from '@/stores/tasks';
 import { useTimeSessionsStore } from '@/stores/timeSessions';
 
@@ -45,14 +45,18 @@ const formattedTime = computed(() => {
     return '00:00:00:000';
   }
 
-  const diffMilliseconds = currentTime.value.getTime() - startTime.value.getTime();
+  const diffMilliseconds =
+    currentTime.value.getTime() - startTime.value.getTime();
   if (diffMilliseconds <= 0) {
     return '00:00:00:000';
   }
 
   const diffSeconds = Math.floor(diffMilliseconds / 1000);
   const hours = String(Math.floor(diffSeconds / 3600)).padStart(2, '0');
-  const minutes = String(Math.floor((diffSeconds % 3600) / 60)).padStart(2, '0');
+  const minutes = String(Math.floor((diffSeconds % 3600) / 60)).padStart(
+    2,
+    '0'
+  );
   const seconds = String(diffSeconds % 60).padStart(2, '0');
   const milliseconds = String(diffMilliseconds % 1000).padStart(3, '0');
 
@@ -93,4 +97,3 @@ onBeforeUnmount(() => {
     </div>
   </div>
 </template>
-

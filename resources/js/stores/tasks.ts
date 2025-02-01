@@ -13,7 +13,7 @@ export interface Task {
   project?: {
     id: number;
     name: string;
-  }
+  };
   timer?: string;
   isRunning?: boolean;
   startTime?: any;
@@ -50,7 +50,10 @@ export const useTasksStore = defineStore('tasks', {
       }
     },
 
-    async updateTask(taskId: number, payload: { title?: string; project_id?: number | null }) {
+    async updateTask(
+      taskId: number,
+      payload: { title?: string; project_id?: number | null }
+    ) {
       await axios.patch(`/tasks/${taskId}`, payload);
       await this.fetchTasks();
     },
@@ -59,7 +62,7 @@ export const useTasksStore = defineStore('tasks', {
       await axios.post(`/tasks/${taskId}/tags`, { tags: tagIds });
       await this.fetchTasks();
     },
-    
+
     async detachTag(taskId: number, tagId: number) {
       await axios.delete(`/tasks/${taskId}/tags/${tagId}`);
       await this.fetchTasks();

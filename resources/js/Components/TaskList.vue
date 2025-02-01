@@ -1,26 +1,26 @@
 <script setup lang="ts">
-import { ref, onMounted } from "vue";
-import { useTasksStore } from "@/stores/tasks";
-import { useProjectsStore } from "@/stores/projects";
-import { useTimeSessionsStore, TimeSession } from "@/stores/timeSessions";
-import dayjs from "dayjs";
-import duration from "dayjs/plugin/duration";
-import Button from "./ui/button/Button.vue";
-import Accordion from "./ui/accordion/Accordion.vue";
-import AccordionItem from "./ui/accordion/AccordionItem.vue";
-import AccordionTrigger from "./ui/accordion/AccordionTrigger.vue";
-import AccordionContent from "./ui/accordion/AccordionContent.vue";
+import { ref, onMounted } from 'vue';
+import { useTasksStore } from '@/stores/tasks';
+import { useProjectsStore } from '@/stores/projects';
+import { useTimeSessionsStore, TimeSession } from '@/stores/timeSessions';
+import dayjs from 'dayjs';
+import duration from 'dayjs/plugin/duration';
+import Button from './ui/button/Button.vue';
+import Accordion from './ui/accordion/Accordion.vue';
+import AccordionItem from './ui/accordion/AccordionItem.vue';
+import AccordionTrigger from './ui/accordion/AccordionTrigger.vue';
+import AccordionContent from './ui/accordion/AccordionContent.vue';
 
 dayjs.extend(duration);
 
 const tasksStore = useTasksStore();
-const projectsStore = useProjectsStore(); 
+const projectsStore = useProjectsStore();
 const timeSessionsStore = useTimeSessionsStore();
 
 const selectedTaskIds = ref<number[]>([]);
 
 const showConfirmModal = ref(false);
-const confirmMessage = ref("");
+const confirmMessage = ref('');
 let confirmAction: (() => void) | null = null;
 
 let intervalId: number | null = null;
@@ -28,12 +28,12 @@ const openAccordion = ref<string[]>([]);
 
 const showEditModal = ref(false);
 const editTaskId = ref<number | null>(null);
-const editTitle = ref("");
+const editTitle = ref('');
 const editProjectId = ref<number | null>(null);
 
 onMounted(async () => {
   await tasksStore.fetchTasks();
-  await projectsStore.fetchProjects(); 
+  await projectsStore.fetchProjects();
   await timeSessionsStore.fetchSessions();
 
   tasksStore.tasks.forEach((task: any) => {
@@ -82,7 +82,7 @@ async function saveEdit() {
   if (editTaskId.value === null) return;
   await tasksStore.updateTask(editTaskId.value, {
     title: editTitle.value,
-    project_id: editProjectId.value, 
+    project_id: editProjectId.value,
   });
   showEditModal.value = false;
 }
@@ -94,14 +94,14 @@ function cancelEdit() {
 function startTimer(task: any) {
   task.isRunning = true;
   task.startTime = dayjs();
-  task.timer = "00:00:00.000";
+  task.timer = '00:00:00.000';
 
   intervalId = window.setInterval(() => {
     if (task.isRunning && task.startTime) {
       const now = dayjs();
       const diffMilliseconds = now.diff(task.startTime);
-      const durationTime = dayjs.duration(diffMilliseconds, "milliseconds");
-      task.timer = durationTime.format("HH:mm:ss.SSS");
+      const durationTime = dayjs.duration(diffMilliseconds, 'milliseconds');
+      task.timer = durationTime.format('HH:mm:ss.SSS');
     }
   }, 10);
 }
@@ -128,24 +128,34 @@ async function stopTimer(task: any) {
     intervalId = null;
   }
 
-  task.timer = "00:00:00.000";
+  task.timer = '00:00:00.000';
   task.startTime = null;
 }
 
 function formatDate(date: string) {
-  return dayjs(date).format("YYYY-MM-DD");
+  return dayjs(date).format('YYYY-MM-DD');
 }
 function formatTimeRange(start: string, end: string) {
-  return `${dayjs(start).format("HH:mm")} - ${dayjs(end).format("HH:mm")}`;
+  return `${dayjs(start).format('HH:mm')} - ${dayjs(end).format('HH:mm')}`;
 }
 function calculateTotalTime(sessions: TimeSession[] = []) {
   const totalMilliseconds = sessions.reduce((sum, session) => {
-    const s = dayjs(session.start_time);
-    const f = session.end_time ? dayjs(session.end_time) : dayjs();
-    return sum + f.diff(s);
+    const start = dayjs(session.start_time);
+    const finish = session.end_time ? dayjs(session.end_time) : dayjs();
+    return sum + finish.diff(start);
   }, 0);
-  const durationTime = dayjs.duration(totalMilliseconds, "milliseconds");
-  return durationTime.format("HH:mm:ss");
+
+  const hours = Math.floor(totalMilliseconds / 3600000);
+  const minutes = Math.floor((totalMilliseconds % 3600000) / 60000);
+  const seconds = Math.floor((totalMilliseconds % 60000) / 1000);
+  const milliseconds = totalMilliseconds % 1000;
+
+  const formattedHours = hours.toString().padStart(2, '0');
+  const formattedMinutes = minutes.toString().padStart(2, '0');
+  const formattedSeconds = seconds.toString().padStart(2, '0');
+  const formattedMilliseconds = milliseconds.toString().padStart(3, '0');
+
+  return `${formattedHours}:${formattedMinutes}:${formattedSeconds}.${formattedMilliseconds}`;
 }
 </script>
 
@@ -213,7 +223,7 @@ function calculateTotalTime(sessions: TimeSession[] = []) {
 
         <div class="flex items-center space-x-4 mt-2">
           <div class="text-gray-600 font-mono w-[12ch] text-center">
-            {{ task.timer ?? "00:00:00.000" }}
+            {{ task.timer ?? '00:00:00.000' }}
           </div>
           <div>
             <Button
@@ -267,7 +277,9 @@ function calculateTotalTime(sessions: TimeSession[] = []) {
         <p class="mb-4">{{ confirmMessage }}</p>
         <div class="flex justify-end space-x-2">
           <Button variant="outline" @click="confirmNo">Cancel</Button>
-          <Button class="bg-red-500 text-white" @click="confirmYes">Delete</Button>
+          <Button class="bg-red-500 text-white" @click="confirmYes"
+            >Delete</Button
+          >
         </div>
       </div>
     </div>

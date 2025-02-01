@@ -14,8 +14,8 @@ return new class extends Migration
         Schema::create('time_sessions', function (Blueprint $table) {
             $table->id();
             $table->foreignId('task_id')->constrained()->cascadeOnDelete();
-            $table->dateTime('start_time');
-            $table->dateTime('end_time')->nullable();
+            $table->dateTime('start_time', 3);
+            $table->dateTime('end_time', 3)->nullable();
             $table->timestamps();
         });
     }

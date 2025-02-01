@@ -1,34 +1,34 @@
 <script setup lang="ts">
-import { ref, onMounted } from "vue";
-import { useProjectsStore } from "@/stores/projects";
-import { useTasksStore } from "@/stores/tasks";
-import { useTagsStore } from "@/stores/tags";
+import { ref, onMounted } from 'vue';
+import { useProjectsStore } from '@/stores/projects';
+import { useTasksStore } from '@/stores/tasks';
+import { useTagsStore } from '@/stores/tags';
 
-import { Button } from "./ui/button";
-import { Input } from "./ui/input";
-import { Label } from "./ui/label";
+import { Button } from './ui/button';
+import { Input } from './ui/input';
+import { Label } from './ui/label';
 
 const projectsStore = useProjectsStore();
 const tasksStore = useTasksStore();
 const tagsStore = useTagsStore();
 
-const title = ref("");
+const title = ref('');
 const selectedProjectId = ref<number | null>(null);
 const selectedTags = ref<number[]>([]);
 
 const showProjectModal = ref(false);
-const newProjectName = ref("");
+const newProjectName = ref('');
 
 const showEditProjectModal = ref(false);
 const editProjectId = ref<number | null>(null);
-const editProjectName = ref("");
+const editProjectName = ref('');
 
 const showTagModal = ref(false);
-const newTagName = ref("");
+const newTagName = ref('');
 
 const showEditTagModal = ref(false);
 const editTagId = ref<number | null>(null);
-const editTagName = ref("");
+const editTagName = ref('');
 
 onMounted(async () => {
   await projectsStore.fetchProjects();
@@ -37,24 +37,29 @@ onMounted(async () => {
 
 const submitTask = async () => {
   if (!title.value) return;
-  const createdTask = await tasksStore.createTask(title.value, selectedProjectId.value);
+  const createdTask = await tasksStore.createTask(
+    title.value,
+    selectedProjectId.value
+  );
 
   if (createdTask && createdTask.id && selectedTags.value.length > 0) {
     await tasksStore.attachTags(createdTask.id, selectedTags.value);
   }
 
-  title.value = "";
+  title.value = '';
   selectedProjectId.value = null;
   selectedTags.value = [];
 };
 
 const submitNewProject = async () => {
   if (!newProjectName.value) return;
-  const createdProject = await projectsStore.createProject(newProjectName.value);
+  const createdProject = await projectsStore.createProject(
+    newProjectName.value
+  );
   if (createdProject && createdProject.id) {
     selectedProjectId.value = createdProject.id;
   }
-  newProjectName.value = "";
+  newProjectName.value = '';
   showProjectModal.value = false;
 };
 
@@ -85,7 +90,7 @@ const submitNewTag = async () => {
   if (createdTag && createdTag.id) {
     selectedTags.value.push(createdTag.id);
   }
-  newTagName.value = "";
+  newTagName.value = '';
   showTagModal.value = false;
 };
 
@@ -109,7 +114,7 @@ async function deleteTag(tagId: number) {
 }
 
 const cancelNewProject = () => {
-  newProjectName.value = "";
+  newProjectName.value = '';
   showProjectModal.value = false;
 };
 
@@ -118,7 +123,7 @@ function cancelProjectEdit() {
 }
 
 function cancelNewTag() {
-  newTagName.value = "";
+  newTagName.value = '';
   showTagModal.value = false;
 }
 
@@ -223,11 +228,7 @@ function cancelTagEdit() {
         </div>
       </div>
 
-      <Button
-        type="button"
-        class="text-sm mb-4"
-        @click="showTagModal = true"
-      >
+      <Button type="button" class="text-sm mb-4" @click="showTagModal = true">
         + Create new tag
       </Button>
 

@@ -2,7 +2,7 @@
   <SidebarProvider>
     <Sidebar>
       <SidebarHeader>
-        <div class="flex items-center px-4 py-2 ">
+        <div class="flex items-center px-4 py-2">
           <span class="text-lg font-bold">MyToDoApp</span>
         </div>
       </SidebarHeader>
