@@ -22,7 +22,16 @@
             window.dataLayer = window.dataLayer || [];
             function gtag(){dataLayer.push(arguments);}
             gtag('js', new Date());
-            gtag('config', '{{ config('services.google.analytics_id') }}');
+            gtag('config', '{{ config('services.google.analytics_id') }}', {
+                page_path: window.location.pathname,
+            });
+            
+            // Make gtag available globally for Inertia tracking
+            window.gtag = gtag;
+        </script>
+        <script>
+            // Set GA ID for client-side tracking
+            window.VITE_GOOGLE_ANALYTICS_ID = '{{ config('services.google.analytics_id') }}';
         </script>
         @endif
 
