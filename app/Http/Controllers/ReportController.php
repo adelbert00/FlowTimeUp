@@ -96,7 +96,7 @@ class ReportController extends Controller
 
     private function exportCsv($sessions)
     {
-        $filename = 'flowtime-report-' . date('Y-m-d-His') . '.csv';
+        $filename = 'flowtimeup-report-' . date('Y-m-d-His') . '.csv';
 
         $headers = [
             'Content-Type' => 'text/csv',

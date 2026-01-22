@@ -2,7 +2,7 @@
 {{-- Header --}}
 <x-slot:header>
 <x-mail::header :url="config('app.url')">
-FlowTime
+FlowTimeUp
 </x-mail::header>
 </x-slot:header>
 
@@ -21,7 +21,7 @@ FlowTime
 {{-- Footer --}}
 <x-slot:footer>
 <x-mail::footer>
-© {{ date('Y') }} FlowTime. {{ __('All rights reserved.') }}
+© {{ date('Y') }} FlowTimeUp. {{ __('All rights reserved.') }}
 </x-mail::footer>
 </x-slot:footer>
 </x-mail::layout>

@@ -32,7 +32,7 @@ const submit = () => {
     <!-- Header -->
     <div class="text-center mb-6 sm:mb-8">
       <h1 class="text-xl sm:text-2xl font-bold text-gray-900">Welcome back</h1>
-      <p class="text-gray-600 mt-2 text-sm sm:text-base">Sign in to continue to FlowTime</p>
+      <p class="text-gray-600 mt-2 text-sm sm:text-base">Sign in to continue to FlowTimeUp</p>
     </div>
 
     <!-- Status message -->
@@ -151,7 +151,7 @@ const submit = () => {
           <div class="w-full border-t border-gray-200" />
         </div>
         <div class="relative flex justify-center text-sm">
-          <span class="px-4 bg-white text-gray-500">New to FlowTime?</span>
+          <span class="px-4 bg-white text-gray-500">New to FlowTimeUp?</span>
         </div>
       </div>
 

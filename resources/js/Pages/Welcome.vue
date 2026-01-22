@@ -13,7 +13,7 @@ const mobileMenuOpen = ref(false);
 </script>
 
 <template>
-  <Head title="FlowTime - Track Your Time" />
+  <Head title="FlowTimeUp - Track Your Time" />
   
   <div class="min-h-screen bg-gradient-to-br from-gray-50 via-gray-50 to-gray-100 overflow-hidden">
     <!-- Decorative elements -->
@@ -33,7 +33,7 @@ const mobileMenuOpen = ref(false);
               <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"/>
             </svg>
           </div>
-          <span class="text-lg sm:text-xl font-bold text-gray-900">FlowTime</span>
+          <span class="text-lg sm:text-xl font-bold text-gray-900">FlowTimeUp</span>
         </div>
 
         <!-- Desktop Auth Links -->
@@ -234,7 +234,7 @@ const mobileMenuOpen = ref(false);
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"/>
               </svg>
             </div>
-            <span class="text-gray-600 text-xs sm:text-sm">© 2025 FlowTime. All rights reserved.</span>
+            <span class="text-gray-600 text-xs sm:text-sm">© 2025 FlowTimeUp. All rights reserved.</span>
           </div>
           <div class="flex items-center gap-4 sm:gap-6 text-xs sm:text-sm text-gray-600">
             <a href="#" class="hover:text-gray-900 transition-colors">Privacy</a>

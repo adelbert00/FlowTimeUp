@@ -290,7 +290,7 @@ const recentTasks = props.recent_tasks || [];
             <div class="flex-1">
               <h3 class="text-base sm:text-lg font-semibold text-gray-900 mb-1">Get Started</h3>
               <p class="text-gray-600 text-xs sm:text-sm mb-3 sm:mb-4">
-                FlowTime helps you track time spent on tasks and projects. Start by creating a task and hit the play button to begin tracking!
+                FlowTimeUp helps you track time spent on tasks and projects. Start by creating a task and hit the play button to begin tracking!
               </p>
               <Link
                 href="/tasks"

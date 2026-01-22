@@ -29,7 +29,7 @@ Profile
 </table>
 
 <p style="margin-top: 24px; color: #9ca3af; font-size: 12px; line-height: 1.5;">
-&copy; {{ date('Y') }} FlowTime. All rights reserved.
+&copy; {{ date('Y') }} FlowTimeUp. All rights reserved.
 </p>
 </td>
 </tr>

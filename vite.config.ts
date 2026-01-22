@@ -20,13 +20,11 @@ export default defineConfig({
 
   // Production build optimizations
   build: {
-    // Enable minification
-    minify: 'terser',
-    terserOptions: {
-      compress: {
-        drop_console: true, // Remove console.log in production
-        drop_debugger: true,
-      },
+    // Enable minification (esbuild is faster and already included)
+    minify: 'esbuild',
+    // Remove console.log and debugger in production
+    esbuild: {
+      drop: ['console', 'debugger'],
     },
 
     // Code splitting configuration
