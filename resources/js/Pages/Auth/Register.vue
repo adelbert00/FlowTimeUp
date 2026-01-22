@@ -37,7 +37,7 @@ onMounted(() => {
   }
 
   const script = document.createElement('script');
-  script.src = `https://www.google.com/recaptcha/api.js?render=${props.recaptchaSiteKey}`;
+  script.src = `https://www.google.com/recaptcha/api.js?render=${props.recaptchaSiteKey}&badge=inline`;
   script.async = true;
   script.defer = true;
   
@@ -263,17 +263,11 @@ declare global {
         {{ (form.errors as any).recaptcha }}
       </p>
       
-      <!-- reCAPTCHA debug info -->
+      <!-- reCAPTCHA debug info (only show if error) -->
       <div v-if="recaptchaError" class="p-3 bg-yellow-50 border border-yellow-200 rounded-lg">
         <p class="text-yellow-800 text-xs sm:text-sm">
           ⚠️ {{ recaptchaError }}
         </p>
-      </div>
-      
-      <!-- reCAPTCHA status (for debugging) -->
-      <div v-if="recaptchaSiteKey && !recaptchaError" class="text-xs text-gray-500">
-        <span v-if="recaptchaLoaded">✓ reCAPTCHA loaded</span>
-        <span v-else>⏳ Loading reCAPTCHA...</span>
       </div>
 
       <!-- Terms notice -->
@@ -282,14 +276,28 @@ declare global {
         <a href="#" class="text-blue-600 hover:text-blue-600">Terms of Service</a>
         and
         <a href="#" class="text-blue-600 hover:text-blue-600">Privacy Policy</a>.
-        <span v-if="recaptchaSiteKey" class="block mt-1">
-          This site is protected by reCAPTCHA and the Google
-          <a href="https://policies.google.com/privacy" class="text-blue-600 hover:text-blue-600" target="_blank">Privacy Policy</a>
-          and
-          <a href="https://policies.google.com/terms" class="text-blue-600 hover:text-blue-600" target="_blank">Terms of Service</a>
-          apply.
-        </span>
       </p>
+
+      <!-- Custom reCAPTCHA badge -->
+      <div v-if="recaptchaSiteKey" class="flex items-center justify-center gap-2 p-3 bg-gray-50 border border-gray-200 rounded-lg">
+        <div class="flex items-center gap-2 text-xs text-gray-600">
+          <svg class="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <rect x="3" y="11" width="18" height="11" rx="2" ry="2"/>
+            <path d="M7 11V7a5 5 0 0 1 10 0v4"/>
+          </svg>
+          <span>Protected by</span>
+          <span class="font-semibold text-gray-700">reCAPTCHA</span>
+        </div>
+        <div class="flex items-center gap-1 text-xs">
+          <a href="https://policies.google.com/privacy" target="_blank" rel="noopener noreferrer" class="text-blue-600 hover:text-blue-700 hover:underline">
+            Privacy
+          </a>
+          <span class="text-gray-400">•</span>
+          <a href="https://policies.google.com/terms" target="_blank" rel="noopener noreferrer" class="text-blue-600 hover:text-blue-700 hover:underline">
+            Terms
+          </a>
+        </div>
+      </div>
 
       <!-- Submit -->
       <button

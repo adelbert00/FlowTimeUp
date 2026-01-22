@@ -152,10 +152,11 @@ onBeforeUnmount(() => {
 
 <template>
   <div
-    class="group relative bg-white rounded-xl border border-gray-200 shadow-sm overflow-hidden transition-all duration-200 hover:border-blue-500/50 hover:shadow-md"
+    class="group relative rounded-xl border shadow-sm overflow-hidden transition-all duration-200"
     :class="{ 
-      'ring-2 ring-blue-500 border-blue-500': selected,
-      'bg-emerald-50/50 border-emerald-200': task.completed
+      'ring-2 ring-blue-500 border-blue-500 bg-white hover:border-blue-500/50 hover:shadow-md': selected && !task.completed,
+      'bg-emerald-50/80 border-emerald-300/50 hover:border-emerald-400/70 hover:shadow-md': task.completed,
+      'bg-white border-gray-200 hover:border-blue-500/50 hover:shadow-md': !selected && !task.completed
     }"
   >
     <div

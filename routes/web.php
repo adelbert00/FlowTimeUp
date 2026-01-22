@@ -11,6 +11,10 @@ use App\Http\Controllers\DashboardController;
 use App\Http\Controllers\ReportController;
 use App\Http\Controllers\CalendarController;
 use App\Http\Controllers\TaskTemplateController;
+use App\Http\Controllers\SitemapController;
+
+// Sitemap
+Route::get('/sitemap.xml', [SitemapController::class, 'index'])->name('sitemap');
 
 // Landing page
 Route::get('/', function () {
@@ -19,6 +23,12 @@ Route::get('/', function () {
         'canRegister' => Route::has('register'),
     ]);
 })->name('welcome');
+
+// Robots.txt
+Route::get('/robots.txt', function () {
+    return response(file_get_contents(public_path('robots.txt')), 200)
+        ->header('Content-Type', 'text/plain');
+});
 
 // Dashboard (authenticated)
 Route::get('/home', [DashboardController::class, 'index'])

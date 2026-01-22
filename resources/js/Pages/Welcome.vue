@@ -13,7 +13,12 @@ const mobileMenuOpen = ref(false);
 </script>
 
 <template>
-  <Head title="FlowTimeUp - Track Your Time" />
+  <Head>
+    <title>FlowTimeUp - Track Your Time | Modern Time Tracking Application</title>
+    <meta name="description" content="FlowTimeUp - Modern time tracking application. Track your time across tasks and projects with an intuitive interface. Boost productivity with precise time tracking and insightful reports." />
+    <meta name="keywords" content="time tracking, task management, productivity, project management, time tracker" />
+    <link rel="canonical" :href="$page.url" />
+  </Head>
   
   <div class="min-h-screen bg-gradient-to-br from-gray-50 via-gray-50 to-gray-100 overflow-hidden">
     <!-- Decorative elements -->

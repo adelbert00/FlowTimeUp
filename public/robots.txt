@@ -1,2 +1,19 @@
 User-agent: *
-Disallow:
+Allow: /
+
+# Disallow admin and private areas
+Disallow: /admin/
+Disallow: /api/
+Disallow: /_dusk/
+Disallow: /storage/
+
+# Allow important pages
+Allow: /
+Allow: /home
+Allow: /tasks
+Allow: /projects
+Allow: /calendar
+Allow: /reports
+
+# Sitemap
+Sitemap: https://flowtimeup.com/sitemap.xml
