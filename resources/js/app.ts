@@ -24,6 +24,9 @@ createInertiaApp({
       .mount(el);
   },
   progress: {
-    color: '#4B5563',
+    // Blue progress bar matching project theme
+    color: '#2563eb',
+    // Show spinner for slower connections
+    showSpinner: true,
   },
 });

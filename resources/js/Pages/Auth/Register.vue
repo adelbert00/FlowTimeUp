@@ -18,34 +18,76 @@ const form = useForm({
 const showPassword = ref(false);
 const showConfirmPassword = ref(false);
 const recaptchaLoaded = ref(false);
+const recaptchaError = ref('');
 
 // Load reCAPTCHA v3 script
 onMounted(() => {
-  if (props.recaptchaSiteKey && !window.grecaptcha) {
-    const script = document.createElement('script');
-    script.src = `https://www.google.com/recaptcha/api.js?render=${props.recaptchaSiteKey}`;
-    script.async = true;
-    script.defer = true;
-    script.onload = () => {
-      recaptchaLoaded.value = true;
-    };
-    document.head.appendChild(script);
-  } else if (window.grecaptcha) {
-    recaptchaLoaded.value = true;
+  console.log('reCAPTCHA Site Key:', props.recaptchaSiteKey);
+  
+  if (!props.recaptchaSiteKey) {
+    recaptchaError.value = 'reCAPTCHA site key is not configured.';
+    console.warn('reCAPTCHA site key is missing');
+    return;
   }
+
+  if (window.grecaptcha) {
+    recaptchaLoaded.value = true;
+    console.log('reCAPTCHA already loaded');
+    return;
+  }
+
+  const script = document.createElement('script');
+  script.src = `https://www.google.com/recaptcha/api.js?render=${props.recaptchaSiteKey}`;
+  script.async = true;
+  script.defer = true;
+  
+  script.onload = () => {
+    console.log('reCAPTCHA script loaded');
+    if (window.grecaptcha) {
+      recaptchaLoaded.value = true;
+    } else {
+      recaptchaError.value = 'reCAPTCHA failed to initialize.';
+      console.error('reCAPTCHA object not available after script load');
+    }
+  };
+  
+  script.onerror = () => {
+    recaptchaError.value = 'Failed to load reCAPTCHA script.';
+    console.error('Failed to load reCAPTCHA script');
+  };
+  
+  document.head.appendChild(script);
 });
 
 const getRecaptchaToken = async (): Promise<string> => {
-  if (!props.recaptchaSiteKey || !window.grecaptcha) {
+  if (!props.recaptchaSiteKey) {
+    console.warn('reCAPTCHA site key not available');
+    return '';
+  }
+
+  if (!window.grecaptcha) {
+    console.error('grecaptcha not available');
+    recaptchaError.value = 'reCAPTCHA is not loaded. Please refresh the page.';
     return '';
   }
   
-  return new Promise((resolve) => {
-    window.grecaptcha.ready(async () => {
-      const token = await window.grecaptcha.execute(props.recaptchaSiteKey as string, { action: 'register' });
-      resolve(token);
+  try {
+    return new Promise((resolve, reject) => {
+      window.grecaptcha.ready(async () => {
+        try {
+          const token = await window.grecaptcha.execute(props.recaptchaSiteKey as string, { action: 'register' });
+          console.log('reCAPTCHA token generated:', token ? 'Success' : 'Failed');
+          resolve(token);
+        } catch (error) {
+          console.error('reCAPTCHA execute error:', error);
+          reject(error);
+        }
+      });
     });
-  });
+  } catch (error) {
+    console.error('reCAPTCHA token generation failed:', error);
+    return '';
+  }
 };
 
 const submit = async () => {
@@ -220,6 +262,19 @@ declare global {
       <p v-if="(form.errors as any).recaptcha" class="text-red-400 text-xs sm:text-sm">
         {{ (form.errors as any).recaptcha }}
       </p>
+      
+      <!-- reCAPTCHA debug info -->
+      <div v-if="recaptchaError" class="p-3 bg-yellow-50 border border-yellow-200 rounded-lg">
+        <p class="text-yellow-800 text-xs sm:text-sm">
+          ⚠️ {{ recaptchaError }}
+        </p>
+      </div>
+      
+      <!-- reCAPTCHA status (for debugging) -->
+      <div v-if="recaptchaSiteKey && !recaptchaError" class="text-xs text-gray-500">
+        <span v-if="recaptchaLoaded">✓ reCAPTCHA loaded</span>
+        <span v-else>⏳ Loading reCAPTCHA...</span>
+      </div>
 
       <!-- Terms notice -->
       <p class="text-xs text-gray-500">

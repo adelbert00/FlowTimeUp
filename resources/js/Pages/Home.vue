@@ -121,6 +121,7 @@ const recentTasks = props.recent_tasks || [];
               <div class="grid grid-cols-2 gap-3 sm:gap-4">
                 <Link
                   href="/tasks"
+                  prefetch="hover"
                   class="flex items-center gap-2 sm:gap-3 p-3 sm:p-4 bg-gray-50 rounded-xl border border-gray-200 shadow-sm hover:border-blue-500/50 hover:bg-blue-600/5 transition-all group"
                 >
                   <div class="w-8 h-8 sm:w-10 sm:h-10 rounded-lg bg-blue-600/10 flex items-center justify-center group-hover:bg-blue-600/20 transition-colors flex-shrink-0">
@@ -136,6 +137,7 @@ const recentTasks = props.recent_tasks || [];
 
                 <Link
                   href="/projects"
+                  prefetch="hover"
                   class="flex items-center gap-2 sm:gap-3 p-3 sm:p-4 bg-gray-50 rounded-xl border border-gray-200 shadow-sm hover:border-blue-500/50 hover:bg-blue-600/5 transition-all group"
                 >
                   <div class="w-8 h-8 sm:w-10 sm:h-10 rounded-lg bg-blue-600/10 flex items-center justify-center group-hover:bg-blue-600/20 transition-colors flex-shrink-0">
@@ -151,6 +153,7 @@ const recentTasks = props.recent_tasks || [];
 
                 <Link
                   href="/tags"
+                  prefetch="hover"
                   class="flex items-center gap-2 sm:gap-3 p-3 sm:p-4 bg-gray-50 rounded-xl border border-gray-200 shadow-sm hover:border-emerald-500/50 hover:bg-emerald-500/5 transition-all group"
                 >
                   <div class="w-8 h-8 sm:w-10 sm:h-10 rounded-lg bg-emerald-500/10 flex items-center justify-center group-hover:bg-emerald-500/20 transition-colors flex-shrink-0">
@@ -166,6 +169,7 @@ const recentTasks = props.recent_tasks || [];
 
                 <Link
                   href="/profile"
+                  prefetch="hover"
                   class="flex items-center gap-2 sm:gap-3 p-3 sm:p-4 bg-gray-50 rounded-xl border border-gray-200 shadow-sm hover:border-amber-500/50 hover:bg-amber-500/5 transition-all group"
                 >
                   <div class="w-8 h-8 sm:w-10 sm:h-10 rounded-lg bg-amber-500/10 flex items-center justify-center group-hover:bg-amber-500/20 transition-colors flex-shrink-0">
@@ -188,7 +192,7 @@ const recentTasks = props.recent_tasks || [];
             <div class="bg-white rounded-xl border border-gray-200 shadow-sm p-4 sm:p-6">
               <div class="flex items-center justify-between mb-4">
                 <h2 class="text-base sm:text-lg font-semibold text-gray-900">Recent Tasks</h2>
-                <Link href="/tasks" class="text-xs sm:text-sm text-blue-600 hover:text-blue-600">View all</Link>
+                <Link href="/tasks" prefetch="hover" class="text-xs sm:text-sm text-blue-600 hover:text-blue-600">View all</Link>
               </div>
               
               <div v-if="recentTasks.length > 0" class="space-y-2 sm:space-y-3">
@@ -213,7 +217,7 @@ const recentTasks = props.recent_tasks || [];
               </div>
               <div v-else class="text-center py-6 sm:py-8">
                 <p class="text-gray-500 text-xs sm:text-sm">No tasks yet</p>
-                <Link href="/tasks" class="text-blue-600 text-xs sm:text-sm hover:text-blue-600 mt-2 inline-block">
+                <Link href="/tasks" prefetch="hover" class="text-blue-600 text-xs sm:text-sm hover:text-blue-600 mt-2 inline-block">
                   Create your first task
                 </Link>
               </div>
@@ -227,6 +231,7 @@ const recentTasks = props.recent_tasks || [];
           <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
             <Link
               href="/reports"
+              prefetch="hover"
               class="flex items-start gap-3 p-4 bg-gray-50 rounded-lg border border-gray-200 hover:border-emerald-500/50 hover:bg-emerald-500/5 transition-all group"
             >
               <div class="w-10 h-10 rounded-lg bg-emerald-500/10 flex items-center justify-center group-hover:bg-emerald-500/20 transition-colors flex-shrink-0">
@@ -242,6 +247,7 @@ const recentTasks = props.recent_tasks || [];
 
             <Link
               href="/calendar"
+              prefetch="hover"
               class="flex items-start gap-3 p-4 bg-gray-50 rounded-lg border border-gray-200 hover:border-cyan-500/50 hover:bg-cyan-500/5 transition-all group"
             >
               <div class="w-10 h-10 rounded-lg bg-cyan-500/10 flex items-center justify-center group-hover:bg-cyan-500/20 transition-colors flex-shrink-0">
@@ -257,6 +263,7 @@ const recentTasks = props.recent_tasks || [];
 
             <Link
               href="/task-templates"
+              prefetch="hover"
               class="flex items-start gap-3 p-4 bg-gray-50 rounded-lg border border-gray-200 hover:border-blue-500/50 hover:bg-blue-600/5 transition-all group"
             >
               <div class="w-10 h-10 rounded-lg bg-blue-600/10 flex items-center justify-center group-hover:bg-blue-600/20 transition-colors flex-shrink-0">
@@ -287,6 +294,7 @@ const recentTasks = props.recent_tasks || [];
               </p>
               <Link
                 href="/tasks"
+                prefetch="hover"
                 class="inline-flex items-center gap-2 px-3 sm:px-4 py-2 bg-blue-600 text-white rounded-lg text-xs sm:text-sm font-medium hover:bg-blue-700 transition-colors"
               >
                 <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">

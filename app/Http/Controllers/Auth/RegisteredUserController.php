@@ -22,8 +22,15 @@ class RegisteredUserController extends Controller
      */
     public function create(): Response
     {
+        $siteKey = config('services.recaptcha.site_key');
+        
+        // Debug: Log if key is missing (only in non-production)
+        if (empty($siteKey) && app()->environment('local')) {
+            \Log::warning('reCAPTCHA site key is not configured. Check RECAPTCHA_SITE_KEY in .env');
+        }
+        
         return Inertia::render('Auth/Register', [
-            'recaptchaSiteKey' => config('services.recaptcha.site_key'),
+            'recaptchaSiteKey' => $siteKey ?: null,
         ]);
     }
 
@@ -34,15 +41,29 @@ class RegisteredUserController extends Controller
      */
     public function store(Request $request): RedirectResponse
     {
-        $request->validate([
+        $hasRecaptcha = !empty(config('services.recaptcha.secret_key'));
+        
+        $rules = [
             'name' => 'required|string|max:255',
             'email' => 'required|string|lowercase|email|max:255|unique:'.User::class,
             'password' => ['required', 'confirmed', Rules\Password::defaults()],
-            'recaptcha_token' => 'required|string',
-        ]);
+        ];
+        
+        // Only require reCAPTCHA token if secret key is configured
+        if ($hasRecaptcha) {
+            $rules['recaptcha_token'] = 'required|string';
+        }
+        
+        $request->validate($rules);
 
         // Verify reCAPTCHA v3
-        if (config('services.recaptcha.secret_key')) {
+        if ($hasRecaptcha) {
+            if (empty($request->recaptcha_token)) {
+                throw ValidationException::withMessages([
+                    'recaptcha' => 'reCAPTCHA token is required. Please refresh the page and try again.',
+                ]);
+            }
+            
             $response = Http::asForm()->post('https://www.google.com/recaptcha/api/siteverify', [
                 'secret' => config('services.recaptcha.secret_key'),
                 'response' => $request->recaptcha_token,
@@ -51,7 +72,21 @@ class RegisteredUserController extends Controller
 
             $recaptchaData = $response->json();
 
-            if (!$recaptchaData['success'] || $recaptchaData['score'] < 0.5) {
+            if (!$recaptchaData || !isset($recaptchaData['success']) || !$recaptchaData['success']) {
+                \Log::warning('reCAPTCHA verification failed', [
+                    'response' => $recaptchaData,
+                    'errors' => $recaptchaData['error-codes'] ?? [],
+                ]);
+                
+                throw ValidationException::withMessages([
+                    'recaptcha' => 'reCAPTCHA verification failed. Please try again.',
+                ]);
+            }
+            
+            $score = $recaptchaData['score'] ?? 0;
+            if ($score < 0.5) {
+                \Log::warning('reCAPTCHA score too low', ['score' => $score]);
+                
                 throw ValidationException::withMessages([
                     'recaptcha' => 'reCAPTCHA verification failed. Please try again.',
                 ]);

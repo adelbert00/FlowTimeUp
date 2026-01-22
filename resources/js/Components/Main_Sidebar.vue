@@ -12,7 +12,7 @@
 
     <!-- Logo -->
     <div class="p-6 border-b border-gray-200">
-      <Link href="/home" class="flex items-center gap-3">
+      <Link href="/home" prefetch="hover" class="flex items-center gap-3">
         <div class="w-10 h-10 rounded-xl bg-blue-600 flex items-center justify-center">
           <svg class="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"/>
@@ -28,6 +28,7 @@
       
       <Link
         href="/home"
+        prefetch="hover"
         class="flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium transition-colors"
         :class="$page.url === '/home' 
           ? 'bg-blue-50 text-blue-600 border-l-2 border-blue-600' 
@@ -42,6 +43,7 @@
 
       <Link
         href="/tasks"
+        prefetch="hover"
         class="flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium transition-colors"
         :class="$page.url.startsWith('/tasks') 
           ? 'bg-blue-50 text-blue-600 border-l-2 border-blue-600' 
@@ -56,6 +58,7 @@
 
       <Link
         href="/projects"
+        prefetch="hover"
         class="flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium transition-colors"
         :class="$page.url.startsWith('/projects') 
           ? 'bg-blue-50 text-blue-600 border-l-2 border-blue-600' 
@@ -70,6 +73,7 @@
 
       <Link
         href="/tags"
+        prefetch="hover"
         class="flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium transition-colors"
         :class="$page.url.startsWith('/tags') 
           ? 'bg-blue-50 text-blue-600 border-l-2 border-blue-600' 
@@ -84,6 +88,7 @@
 
       <Link
         href="/calendar"
+        prefetch="hover"
         class="flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium transition-colors"
         :class="$page.url.startsWith('/calendar') 
           ? 'bg-blue-50 text-blue-600 border-l-2 border-blue-600' 
@@ -98,6 +103,7 @@
 
       <Link
         href="/reports"
+        prefetch="hover"
         class="flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium transition-colors"
         :class="$page.url.startsWith('/reports') 
           ? 'bg-blue-50 text-blue-600 border-l-2 border-blue-600' 
@@ -112,6 +118,7 @@
 
       <Link
         href="/task-templates"
+        prefetch="hover"
         class="flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium transition-colors"
         :class="$page.url.startsWith('/task-templates') 
           ? 'bg-blue-50 text-blue-600 border-l-2 border-blue-600' 
@@ -128,6 +135,7 @@
 
       <Link
         href="/profile"
+        prefetch="hover"
         class="flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium transition-colors"
         :class="$page.url.startsWith('/profile') 
           ? 'bg-blue-50 text-blue-600 border-l-2 border-blue-600' 
