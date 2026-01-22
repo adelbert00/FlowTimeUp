@@ -9,7 +9,9 @@ use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Hash;
+use Illuminate\Support\Facades\Http;
 use Illuminate\Validation\Rules;
+use Illuminate\Validation\ValidationException;
 use Inertia\Inertia;
 use Inertia\Response;
 
@@ -20,7 +22,9 @@ class RegisteredUserController extends Controller
      */
     public function create(): Response
     {
-        return Inertia::render('Auth/Register');
+        return Inertia::render('Auth/Register', [
+            'recaptchaSiteKey' => config('services.recaptcha.site_key'),
+        ]);
     }
 
     /**
@@ -34,7 +38,25 @@ class RegisteredUserController extends Controller
             'name' => 'required|string|max:255',
             'email' => 'required|string|lowercase|email|max:255|unique:'.User::class,
             'password' => ['required', 'confirmed', Rules\Password::defaults()],
+            'recaptcha_token' => 'required|string',
         ]);
+
+        // Verify reCAPTCHA v3
+        if (config('services.recaptcha.secret_key')) {
+            $response = Http::asForm()->post('https://www.google.com/recaptcha/api/siteverify', [
+                'secret' => config('services.recaptcha.secret_key'),
+                'response' => $request->recaptcha_token,
+                'remoteip' => $request->ip(),
+            ]);
+
+            $recaptchaData = $response->json();
+
+            if (!$recaptchaData['success'] || $recaptchaData['score'] < 0.5) {
+                throw ValidationException::withMessages([
+                    'recaptcha' => 'reCAPTCHA verification failed. Please try again.',
+                ]);
+            }
+        }
 
         $user = User::create([
             'name' => $request->name,
@@ -46,6 +68,7 @@ class RegisteredUserController extends Controller
 
         Auth::login($user);
 
-        return redirect(route('dashboard', absolute: false));
+        // Redirect to email verification page
+        return redirect()->route('verification.notice');
     }
 }

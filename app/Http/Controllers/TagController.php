@@ -2,43 +2,95 @@
 
 namespace App\Http\Controllers;
 
+use App\Http\Resources\TagResource;
 use App\Models\Tag;
+use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
+use Inertia\Inertia;
+use Inertia\Response;
 
 class TagController extends Controller
 {
-
-    public function index()
+    public function index(Request $request): Response
     {
-        return Tag::all();
+        $userId = $request->user()->id;
+        
+        $tags = Tag::where('user_id', $userId)
+            ->withCount([
+                'tasks' => function ($query) use ($userId) {
+                    $query->where('user_id', $userId);
+                }
+            ])
+            ->get();
+
+        return Inertia::render('Tags/Index', [
+            'tags' => TagResource::collection($tags)->resolve(),
+        ]);
     }
 
-    public function store(Request $request)
+    public function store(Request $request): RedirectResponse
     {
-        $request->validate(['name' => 'required|string|max:255']);
-        $tag = Tag::create(['name' => $request->name]);
-        return response()->json($tag, 201);
+        $validated = $request->validate([
+            'name' => [
+                'required',
+                'string',
+                'max:255',
+                'unique:tags,name,NULL,id,user_id,' . $request->user()->id,
+            ],
+        ]);
+
+        Tag::create([
+            ...$validated,
+            'user_id' => $request->user()->id,
+        ]);
+
+        return redirect()->back()->with('success', 'Tag created successfully.');
     }
 
-    public function show(Tag $tag)
+    public function show(Tag $tag, Request $request): Response
     {
-        return $tag;
+        // Authorization: ensure tag belongs to user
+        if ($tag->user_id !== $request->user()->id) {
+            abort(403);
+        }
+
+        $tag->load('tasks.project', 'tasks.timeSessions');
+
+        return Inertia::render('Tags/Show', [
+            'tag' => new TagResource($tag),
+        ]);
     }
 
-    public function update(Request $request, Tag $tag)
-{
-    $validated = $request->validate([
-        'name' => 'required|string|max:255',
-    ]);
-
-    $tag->update($validated);
-    return response()->json($tag, 200);
-}
-
-    public function destroy(Tag $tag)
+    public function update(Request $request, Tag $tag): RedirectResponse
     {
+        // Authorization: ensure tag belongs to user
+        if ($tag->user_id !== $request->user()->id) {
+            abort(403);
+        }
+
+        $validated = $request->validate([
+            'name' => [
+                'required',
+                'string',
+                'max:255',
+                'unique:tags,name,' . $tag->id . ',id,user_id,' . $request->user()->id,
+            ],
+        ]);
+
+        $tag->update($validated);
+
+        return redirect()->back()->with('success', 'Tag updated successfully.');
+    }
+
+    public function destroy(Tag $tag, Request $request): RedirectResponse
+    {
+        // Authorization: ensure tag belongs to user
+        if ($tag->user_id !== $request->user()->id) {
+            abort(403);
+        }
+
         $tag->delete();
-        return response()->json(null, 204);
-    }
 
+        return redirect()->back()->with('success', 'Tag deleted successfully.');
+    }
 }

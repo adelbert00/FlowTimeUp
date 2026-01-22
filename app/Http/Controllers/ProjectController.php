@@ -2,86 +2,79 @@
 
 namespace App\Http\Controllers;
 
+use App\Http\Requests\Projects\StoreProjectRequest;
+use App\Http\Requests\Projects\UpdateProjectRequest;
+use App\Http\Resources\ProjectResource;
 use App\Models\Project;
+use App\Policies\ProjectPolicy;
+use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Inertia\Inertia;
+use Inertia\Response;
 
 class ProjectController extends Controller
 {
-    public function index(Request $request)
+    public function index(Request $request): Response
     {
-        $projects = Project::all();
-
-        if ($request->wantsJson()) {
-            return response()->json($projects);
-        }
+        $projects = Project::where('user_id', $request->user()->id)
+            ->withCount('tasks')
+            ->get();
 
         return Inertia::render('Projects/Index', [
-            'projects' => $projects,
+            'projects' => ProjectResource::collection($projects)->resolve(),
         ]);
     }
 
-    public function create()
+    public function create(): Response
     {
         return Inertia::render('Projects/Create');
     }
 
-    public function store(Request $request)
+    public function store(StoreProjectRequest $request): RedirectResponse
     {
-        $validated = $request->validate([
-            'name' => 'required|string|max:255',
+        Project::create([
+            ...$request->validated(),
+            'user_id' => $request->user()->id,
         ]);
 
-        $project = Project::create($validated);
-
-        if ($request->wantsJson()) {
-            return response()->json($project, 201);
-        }
-
-        return redirect()->route('projects.index')->with('success', 'Project created!');
+        return redirect()->back()->with('success', 'Project created!');
     }
 
-    public function show(Project $project, Request $request)
+    public function show(Project $project, Request $request): Response
     {
-        if ($request->wantsJson()) {
-            return response()->json($project);
-        }
+        $this->authorize('view', $project);
+
+        $project->load(['tasks.timeSessions', 'tasks.tags']);
 
         return Inertia::render('Projects/Show', [
-            'project' => $project,
+            'project' => new ProjectResource($project),
         ]);
     }
 
-    public function edit(Project $project)
+    public function edit(Project $project): Response
     {
+        $this->authorize('update', $project);
+
         return Inertia::render('Projects/Edit', [
-            'project' => $project,
+            'project' => new ProjectResource($project),
         ]);
     }
 
-    public function update(Request $request, Project $project)
+    public function update(UpdateProjectRequest $request, Project $project): RedirectResponse
     {
-        $validated = $request->validate([
-            'name' => 'required|string|max:255',
-        ]);
+        $this->authorize('update', $project);
 
-        $project->update($validated);
+        $project->update($request->validated());
 
-        if ($request->wantsJson()) {
-            return response()->json($project, 200);
-        }
-
-        return redirect()->route('projects.index')->with('success', 'Project updated!');
+        return redirect()->back()->with('success', 'Project updated!');
     }
 
-    public function destroy(Project $project, Request $request)
+    public function destroy(Project $project): RedirectResponse
     {
+        $this->authorize('delete', $project);
+
         $project->delete();
 
-        if ($request->wantsJson()) {
-            return response()->json(null, 204);
-        }
-
-        return redirect()->route('projects.index')->with('success', 'Project deleted!');
+        return redirect()->back()->with('success', 'Project deleted!');
     }
 }

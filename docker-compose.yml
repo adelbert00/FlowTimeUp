@@ -1,0 +1,35 @@
+version: '3.9'
+services:
+  mailhog:
+    platform: linux/amd64
+    image: mailhog/mailhog
+    logging:
+      driver: 'none'
+    ports:
+      - 1025:1025  
+      - 8025:8025  
+
+  database:
+    image: postgres:15.7-alpine
+    ports:
+      - '5432:5432'
+    environment:
+      POSTGRES_DB: ${DB_DATABASE}
+      POSTGRES_USER: ${DB_USERNAME}
+      POSTGRES_PASSWORD: ${DB_PASSWORD}
+      POSTGRES_HOST_AUTH_METHOD: trust
+    volumes:
+      - db-data:/var/lib/postgresql/data:rw
+
+  redis:
+    image: redis:latest
+    ports:
+      - '6379:6379'
+    command: redis-server --save 60 1 --loglevel warning
+    volumes:
+      - redis:/data
+
+volumes:
+  db-data:
+  redis:
+    driver: local

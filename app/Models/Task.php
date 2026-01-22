@@ -9,7 +9,25 @@ class Task extends Model
 {
     use HasFactory;
 
-    protected $fillable = ['title', 'project_id'];
+    protected $fillable = [
+        'title',
+        'description',
+        'project_id',
+        'user_id',
+        'due_date',
+        'priority',
+        'completed',
+    ];
+
+    protected $casts = [
+        'due_date' => 'date',
+        'completed' => 'boolean',
+    ];
+
+    public function user()
+    {
+        return $this->belongsTo(User::class);
+    }
 
     public function project()
     {

@@ -36,7 +36,7 @@ export const useTasksStore = defineStore('tasks', {
     async createTask(title: string, projectId?: number | null) {
       const res = await axios.post('/tasks', {
         title,
-        project_id: projectId ?? null,
+        ...(projectId !== undefined && { project_id: projectId }),
       });
       return res.data;
     },

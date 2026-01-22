@@ -25,8 +25,14 @@ class TimeSessionController extends Controller
         $validated = $request->validate([
             'task_id' => 'required|exists:tasks,id',
             'start_time' => 'required|date',
-            'end_time'   => 'nullable|date|after_or_equal:start_time',
+            'end_time' => 'nullable|date|after_or_equal:start_time',
         ]);
+
+        // Verify task belongs to user
+        $task = \App\Models\Task::findOrFail($validated['task_id']);
+        if ($task->user_id !== $request->user()->id) {
+            abort(403, 'Unauthorized');
+        }
 
         TimeSession::create($validated);
 

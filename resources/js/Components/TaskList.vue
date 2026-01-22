@@ -1,58 +1,71 @@
 <script setup lang="ts">
-import { ref, onMounted } from 'vue';
-import { useTasksStore } from '@/stores/tasks';
-import { useProjectsStore } from '@/stores/projects';
-import { useTimeSessionsStore, TimeSession } from '@/stores/timeSessions';
-import dayjs from 'dayjs';
-import duration from 'dayjs/plugin/duration';
-import Button from './ui/button/Button.vue';
-import Accordion from './ui/accordion/Accordion.vue';
-import AccordionItem from './ui/accordion/AccordionItem.vue';
-import AccordionTrigger from './ui/accordion/AccordionTrigger.vue';
-import AccordionContent from './ui/accordion/AccordionContent.vue';
+import { ref, computed } from 'vue';
+import { router } from '@inertiajs/vue3';
+import TaskCard from './Tasks/TaskCard.vue';
+import CustomCheckbox from './CustomCheckbox.vue';
 
-dayjs.extend(duration);
+interface Task {
+  id: number;
+  title: string;
+  description?: string;
+  project_id?: number | null;
+  due_date?: string;
+  priority?: 'low' | 'medium' | 'high';
+  completed: boolean;
+  project?: {
+    id: number;
+    name: string;
+    color?: string;
+  };
+  tags?: Array<{ id: number; name: string }>;
+  time_sessions?: Array<{
+    id: number;
+    start_time: string;
+    end_time?: string;
+  }>;
+  total_time?: string;
+}
 
-const tasksStore = useTasksStore();
-const projectsStore = useProjectsStore();
-const timeSessionsStore = useTimeSessionsStore();
+interface Pagination {
+  current_page: number;
+  last_page: number;
+  per_page: number;
+  total: number;
+}
+
+interface Filters {
+  project_id?: number;
+  completed?: boolean;
+  priority?: string;
+  search?: string;
+  sort_by?: string;
+  sort_order?: string;
+}
+
+const props = defineProps<{
+  tasks: Task[];
+  pagination: Pagination;
+  filters?: Filters;
+}>();
+
+const emit = defineEmits<{
+  delete: [taskId: number];
+  'bulk-delete': [taskIds: number[]];
+}>();
 
 const selectedTaskIds = ref<number[]>([]);
-
 const showConfirmModal = ref(false);
 const confirmMessage = ref('');
 let confirmAction: (() => void) | null = null;
 
-let intervalId: number | null = null;
-const openAccordion = ref<string[]>([]);
-
-const showEditModal = ref(false);
-const editTaskId = ref<number | null>(null);
-const editTitle = ref('');
-const editProjectId = ref<number | null>(null);
-
-onMounted(async () => {
-  await tasksStore.fetchTasks();
-  await projectsStore.fetchProjects();
-  await timeSessionsStore.fetchSessions();
-
-  tasksStore.tasks.forEach((task: any) => {
-    task.time_sessions = timeSessionsStore.sessions.filter(
-      (session: TimeSession) => session.task_id === task.id
-    );
-  });
-});
-
-function canBulkDelete() {
-  return selectedTaskIds.value.length >= 2;
-}
+const canBulkDelete = computed(() => selectedTaskIds.value.length >= 1);
 
 function openBulkDeleteModal() {
-  if (!canBulkDelete()) return;
+  if (!canBulkDelete.value) return;
   showConfirmModal.value = true;
-  confirmMessage.value = `Are you sure you want to delete ${selectedTaskIds.value.length} tasks?`;
-  confirmAction = async () => {
-    await tasksStore.bulkDeleteTasks(selectedTaskIds.value);
+  confirmMessage.value = `Are you sure you want to delete ${selectedTaskIds.value.length} task${selectedTaskIds.value.length > 1 ? 's' : ''}? This action cannot be undone.`;
+  confirmAction = () => {
+    emit('bulk-delete', [...selectedTaskIds.value]);
     selectedTaskIds.value = [];
   };
 }
@@ -62,261 +75,165 @@ function confirmYes() {
   showConfirmModal.value = false;
   confirmAction = null;
 }
+
 function confirmNo() {
   showConfirmModal.value = false;
   confirmAction = null;
 }
 
-async function deleteTask(taskId: number) {
-  await tasksStore.deleteTask(taskId);
+function handleDelete(taskId: number) {
+  emit('delete', taskId);
 }
 
-function openEditModal(task: any) {
-  showEditModal.value = true;
-  editTaskId.value = task.id;
-  editTitle.value = task.title;
-  editProjectId.value = task.project?.id ?? null;
-}
-
-async function saveEdit() {
-  if (editTaskId.value === null) return;
-  await tasksStore.updateTask(editTaskId.value, {
-    title: editTitle.value,
-    project_id: editProjectId.value,
-  });
-  showEditModal.value = false;
-}
-
-function cancelEdit() {
-  showEditModal.value = false;
-}
-
-function startTimer(task: any) {
-  task.isRunning = true;
-  task.startTime = dayjs();
-  task.timer = '00:00:00.000';
-
-  intervalId = window.setInterval(() => {
-    if (task.isRunning && task.startTime) {
-      const now = dayjs();
-      const diffMilliseconds = now.diff(task.startTime);
-      const durationTime = dayjs.duration(diffMilliseconds, 'milliseconds');
-      task.timer = durationTime.format('HH:mm:ss.SSS');
+function toggleTaskComplete(taskId: number) {
+  router.post(
+    route('tasks.toggleComplete', taskId),
+    {},
+    {
+      preserveScroll: true,
+      only: ['tasks'],
     }
-  }, 10);
+  );
 }
 
-async function stopTimer(task: any) {
-  if (!task.isRunning) return;
-
-  task.isRunning = false;
-  const endTime = dayjs();
-
-  await timeSessionsStore.createTimeSession(
-    task.id,
-    task.startTime.toISOString(),
-    endTime.toISOString()
-  );
-
-  await timeSessionsStore.fetchSessions();
-  task.time_sessions = timeSessionsStore.sessions.filter(
-    (session: TimeSession) => session.task_id === task.id
-  );
-
-  if (intervalId) {
-    clearInterval(intervalId);
-    intervalId = null;
+function selectAll(checked?: boolean) {
+  const shouldSelect = checked !== undefined ? checked : selectedTaskIds.value.length !== props.tasks.length;
+  if (shouldSelect) {
+    selectedTaskIds.value = props.tasks.map(t => t.id);
+  } else {
+    selectedTaskIds.value = [];
   }
-
-  task.timer = '00:00:00.000';
-  task.startTime = null;
-}
-
-function formatDate(date: string) {
-  return dayjs(date).format('YYYY-MM-DD');
-}
-function formatTimeRange(start: string, end: string) {
-  return `${dayjs(start).format('HH:mm')} - ${dayjs(end).format('HH:mm')}`;
-}
-function calculateTotalTime(sessions: TimeSession[] = []) {
-  const totalMilliseconds = sessions.reduce((sum, session) => {
-    const start = dayjs(session.start_time);
-    const finish = session.end_time ? dayjs(session.end_time) : dayjs();
-    return sum + finish.diff(start);
-  }, 0);
-
-  const hours = Math.floor(totalMilliseconds / 3600000);
-  const minutes = Math.floor((totalMilliseconds % 3600000) / 60000);
-  const seconds = Math.floor((totalMilliseconds % 60000) / 1000);
-  const milliseconds = totalMilliseconds % 1000;
-
-  const formattedHours = hours.toString().padStart(2, '0');
-  const formattedMinutes = minutes.toString().padStart(2, '0');
-  const formattedSeconds = seconds.toString().padStart(2, '0');
-  const formattedMilliseconds = milliseconds.toString().padStart(3, '0');
-
-  return `${formattedHours}:${formattedMinutes}:${formattedSeconds}.${formattedMilliseconds}`;
 }
 </script>
 
 <template>
-  <div>
-    <h2 class="text-2xl font-bold mb-4">Tasks</h2>
-
-    <div class="mb-4 flex items-center space-x-2">
-      <Button
-        class="bg-red-500 text-white px-3 py-1 rounded"
-        :disabled="!canBulkDelete()"
-        @click="openBulkDeleteModal"
-      >
-        Bulk Delete
-      </Button>
-      <span class="text-sm text-gray-600">
-        {{ selectedTaskIds.length }} selected
-      </span>
-    </div>
-
-    <div
-      v-for="task in tasksStore.tasks"
-      :key="task.id"
-      class="mb-4 border rounded p-4 flex items-start"
-    >
-      <input
-        type="checkbox"
-        class="mr-2 mt-1"
-        :value="task.id"
-        v-model="selectedTaskIds"
-      />
-
-      <div class="flex-1">
-        <div class="flex justify-between items-center">
-          <div>
-            <strong>{{ task.title }}</strong>
-            <span v-if="task.project"> [{{ task.project.name }}]</span>
-          </div>
-          <div class="flex items-center space-x-2">
-            <p>Total: {{ calculateTotalTime(task.time_sessions) }}</p>
-            <button
-              class="bg-gray-500 text-white px-2 py-1 rounded"
-              @click="openEditModal(task)"
-            >
-              Edit
-            </button>
-            <button
-              class="bg-red-500 text-white px-2 py-1 rounded"
-              @click="deleteTask(task.id)"
-            >
-              Delete
-            </button>
-          </div>
+  <div class="space-y-4">
+    <div class="flex items-center justify-between bg-white/50 backdrop-blur-sm p-3 sm:p-4 rounded-xl border border-gray-200/50 sticky top-0 z-10">
+      <div class="flex items-center gap-4">
+        <div class="flex items-center gap-2">
+          <CustomCheckbox
+            :checked="selectedTaskIds.length === tasks.length && tasks.length > 0"
+            :indeterminate="selectedTaskIds.length > 0 && selectedTaskIds.length < tasks.length"
+            @change="(checked: boolean) => selectAll(checked)"
+          />
+          <span class="text-sm text-gray-600 cursor-pointer" @click="selectAll()">Select all</span>
         </div>
 
-        <div class="mt-2 flex flex-wrap gap-2">
-          <span
-            v-for="tag in task.tags ?? []"
-            :key="tag.id"
-            class="bg-gray-200 text-gray-700 px-2 py-1 rounded text-sm flex items-center"
-          >
-            {{ tag.name }}
-          </span>
-        </div>
-
-        <div class="flex items-center space-x-4 mt-2">
-          <div class="text-gray-600 font-mono w-[12ch] text-center">
-            {{ task.timer ?? '00:00:00.000' }}
-          </div>
-          <div>
-            <Button
-              v-if="!task.isRunning"
-              @click="startTimer(task)"
-              class="px-3 py-1 bg-green-500 text-white rounded"
-            >
-              Start
-            </Button>
-            <Button
-              v-else
-              @click="stopTimer(task)"
-              class="px-3 py-1 bg-red-500 text-white rounded"
-            >
-              Stop
-            </Button>
-          </div>
-        </div>
-
-        <Accordion v-model="openAccordion" collapsible>
-          <AccordionItem :value="`task-${task.id}`">
-            <AccordionTrigger>View Sessions</AccordionTrigger>
-            <AccordionContent>
-              <ul>
-                <li
-                  v-for="session in task.time_sessions ?? []"
-                  :key="session.id"
-                  class="border-b last:border-none py-2"
-                >
-                  <span class="block text-gray-700">
-                    Date: {{ formatDate(session.start_time) }}
-                  </span>
-                  <span class="block text-gray-500">
-                    Time:
-                    {{ formatTimeRange(session.start_time, session.end_time) }}
-                  </span>
-                </li>
-              </ul>
-            </AccordionContent>
-          </AccordionItem>
-        </Accordion>
-      </div>
-    </div>
-
-    <div
-      v-if="showConfirmModal"
-      class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center"
-    >
-      <div class="bg-white p-4 rounded shadow w-80">
-        <h3 class="text-lg font-semibold mb-2">Confirm Deletion</h3>
-        <p class="mb-4">{{ confirmMessage }}</p>
-        <div class="flex justify-end space-x-2">
-          <Button variant="outline" @click="confirmNo">Cancel</Button>
-          <Button class="bg-red-500 text-white" @click="confirmYes"
-            >Delete</Button
-          >
-        </div>
-      </div>
-    </div>
-
-    <div
-      v-if="showEditModal"
-      class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center"
-    >
-      <div class="bg-white p-4 rounded shadow w-80">
-        <h3 class="text-lg font-semibold mb-2">Edit Task</h3>
-
-        <label class="block mb-2 font-medium">Title:</label>
-        <input
-          v-model="editTitle"
-          class="border px-2 py-1 rounded w-full mb-3"
-        />
-
-        <label class="block mb-2 font-medium">Project:</label>
-        <select
-          v-model.number="editProjectId"
-          class="border px-2 py-1 rounded w-full mb-3"
+        <button
+          v-if="canBulkDelete"
+          @click="openBulkDeleteModal"
+          class="flex items-center gap-2 px-3 py-1.5 bg-red-500/10 text-red-400 rounded-lg text-sm font-medium hover:bg-red-500/20 transition-colors"
         >
-          <option :value="null">-- Select project --</option>
-          <option
-            v-for="proj in projectsStore.projects"
-            :key="proj.id"
-            :value="proj.id"
-          >
-            {{ proj.name }}
-          </option>
-        </select>
+          <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"/>
+          </svg>
+          Delete ({{ selectedTaskIds.length }})
+        </button>
+      </div>
 
-        <div class="mt-3 flex justify-end space-x-2">
-          <Button variant="outline" @click="cancelEdit">Cancel</Button>
-          <Button class="bg-blue-500 text-white" @click="saveEdit">Save</Button>
-        </div>
+      <div class="text-sm text-gray-600">
+        {{ pagination.total }} task{{ pagination.total !== 1 ? 's' : '' }}
       </div>
     </div>
+
+    <div v-if="tasks.length > 0" class="space-y-3">
+      <TaskCard
+        v-for="task in tasks"
+        :key="task.id"
+        :task="task"
+        :selected="selectedTaskIds.includes(task.id)"
+        @select="(id) => {
+          const index = selectedTaskIds.indexOf(id);
+          if (index > -1) {
+            selectedTaskIds.splice(index, 1);
+          } else {
+            selectedTaskIds.push(id);
+          }
+        }"
+        @delete="handleDelete"
+        @toggle-complete="toggleTaskComplete"
+      />
+    </div>
+
+    <div v-else class="flex flex-col items-center justify-center py-16 bg-white/30 rounded-xl border border-gray-200/50 border-dashed">
+      <div class="w-16 h-16 rounded-full bg-gray-100 flex items-center justify-center mb-4">
+        <svg class="w-8 h-8 text-gray-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2"/>
+        </svg>
+      </div>
+      <p class="text-gray-600 text-lg font-medium">No tasks yet</p>
+      <p class="text-gray-500 text-sm mt-1">Create your first task to get started</p>
+    </div>
+
+    <div v-if="pagination.last_page > 1" class="flex items-center justify-center gap-2 pt-4">
+      <button
+        :disabled="pagination.current_page === 1"
+        @click="router.get(route('tasks.index'), { ...filters, page: pagination.current_page - 1 })"
+        class="px-4 py-2 rounded-lg text-sm font-medium transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+        :class="pagination.current_page === 1 ? 'bg-gray-100 text-gray-500' : 'bg-gray-100 text-gray-700 hover:bg-gray-200'"
+      >
+        Previous
+      </button>
+      
+      <div class="flex items-center gap-1 px-4">
+        <span class="text-gray-600 text-sm">Page</span>
+        <span class="text-gray-900 font-medium">{{ pagination.current_page }}</span>
+        <span class="text-gray-600 text-sm">of</span>
+        <span class="text-gray-900 font-medium">{{ pagination.last_page }}</span>
+      </div>
+
+      <button
+        :disabled="pagination.current_page === pagination.last_page"
+        @click="router.get(route('tasks.index'), { ...filters, page: pagination.current_page + 1 })"
+        class="px-4 py-2 rounded-lg text-sm font-medium transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+        :class="pagination.current_page === pagination.last_page ? 'bg-gray-100 text-gray-500' : 'bg-gray-100 text-gray-700 hover:bg-gray-200'"
+      >
+        Next
+      </button>
+    </div>
+
+    <Teleport to="body">
+      <div
+        v-if="showConfirmModal"
+        class="fixed inset-0 z-50 flex items-center justify-center p-4"
+        @click.self="confirmNo"
+      >
+        <div class="absolute inset-0 bg-black/60 backdrop-blur-sm" />
+        
+        <div class="relative bg-white rounded-2xl shadow-2xl max-w-md w-full border border-gray-200 overflow-hidden">
+          <div class="absolute top-0 left-0 right-0 h-1 bg-red-500" />
+          
+          <div class="p-6">
+            <div class="w-12 h-12 rounded-full bg-red-500/10 flex items-center justify-center mb-4 mx-auto">
+              <svg class="w-6 h-6 text-red-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"/>
+              </svg>
+            </div>
+
+            <h3 class="text-xl font-semibold text-gray-900 text-center mb-2">
+              Delete Tasks
+            </h3>
+            <p class="text-gray-600 text-center mb-6">
+              {{ confirmMessage }}
+            </p>
+
+            <div class="flex gap-3">
+              <button
+                @click="confirmNo"
+                class="flex-1 px-4 py-2.5 bg-gray-100 text-gray-700 rounded-lg font-medium hover:bg-gray-200 transition-colors"
+              >
+                Cancel
+              </button>
+              <button
+                @click="confirmYes"
+                class="flex-1 px-4 py-2.5 bg-red-500 text-white rounded-lg font-medium hover:bg-red-600 transition-colors"
+              >
+                Delete
+              </button>
+            </div>
+          </div>
+        </div>
+      </div>
+    </Teleport>
   </div>
 </template>
