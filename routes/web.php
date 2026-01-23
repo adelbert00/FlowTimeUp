@@ -28,7 +28,6 @@ Route::get('/robots.txt', function () {
         ->header('Content-Type', 'text/plain');
 });
 
-// Static pages
 Route::get('/documentation', [PageController::class, 'documentation'])->name('pages.documentation');
 Route::get('/api-reference', [PageController::class, 'apiReference'])->name('pages.api-reference');
 Route::get('/help-center', [PageController::class, 'helpCenter'])->name('pages.help-center');

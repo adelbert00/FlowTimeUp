@@ -5,6 +5,7 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\SoftDeletes;
+use App\Models\TimeSession;
 
 class Project extends Model
 {
@@ -28,11 +29,10 @@ class Project extends Model
 
     public function getTotalTrackedSecondsAttribute(): int
     {
-        return $this->tasks()
-            ->with('timeSessions')
+        return TimeSession::join('tasks', 'time_sessions.task_id', '=', 'tasks.id')
+            ->where('tasks.project_id', $this->id)
+            ->whereNotNull('time_sessions.end_time')
             ->get()
-            ->flatMap(fn($task) => $task->timeSessions)
-            ->filter(fn($session) => $session->end_time !== null)
             ->sum(fn($session) => $session->start_time->diffInSeconds($session->end_time));
     }
 
@@ -47,29 +47,21 @@ class Project extends Model
 
     public function getTotalAmountAttribute(): float
     {
-        // Sum earnings from all tasks in this project using their actual rates
-        // This ensures we use task rates or session rates, not just project rate
-        $total = 0;
+        $sessions = TimeSession::join('tasks', 'time_sessions.task_id', '=', 'tasks.id')
+            ->where('tasks.project_id', $this->id)
+            ->where('time_sessions.is_billable', true)
+            ->whereNotNull('time_sessions.end_time')
+            ->select('time_sessions.*', 'tasks.hourly_rate as task_rate')
+            ->get();
         
-        $tasks = $this->tasks()->with('timeSessions')->get();
-        
-        foreach ($tasks as $task) {
-            foreach ($task->timeSessions as $session) {
-                if (!$session->is_billable || !$session->end_time) {
-                    continue;
-                }
-                
-                // Use session rate, fallback to task rate, fallback to project rate
-                $rate = $session->billable_rate 
-                    ?? $task->hourly_rate 
-                    ?? $this->hourly_rate;
-                
-                if ($rate) {
-                    $hours = $session->start_time->diffInSeconds($session->end_time) / 3600;
-                    $total += $hours * $rate;
-                }
+        $total = $sessions->sum(function ($session) {
+            $rate = $session->billable_rate ?? $session->task_rate ?? $this->hourly_rate;
+            if (!$rate) {
+                return 0;
             }
-        }
+            $hours = $session->start_time->diffInSeconds($session->end_time) / 3600;
+            return $hours * $rate;
+        });
         
         return round($total, 2);
     }

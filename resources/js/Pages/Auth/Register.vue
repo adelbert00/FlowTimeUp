@@ -144,7 +144,7 @@ declare global {
               required
               autofocus
               autocomplete="given-name"
-              placeholder="John"
+              placeholder="Alex"
               class="w-full pl-10 pr-4 py-2.5 sm:py-3 bg-gray-50/50 border border-gray-300 rounded-lg text-gray-900 placeholder-gray-400 focus:outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-500 transition-colors text-sm sm:text-base"
               :class="{ 'border-red-500': form.errors.first_name }"
             />
@@ -171,7 +171,7 @@ declare global {
               v-model="form.last_name"
               required
               autocomplete="family-name"
-              placeholder="Doe"
+              placeholder="Taylor"
               class="w-full pl-10 pr-4 py-2.5 sm:py-3 bg-gray-50/50 border border-gray-300 rounded-lg text-gray-900 placeholder-gray-400 focus:outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-500 transition-colors text-sm sm:text-base"
               :class="{ 'border-red-500': form.errors.last_name }"
             />
@@ -199,7 +199,7 @@ declare global {
             v-model="form.email"
             required
             autocomplete="username"
-            placeholder="you@example.com"
+            placeholder="name@company.com"
             class="w-full pl-10 pr-4 py-2.5 sm:py-3 bg-gray-50/50 border border-gray-300 rounded-lg text-gray-900 placeholder-gray-400 focus:outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-500 transition-colors text-sm sm:text-base"
             :class="{ 'border-red-500': form.errors.email }"
           />
@@ -352,7 +352,7 @@ declare global {
           <div class="w-full border-t border-gray-200" />
         </div>
         <div class="relative flex justify-center text-sm">
-          <span class="px-4 bg-white text-gray-500">Already have an account?</span>
+          <span class="px-4 text-gray-500">Already have an account?</span>
         </div>
       </div>
 

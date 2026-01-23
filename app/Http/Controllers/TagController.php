@@ -56,7 +56,6 @@ class TagController extends Controller
 
     public function show(Tag $tag, Request $request): Response
     {
-        // Authorization: ensure tag belongs to user
         if ($tag->user_id !== $request->user()->id) {
             abort(403);
         }
@@ -70,7 +69,6 @@ class TagController extends Controller
 
     public function update(Request $request, Tag $tag): RedirectResponse
     {
-        // Authorization: ensure tag belongs to user
         if ($tag->user_id !== $request->user()->id) {
             abort(403);
         }
@@ -91,7 +89,6 @@ class TagController extends Controller
 
     public function destroy(Tag $tag, Request $request): RedirectResponse
     {
-        // Authorization: ensure tag belongs to user
         if ($tag->user_id !== $request->user()->id) {
             abort(403);
         }
@@ -103,7 +100,6 @@ class TagController extends Controller
 
     public function archive(Tag $tag, Request $request): RedirectResponse
     {
-        // Authorization: ensure tag belongs to user
         if ($tag->user_id !== $request->user()->id) {
             abort(403);
         }
@@ -115,7 +111,6 @@ class TagController extends Controller
 
     public function restore(Tag $tag, Request $request): RedirectResponse
     {
-        // Authorization: ensure tag belongs to user
         if ($tag->user_id !== $request->user()->id) {
             abort(403);
         }

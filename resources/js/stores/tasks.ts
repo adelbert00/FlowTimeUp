@@ -45,9 +45,8 @@ export const useTasksStore = defineStore('tasks', {
       await this.fetchTasks();
     },
     async bulkDeleteTasks(taskIds: number[]) {
-      for (const id of taskIds) {
-        await this.deleteTask(id);
-      }
+      await Promise.all(taskIds.map(id => axios.delete(`/tasks/${id}`)));
+      await this.fetchTasks();
     },
 
     async updateTask(

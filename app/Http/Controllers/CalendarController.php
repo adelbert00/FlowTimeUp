@@ -21,13 +21,11 @@ class CalendarController extends Controller
         $startOfMonth = Carbon::create($year, $month, 1)->startOfDay();
         $endOfMonth = Carbon::create($year, $month, 1)->endOfMonth()->endOfDay();
 
-        // Get tasks with due dates in this month
         $tasks = Task::where('user_id', $userId)
             ->whereBetween('due_date', [$startOfMonth, $endOfMonth])
             ->with(['project', 'tags'])
             ->get();
 
-        // Get time sessions in this month
         $timeSessions = TimeSession::whereHas('task', function ($q) use ($userId) {
                 $q->where('user_id', $userId);
             })
@@ -39,7 +37,6 @@ class CalendarController extends Controller
                 return Carbon::parse($session->start_time)->format('Y-m-d');
             });
 
-        // Calculate daily totals
         $dailyTotals = [];
         foreach ($timeSessions as $date => $sessions) {
             $totalSeconds = $sessions->sum(function ($session) {

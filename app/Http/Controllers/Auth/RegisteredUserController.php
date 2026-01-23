@@ -17,14 +17,10 @@ use Inertia\Response;
 
 class RegisteredUserController extends Controller
 {
-    /**
-     * Display the registration view.
-     */
     public function create(): Response
     {
         $siteKey = config('services.recaptcha.site_key');
         
-        // Debug: Log if key is missing (only in non-production)
         if (empty($siteKey) && app()->environment('local')) {
             \Log::warning('reCAPTCHA site key is not configured. Check RECAPTCHA_SITE_KEY in .env');
         }
@@ -34,11 +30,6 @@ class RegisteredUserController extends Controller
         ]);
     }
 
-    /**
-     * Handle an incoming registration request.
-     *
-     * @throws \Illuminate\Validation\ValidationException
-     */
     public function store(Request $request): RedirectResponse
     {
         $hasRecaptcha = !empty(config('services.recaptcha.secret_key'));
@@ -50,14 +41,12 @@ class RegisteredUserController extends Controller
             'password' => ['required', 'confirmed', Rules\Password::defaults()],
         ];
         
-        // Only require reCAPTCHA token if secret key is configured
         if ($hasRecaptcha) {
             $rules['recaptcha_token'] = 'required|string';
         }
         
         $request->validate($rules);
 
-        // Verify reCAPTCHA v3
         if ($hasRecaptcha) {
             if (empty($request->recaptcha_token)) {
                 throw ValidationException::withMessages([
@@ -106,7 +95,6 @@ class RegisteredUserController extends Controller
 
         Auth::login($user);
 
-        // Redirect to email verification page
         return redirect()->route('verification.notice');
     }
 }

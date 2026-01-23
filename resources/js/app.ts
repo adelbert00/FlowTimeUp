@@ -10,7 +10,6 @@ import pinia from './stores/store';
 
 const appName = import.meta.env.VITE_APP_NAME || 'FlowTimeUp';
 
-// Google Analytics tracking for Inertia.js SPA
 declare global {
   interface Window {
     gtag?: (...args: any[]) => void;
@@ -19,7 +18,6 @@ declare global {
   }
 }
 
-// Track page views for Google Analytics in SPA
 router.on('navigate', () => {
   if (window.gtag && window.VITE_GOOGLE_ANALYTICS_ID) {
     window.gtag('config', window.VITE_GOOGLE_ANALYTICS_ID, {
@@ -43,9 +41,7 @@ createInertiaApp({
       .mount(el);
   },
   progress: {
-    // Blue progress bar matching project theme
     color: '#2563eb',
-    // Show spinner for slower connections
     showSpinner: true,
   },
 });

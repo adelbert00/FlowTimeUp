@@ -7,6 +7,7 @@ use App\Models\Task;
 use App\Models\TimeSession;
 use Carbon\Carbon;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\DB;
 use Inertia\Inertia;
 use Inertia\Response;
 
@@ -22,45 +23,28 @@ class DashboardController extends Controller
         $startDate = $this->getStartDate($period);
         $endDate = Carbon::now();
 
-        $periodSessions = TimeSession::join('tasks', 'time_sessions.task_id', '=', 'tasks.id')
-            ->where('tasks.user_id', $userId)
-            ->where('time_sessions.start_time', '>=', $startDate)
-            ->whereNotNull('time_sessions.end_time')
-            ->select('time_sessions.*')
-            ->get();
-
-        $totalSeconds = $periodSessions->sum(function ($session) {
-            return $session->start_time->diffInSeconds($session->end_time);
-        });
+        $totalSeconds = $this->calculateTotalSeconds($userId, $startDate, $endDate);
 
         $monthlyData = $this->getMonthlyBreakdown($userId, $startDate, $endDate);
         $projectBreakdown = $this->getProjectBreakdown($userId, $startDate, $endDate);
         $topProject = !empty($projectBreakdown) ? $projectBreakdown[0] : null;
 
-        $todaysSessions = TimeSession::join('tasks', 'time_sessions.task_id', '=', 'tasks.id')
+        $todaySeconds = TimeSession::join('tasks', 'time_sessions.task_id', '=', 'tasks.id')
             ->where('tasks.user_id', $userId)
             ->whereDate('time_sessions.start_time', $today)
             ->whereNotNull('time_sessions.end_time')
-            ->select('time_sessions.*')
-            ->get();
-
-        $todaySeconds = $todaysSessions->sum(function ($session) {
-            return $session->start_time->diffInSeconds($session->end_time);
-        });
+            ->get()
+            ->sum(fn($session) => $session->start_time->diffInSeconds($session->end_time));
 
         $weekStart = Carbon::now()->startOfWeek();
         $weekEnd = Carbon::now()->endOfWeek();
         
-        $weeklySessions = TimeSession::join('tasks', 'time_sessions.task_id', '=', 'tasks.id')
+        $weeklySeconds = TimeSession::join('tasks', 'time_sessions.task_id', '=', 'tasks.id')
             ->where('tasks.user_id', $userId)
             ->whereBetween('time_sessions.start_time', [$weekStart, $weekEnd])
             ->whereNotNull('time_sessions.end_time')
-            ->select('time_sessions.*')
-            ->get();
-
-        $weeklySeconds = $weeklySessions->sum(function ($session) {
-            return $session->start_time->diffInSeconds($session->end_time);
-        });
+            ->get()
+            ->sum(fn($session) => $session->start_time->diffInSeconds($session->end_time));
 
         $completedToday = Task::where('user_id', $userId)
             ->where('completed', true)
@@ -77,7 +61,6 @@ class DashboardController extends Controller
 
         $teamActivities = $this->getTeamActivities($userId, 10);
 
-        // Edge case: Ensure arrays are never null
         $monthlyData = $monthlyData ?? [];
         $projectBreakdown = $projectBreakdown ?? [];
         $teamActivities = $teamActivities ?? [];
@@ -138,9 +121,7 @@ class DashboardController extends Controller
                 ->select('time_sessions.*', 'tasks.id as task_id', 'tasks.title as task_title', 'tasks.project_id', 'projects.name as project_name', 'projects.color as project_color')
                 ->get();
 
-            $totalSeconds = $sessions->sum(function ($session) {
-                return $session->start_time->diffInSeconds($session->end_time);
-            });
+            $totalSeconds = $sessions->sum(fn($session) => $session->start_time->diffInSeconds($session->end_time));
 
             $projectBreakdown = [];
             foreach ($sessions as $session) {
@@ -212,11 +193,10 @@ class DashboardController extends Controller
 
         foreach ($breakdown as &$project) {
             $project['formatted_time'] = $this->formatTime($project['seconds']);
-            // Edge case: Prevent division by zero
             $project['percentage'] = $totalSeconds > 0 
                 ? round(($project['seconds'] / $totalSeconds) * 100, 2) 
                 : 0;
-            $project['percentage'] = max(0, min(100, $project['percentage'])); // Ensure 0-100 range
+            $project['percentage'] = max(0, min(100, $project['percentage']));
         }
 
         return $breakdown;
@@ -269,9 +249,22 @@ class DashboardController extends Controller
         return $result ?: [];
     }
 
+    private function calculateTotalSeconds(int $userId, Carbon $startDate, ?Carbon $endDate = null): int
+    {
+        $query = TimeSession::join('tasks', 'time_sessions.task_id', '=', 'tasks.id')
+            ->where('tasks.user_id', $userId)
+            ->where('time_sessions.start_time', '>=', $startDate)
+            ->whereNotNull('time_sessions.end_time');
+        
+        if ($endDate) {
+            $query->where('time_sessions.start_time', '<=', $endDate);
+        }
+        
+        return $query->get()->sum(fn($session) => $session->start_time->diffInSeconds($session->end_time));
+    }
+
     private function formatTime(int $seconds): string
     {
-        // Edge case: Handle negative or zero seconds
         if ($seconds <= 0) {
             return '00:00:00';
         }

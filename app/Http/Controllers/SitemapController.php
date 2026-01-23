@@ -15,10 +15,8 @@ class SitemapController extends Controller
         $baseUrl = config('app.url');
         $now = now()->toAtomString();
         
-        // Home page
         $sitemap .= $this->url($baseUrl . '/', $now, '1.0', 'daily');
         
-        // Public pages
         $sitemap .= $this->url($baseUrl . '/login', $now, '0.8', 'monthly');
         $sitemap .= $this->url($baseUrl . '/register', $now, '0.8', 'monthly');
         

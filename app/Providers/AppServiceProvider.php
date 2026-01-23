@@ -16,11 +16,6 @@ use Illuminate\Support\ServiceProvider;
 
 class AppServiceProvider extends ServiceProvider
 {
-    /**
-     * The policy mappings for the application.
-     *
-     * @var array<class-string, class-string>
-     */
     protected $policies = [
         Task::class => TaskPolicy::class,
         Project::class => ProjectPolicy::class,
@@ -28,17 +23,11 @@ class AppServiceProvider extends ServiceProvider
         Tag::class => TagPolicy::class,
     ];
 
-    /**
-     * Register any application services.
-     */
     public function register(): void
     {
         //
     }
 
-    /**
-     * Bootstrap any application services.
-     */
     public function boot(): void
     {
         Vite::prefetch(concurrency: 3);

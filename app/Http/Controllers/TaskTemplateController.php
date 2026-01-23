@@ -137,7 +137,6 @@ class TaskTemplateController extends Controller
             abort(403);
         }
 
-        // Create task from template
         $task = Task::create([
             'user_id' => $request->user()->id,
             'title' => $taskTemplate->title,
@@ -147,7 +146,6 @@ class TaskTemplateController extends Controller
             'completed' => false,
         ]);
 
-        // Attach tags if any
         if ($taskTemplate->tag_ids && count($taskTemplate->tag_ids) > 0) {
             $task->tags()->attach($taskTemplate->tag_ids);
         }

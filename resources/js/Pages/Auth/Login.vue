@@ -59,7 +59,7 @@ const submit = () => {
             required
             autofocus
             autocomplete="username"
-            placeholder="you@example.com"
+            placeholder="name@company.com"
             class="w-full pl-10 pr-4 py-2.5 sm:py-3 bg-gray-50/50 border border-gray-300 rounded-lg text-gray-900 placeholder-gray-400 focus:outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-500 transition-colors text-sm sm:text-base"
             :class="{ 'border-red-500': form.errors.email }"
           />
@@ -151,7 +151,7 @@ const submit = () => {
           <div class="w-full border-t border-gray-200" />
         </div>
         <div class="relative flex justify-center text-sm">
-          <span class="px-4 bg-white text-gray-500">New to FlowTimeUp?</span>
+          <span class="px-4 text-gray-500">New to FlowTimeUp?</span>
         </div>
       </div>
 
