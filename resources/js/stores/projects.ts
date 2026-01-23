@@ -40,7 +40,6 @@ export const useProjectsStore = defineStore('projects', {
         this.projects.push(createdProject);
         return createdProject;
       } catch (error) {
-        console.error('Error creating project:', error);
         return undefined;
       }
     },

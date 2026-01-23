@@ -16,7 +16,6 @@ export const useTimerStore = defineStore('timer', () => {
   const isRunning = ref(false);
   const currentTime = ref<Date>(new Date());
   let intervalId: number | null = null;
-  let autoSaveIntervalId: number | null = null;
 
   function loadFromStorage() {
     if (typeof window === 'undefined') return;
@@ -33,15 +32,12 @@ export const useTimerStore = defineStore('timer', () => {
             startTime.value = storedStartTime;
             isRunning.value = true;
             startInterval();
-            startAutoSave();
           } else {
-            autoSaveTimer(data.taskId, storedStartTime, new Date());
             clearStorage();
           }
         }
       }
     } catch (e) {
-      console.error('Failed to load timer from storage:', e);
       clearStorage();
     }
   }
@@ -59,7 +55,6 @@ export const useTimerStore = defineStore('timer', () => {
         clearStorage();
       }
     } catch (e) {
-      console.error('Failed to save timer to storage:', e);
     }
   }
 
@@ -84,52 +79,6 @@ export const useTimerStore = defineStore('timer', () => {
     }
   }
 
-  function startAutoSave() {
-    if (autoSaveIntervalId) return;
-    let lastSaveTime = startTime.value ? startTime.value.getTime() : Date.now();
-    
-    autoSaveIntervalId = window.setInterval(() => {
-      if (taskId.value && startTime.value && isRunning.value) {
-        const now = new Date();
-        const minutesElapsed = (now.getTime() - lastSaveTime) / (1000 * 60);
-        if (minutesElapsed >= 1) {
-          const saveStartTime = new Date(lastSaveTime);
-          autoSaveTimer(taskId.value, saveStartTime, now);
-          lastSaveTime = now.getTime();
-          startTime.value = now;
-          saveToStorage();
-        }
-      }
-    }, 60000);
-  }
-
-  function stopAutoSave() {
-    if (autoSaveIntervalId) {
-      clearInterval(autoSaveIntervalId);
-      autoSaveIntervalId = null;
-    }
-  }
-
-  async function autoSaveTimer(taskId: number, startTime: Date, endTime: Date) {
-    try {
-      const routeUrl = (window as any).route('time-sessions.store');
-      await router.post(routeUrl, {
-        task_id: taskId,
-        start_time: startTime.toISOString(),
-        end_time: endTime.toISOString(),
-        is_billable: true,
-      }, {
-        preserveState: true,
-        preserveScroll: true,
-        only: ['tasks'],
-        onError: (errors) => {
-          console.error('Failed to auto-save timer:', errors);
-        },
-      });
-    } catch (e) {
-      console.error('Failed to auto-save timer:', e);
-    }
-  }
 
   function startTimer(newTaskId: number) {
     if (isRunning.value && taskId.value) {
@@ -143,7 +92,6 @@ export const useTimerStore = defineStore('timer', () => {
     
     saveToStorage();
     startInterval();
-    startAutoSave();
   }
 
   async function stopTimer() {
@@ -157,7 +105,6 @@ export const useTimerStore = defineStore('timer', () => {
 
     isRunning.value = false;
     stopInterval();
-    stopAutoSave();
 
     taskId.value = null;
     startTime.value = null;
@@ -175,7 +122,6 @@ export const useTimerStore = defineStore('timer', () => {
         only: ['tasks'],
       });
     } catch (e) {
-      console.error('Failed to save timer:', e);
     }
   }
 
