@@ -47,11 +47,31 @@ class Project extends Model
 
     public function getTotalAmountAttribute(): float
     {
-        if (!$this->hourly_rate) {
-            return 0;
+        // Sum earnings from all tasks in this project using their actual rates
+        // This ensures we use task rates or session rates, not just project rate
+        $total = 0;
+        
+        $tasks = $this->tasks()->with('timeSessions')->get();
+        
+        foreach ($tasks as $task) {
+            foreach ($task->timeSessions as $session) {
+                if (!$session->is_billable || !$session->end_time) {
+                    continue;
+                }
+                
+                // Use session rate, fallback to task rate, fallback to project rate
+                $rate = $session->billable_rate 
+                    ?? $task->hourly_rate 
+                    ?? $this->hourly_rate;
+                
+                if ($rate) {
+                    $hours = $session->start_time->diffInSeconds($session->end_time) / 3600;
+                    $total += $hours * $rate;
+                }
+            }
         }
-        $hours = $this->total_tracked_seconds / 3600;
-        return round($hours * $this->hourly_rate, 2);
+        
+        return round($total, 2);
     }
 
     public function user()

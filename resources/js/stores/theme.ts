@@ -4,7 +4,7 @@ import { ref, watch } from 'vue';
 export type ThemeMode = 'light' | 'dark' | 'system';
 
 export const useThemeStore = defineStore('theme', () => {
-  const mode = ref<ThemeMode>((localStorage.getItem('theme') as ThemeMode) || 'system');
+  const mode = ref<ThemeMode>((localStorage.getItem('theme') as ThemeMode) || 'light');
   const isDark = ref(false);
 
   function updateTheme() {

@@ -25,6 +25,7 @@ interface Task {
     end_time?: string;
   }>;
   total_time?: string;
+  total_time_seconds?: number;
 }
 
 interface Project {

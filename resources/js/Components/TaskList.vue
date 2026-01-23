@@ -24,6 +24,7 @@ interface Task {
     end_time?: string;
   }>;
   total_time?: string;
+  total_time_seconds?: number;
 }
 
 interface Pagination {
@@ -153,6 +154,24 @@ function selectAll(checked?: boolean) {
 const hasActiveFilters = computed(() => {
   return searchQuery.value || selectedProject.value || selectedPriority.value || selectedStatus.value;
 });
+
+// Calculate total time from all tasks using pre-calculated values from API
+const totalTime = computed(() => {
+  let totalSeconds = 0;
+  
+  props.tasks.forEach(task => {
+    // Use pre-calculated total_time_seconds from API if available
+    if (task.total_time_seconds) {
+      totalSeconds += task.total_time_seconds;
+    }
+  });
+  
+  const hours = Math.floor(totalSeconds / 3600);
+  const minutes = Math.floor((totalSeconds % 3600) / 60);
+  const seconds = totalSeconds % 60;
+  
+  return `${String(hours).padStart(2, '0')}:${String(minutes).padStart(2, '0')}:${String(seconds).padStart(2, '0')}`;
+});
 </script>
 
 <template>
@@ -259,7 +278,7 @@ const hasActiveFilters = computed(() => {
       </div>
     </div>
     
-    <div class="flex items-center justify-between bg-white/50 dark:bg-gray-800/50 backdrop-blur-sm p-3 sm:p-4 rounded-xl border border-gray-200/50 dark:border-gray-700/50">
+    <div class="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 bg-white/50 dark:bg-gray-800/50 backdrop-blur-sm p-3 sm:p-4 rounded-xl border border-gray-200/50 dark:border-gray-700/50">
       <div class="flex items-center gap-3 sm:gap-4">
         <div class="flex items-center gap-2">
           <CustomCheckbox
@@ -282,8 +301,19 @@ const hasActiveFilters = computed(() => {
         </button>
       </div>
 
-      <div class="text-xs sm:text-sm text-gray-600 dark:text-gray-400">
-        {{ pagination.total }} task{{ pagination.total !== 1 ? 's' : '' }}
+      <div class="flex items-center gap-4 sm:gap-6 flex-wrap">
+        <div class="flex items-center gap-2">
+          <svg class="w-4 h-4 text-gray-500 dark:text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"/>
+          </svg>
+          <div class="text-xs sm:text-sm">
+            <span class="text-gray-600 dark:text-gray-400">Total time:</span>
+            <span class="ml-1 font-mono font-semibold text-gray-900 dark:text-white">{{ totalTime }}</span>
+          </div>
+        </div>
+        <div class="text-xs sm:text-sm text-gray-600 dark:text-gray-400">
+          {{ pagination.total }} task{{ pagination.total !== 1 ? 's' : '' }}
+        </div>
       </div>
     </div>
 

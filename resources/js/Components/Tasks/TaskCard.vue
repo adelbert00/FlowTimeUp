@@ -1,11 +1,14 @@
 <script setup lang="ts">
-import { ref, computed, onBeforeUnmount } from 'vue';
+import { ref, computed, onMounted, onBeforeUnmount, watch } from 'vue';
 import { router, useForm } from '@inertiajs/vue3';
 import dayjs from 'dayjs';
 import duration from 'dayjs/plugin/duration';
 import CustomCheckbox from '@/Components/CustomCheckbox.vue';
+import { useTimerStore } from '@/stores/timer';
 
 dayjs.extend(duration);
+
+const timerStore = useTimerStore();
 
 interface TimeSession {
   id: number;
@@ -41,15 +44,22 @@ interface Task {
 const props = defineProps<{ task: Task; selected: boolean }>();
 const emit = defineEmits<{ select: [id: number]; delete: [id: number]; 'toggle-complete': [id: number] }>();
 
-const isRunning = ref(false);
-const startTime = ref<Date | null>(null);
-const currentTime = ref<Date>(new Date());
 const showSessions = ref(false);
 const showMobileActions = ref(false);
 const showManualEntry = ref(false);
 const editingSession = ref<TimeSession | null>(null);
 
-let timerInterval: number | null = null;
+// Use timer store for running state
+const isRunning = computed(() => timerStore.isTaskRunning(props.task.id));
+
+// Show live timer when running, or total accumulated time when stopped
+const formattedTime = computed(() => {
+  if (isRunning.value) {
+    return timerStore.formattedTime;
+  }
+  // For non-running tasks, show their total accumulated time
+  return props.task.total_time ? props.task.total_time : '00:00:00';
+});
 
 const manualForm = useForm({
   task_id: props.task.id,
@@ -68,17 +78,7 @@ const editForm = useForm({
   description: '',
 });
 
-const formattedTime = computed(() => {
-  if (!isRunning.value || !startTime.value) return '00:00:00.00';
-  const diffMs = currentTime.value.getTime() - startTime.value.getTime();
-  if (diffMs <= 0) return '00:00:00.00';
-  const totalSeconds = Math.floor(diffMs / 1000);
-  const centiseconds = Math.floor((diffMs % 1000) / 10);
-  const hours = Math.floor(totalSeconds / 3600);
-  const minutes = Math.floor((totalSeconds % 3600) / 60);
-  const seconds = totalSeconds % 60;
-  return `${String(hours).padStart(2, '0')}:${String(minutes).padStart(2, '0')}:${String(seconds).padStart(2, '0')}.${String(centiseconds).padStart(2, '0')}`;
-});
+// formattedTime is now from timer store
 
 const priorityConfig = computed(() => {
   switch (props.task.priority) {
@@ -92,30 +92,11 @@ const priorityConfig = computed(() => {
 const projectColor = computed(() => props.task.project?.color || '#6366f1');
 
 function startTimer() {
-  if (isRunning.value) return;
-  isRunning.value = true;
-  startTime.value = new Date();
-  currentTime.value = new Date();
-  timerInterval = window.setInterval(() => {
-    if (isRunning.value && startTime.value) currentTime.value = new Date();
-  }, 10);
+  timerStore.startTimer(props.task.id);
 }
 
 function stopTimer() {
-  if (!isRunning.value || !startTime.value) return;
-  const endTime = new Date();
-  isRunning.value = false;
-  if (timerInterval) { clearInterval(timerInterval); timerInterval = null; }
-  router.post(route('time-sessions.store'), {
-    task_id: props.task.id,
-    start_time: startTime.value.toISOString(),
-    end_time: endTime.toISOString(),
-    is_billable: true,
-  }, {
-    preserveScroll: true,
-    only: ['tasks'],
-    onSuccess: () => { startTime.value = null; currentTime.value = new Date(); },
-  });
+  timerStore.stopTimer();
 }
 
 function submitManualEntry() {
@@ -164,7 +145,7 @@ function formatDuration(start: string, end?: string): string {
 function formatSessionTime(date: string) { return dayjs(date).format('HH:mm'); }
 function formatSessionDate(date: string) { return dayjs(date).format('MMM D'); }
 
-onBeforeUnmount(() => { if (timerInterval) clearInterval(timerInterval); });
+// Timer is managed by the store, no cleanup needed here
 </script>
 
 <template>
@@ -209,7 +190,7 @@ onBeforeUnmount(() => { if (timerInterval) clearInterval(timerInterval); });
             <div class="flex-1 min-w-0">
               <div class="font-mono text-base sm:text-xl font-bold tracking-wider" :class="isRunning ? 'text-emerald-500' : 'text-gray-600 dark:text-gray-300'">{{ formattedTime }}</div>
               <div class="flex items-center gap-2 mt-0.5 flex-wrap text-xs">
-                <span v-if="task.total_time" class="text-gray-500">Total: {{ task.total_time }}</span>
+                <span v-if="isRunning && task.total_time" class="text-gray-500">Total: {{ task.total_time }}</span>
                 <span v-if="task.billable_time && task.billable_time !== task.total_time" class="text-blue-500">Billable: {{ task.billable_time }}</span>
                 <span v-if="task.earnings" class="text-emerald-600 font-medium">{{ task.currency || 'USD' }} {{ task.earnings.toFixed(2) }}</span>
               </div>
@@ -220,7 +201,7 @@ onBeforeUnmount(() => { if (timerInterval) clearInterval(timerInterval); });
                 <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"/></svg>
               </button>
               <button @click.stop="isRunning ? stopTimer() : startTimer()" class="relative w-10 h-10 rounded-full flex items-center justify-center transition-all" :class="isRunning ? 'bg-red-500 hover:bg-red-600' : 'bg-emerald-500 hover:bg-emerald-600'">
-                <svg v-if="!isRunning" class="w-5 h-5 text-white ml-0.5" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM9.555 7.168A1 1 0 008 8v4a1 1 0 001.555.832l3-2a1 1 0 000-1.664l-3-2z" clip-rule="evenodd"/></svg>
+                <svg v-if="!isRunning" class="w-5 h-5 text-white" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM9.555 7.168A1 1 0 008 8v4a1 1 0 001.555.832l3-2a1 1 0 000-1.664l-3-2z" clip-rule="evenodd"/></svg>
                 <svg v-else class="w-5 h-5 text-white" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM8 7a1 1 0 00-1 1v4a1 1 0 001 1h4a1 1 0 001-1V8a1 1 0 00-1-1H8z" clip-rule="evenodd"/></svg>
                 <span v-if="isRunning" class="absolute inset-0 rounded-full animate-ping bg-red-500/30" />
               </button>
