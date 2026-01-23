@@ -25,8 +25,9 @@ const tagId = ref<number | null>(null);
 const taskId = ref<number | null>(null);
 const startDate = ref<string>('');
 const endDate = ref<string>('');
+const includeBillable = ref(true);
+const includeNonBillable = ref(true);
 
-// Set default dates (last 30 days)
 const today = new Date();
 const thirtyDaysAgo = new Date();
 thirtyDaysAgo.setDate(today.getDate() - 30);
@@ -40,6 +41,8 @@ const exportCsv = () => {
   if (taskId.value) params.append('task_id', taskId.value.toString());
   if (startDate.value) params.append('start_date', startDate.value);
   if (endDate.value) params.append('end_date', endDate.value);
+  params.append('include_billable', includeBillable.value.toString());
+  params.append('include_non_billable', includeNonBillable.value.toString());
   params.append('format', 'csv');
 
   window.location.href = route('reports.export') + '?' + params.toString();
@@ -52,9 +55,10 @@ const exportPdf = () => {
   if (taskId.value) params.append('task_id', taskId.value.toString());
   if (startDate.value) params.append('start_date', startDate.value);
   if (endDate.value) params.append('end_date', endDate.value);
+  params.append('include_billable', includeBillable.value.toString());
+  params.append('include_non_billable', includeNonBillable.value.toString());
   params.append('format', 'pdf');
 
-  // Otwórz w nowym oknie dla PDF
   window.open(route('reports.export') + '?' + params.toString(), '_blank');
 };
 </script>
@@ -63,54 +67,68 @@ const exportPdf = () => {
   <Head title="Reports" />
 
   <MainLayout>
-    <div class="min-h-screen bg-gradient-to-br from-gray-50 via-gray-50 to-gray-100">
+    <div class="min-h-screen bg-gradient-to-br from-gray-50 via-gray-50 to-gray-100 dark:from-gray-900 dark:via-gray-900 dark:to-gray-800">
       <div class="container mx-auto px-4 sm:px-6 lg:px-8 py-6 sm:py-8 max-w-6xl pt-20 sm:pt-24 md:pt-28 xl:pt-8">
         <div class="mb-6 sm:mb-8">
-          <h1 class="text-2xl sm:text-3xl font-bold text-gray-900 mb-2">Reports</h1>
-          <p class="text-gray-600 text-sm sm:text-base">Generate and export time tracking reports</p>
+          <h1 class="text-2xl sm:text-3xl font-bold font-sans text-gray-900 dark:text-white mb-2">Reports</h1>
+          <p class="text-gray-600 dark:text-gray-400 text-sm sm:text-base">Generate and export time tracking reports</p>
         </div>
 
-        <div class="bg-white rounded-xl border border-gray-200 shadow-sm overflow-hidden mb-6">
+        <div class="bg-white dark:bg-gray-800 rounded-xl border border-gray-200 dark:border-gray-700 shadow-sm overflow-hidden mb-6">
           <div class="p-4 sm:p-6">
-            <h2 class="text-lg font-semibold text-gray-900 mb-4">Filters</h2>
+            <h2 class="text-lg font-semibold text-gray-900 dark:text-white mb-4">Filters</h2>
             
             <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
               <div>
-                <label class="block text-sm font-medium text-gray-700 mb-1.5">Project</label>
-                <select
-                  v-model="projectId"
-                  class="w-full px-3 sm:px-4 py-2 sm:py-2.5 bg-gray-50/50 border border-gray-300 rounded-lg text-gray-900 focus:outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-500 transition-colors appearance-none cursor-pointer text-sm sm:text-base"
-                >
-                  <option :value="null">All projects</option>
-                  <option
-                    v-for="project in projects"
-                    :key="project.id"
-                    :value="project.id"
+                <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1.5">Project</label>
+                <div class="relative">
+                  <select
+                    v-model="projectId"
+                    class="w-full px-3 sm:px-4 py-2 sm:py-2.5 pr-10 bg-gray-50 dark:bg-gray-700 border border-gray-300 dark:border-gray-600 rounded-lg text-gray-900 dark:text-white focus:outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-500 transition-colors appearance-none cursor-pointer text-sm sm:text-base"
                   >
-                    {{ project.name }}
-                  </option>
-                </select>
+                    <option :value="null">All projects</option>
+                    <option
+                      v-for="project in projects"
+                      :key="project.id"
+                      :value="project.id"
+                    >
+                      {{ project.name }}
+                    </option>
+                  </select>
+                  <div class="absolute inset-y-0 right-0 flex items-center pr-3 pointer-events-none">
+                    <svg class="w-4 h-4 text-gray-400 dark:text-gray-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"/>
+                    </svg>
+                  </div>
+                </div>
               </div>
 
               <div>
-                <label class="block text-sm font-medium text-gray-700 mb-1.5">Tag</label>
-                <select
-                  v-model="tagId"
-                  class="w-full px-3 sm:px-4 py-2 sm:py-2.5 bg-gray-50/50 border border-gray-300 rounded-lg text-gray-900 focus:outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-500 transition-colors appearance-none cursor-pointer text-sm sm:text-base"
-                >
-                  <option :value="null">All tags</option>
-                  <option
-                    v-for="tag in tags"
-                    :key="tag.id"
-                    :value="tag.id"
+                <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1.5">Tag</label>
+                <div class="relative">
+                  <select
+                    v-model="tagId"
+                    class="w-full px-3 sm:px-4 py-2 sm:py-2.5 pr-10 bg-gray-50 dark:bg-gray-700 border border-gray-300 dark:border-gray-600 rounded-lg text-gray-900 dark:text-white focus:outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-500 transition-colors appearance-none cursor-pointer text-sm sm:text-base"
                   >
-                    #{{ tag.name }}
-                  </option>
-                </select>
+                    <option :value="null">All tags</option>
+                    <option
+                      v-for="tag in tags"
+                      :key="tag.id"
+                      :value="tag.id"
+                    >
+                      #{{ tag.name }}
+                    </option>
+                  </select>
+                  <div class="absolute inset-y-0 right-0 flex items-center pr-3 pointer-events-none">
+                    <svg class="w-4 h-4 text-gray-400 dark:text-gray-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"/>
+                    </svg>
+                  </div>
+                </div>
               </div>
 
               <div>
-                <label class="block text-sm font-medium text-gray-700 mb-1.5">Start Date</label>
+                <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1.5">Start Date</label>
                 <CustomDatePicker
                   v-model="startDate"
                   placeholder="Start date"
@@ -118,12 +136,31 @@ const exportPdf = () => {
               </div>
 
               <div>
-                <label class="block text-sm font-medium text-gray-700 mb-1.5">End Date</label>
+                <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1.5">End Date</label>
                 <CustomDatePicker
                   v-model="endDate"
                   placeholder="End date"
                 />
               </div>
+            </div>
+
+            <div class="flex flex-wrap items-center gap-4 mt-4">
+              <label class="flex items-center gap-2 cursor-pointer">
+                <input
+                  v-model="includeBillable"
+                  type="checkbox"
+                  class="rounded border-gray-300 dark:border-gray-600 text-blue-600 focus:ring-blue-500"
+                />
+                <span class="text-sm text-gray-700 dark:text-gray-300">Include billable</span>
+              </label>
+              <label class="flex items-center gap-2 cursor-pointer">
+                <input
+                  v-model="includeNonBillable"
+                  type="checkbox"
+                  class="rounded border-gray-300 dark:border-gray-600 text-blue-600 focus:ring-blue-500"
+                />
+                <span class="text-sm text-gray-700 dark:text-gray-300">Include non-billable</span>
+              </label>
             </div>
 
             <div class="flex gap-3 mt-6">
@@ -150,12 +187,12 @@ const exportPdf = () => {
           </div>
         </div>
 
-        <div class="bg-white rounded-xl border border-gray-200 shadow-sm overflow-hidden">
+        <div class="bg-white dark:bg-gray-800 rounded-xl border border-gray-200 dark:border-gray-700 shadow-sm overflow-hidden">
           <div class="p-4 sm:p-6">
-            <h2 class="text-lg font-semibold text-gray-900 mb-4">Report Preview</h2>
-            <p class="text-gray-600 text-sm">
+            <h2 class="text-lg font-semibold text-gray-900 dark:text-white mb-4">Report Preview</h2>
+            <p class="text-gray-600 dark:text-gray-400 text-sm">
               Use the filters above and click "Export CSV" or "Export PDF" to generate your report.
-              The report will include all time sessions matching your selected filters.
+              The report will include all time sessions matching your selected filters, including billable hours and earnings.
             </p>
           </div>
         </div>

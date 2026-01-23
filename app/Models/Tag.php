@@ -9,7 +9,11 @@ class Tag extends Model
 {
     use HasFactory;
 
-    protected $fillable = ['name', 'user_id'];
+    protected $fillable = ['name', 'user_id', 'is_archived'];
+
+    protected $casts = [
+        'is_archived' => 'boolean',
+    ];
 
     public function user()
     {

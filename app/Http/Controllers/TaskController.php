@@ -11,7 +11,6 @@ use App\Models\Task;
 use App\Models\Tag;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
-use Illuminate\Support\Facades\Gate;
 use Inertia\Inertia;
 use Inertia\Response;
 
@@ -22,7 +21,6 @@ class TaskController extends Controller
         $query = Task::with(['project', 'tags', 'timeSessions'])
             ->where('user_id', $request->user()->id);
 
-        // Filtrowanie
         if ($request->filled('project_id')) {
             $query->where('project_id', $request->project_id);
         }
@@ -42,7 +40,6 @@ class TaskController extends Controller
             });
         }
 
-        // Sortowanie
         $sortBy = $request->get('sort_by', 'created_at');
         $sortOrder = $request->get('sort_order', 'desc');
         $query->orderBy($sortBy, $sortOrder);
@@ -59,7 +56,7 @@ class TaskController extends Controller
             ],
             'filters' => $request->only(['project_id', 'completed', 'priority', 'search', 'sort_by', 'sort_order']),
             'projects' => Project::where('user_id', $request->user()->id)->get(),
-            'tags' => Tag::where('user_id', $request->user()->id)->get(),
+            'tags' => Tag::where('user_id', $request->user()->id)->where('is_archived', false)->get(),
         ]);
     }
 
@@ -67,7 +64,7 @@ class TaskController extends Controller
     {
         return Inertia::render('Tasks/Create', [
             'projects' => Project::where('user_id', $request->user()->id)->get(),
-            'tags' => Tag::where('user_id', $request->user()->id)->get(),
+            'tags' => Tag::where('user_id', $request->user()->id)->where('is_archived', false)->get(),
         ]);
     }
 
@@ -84,17 +81,16 @@ class TaskController extends Controller
             $task->tags()->attach($dto->tagIds);
         }
 
-        return redirect()->route('tasks.index')
-            ->with('success', 'Task created successfully.');
-    }
-
-    public function show(Task $task, Request $request): Response
-    {
-        // Authorization: ensure task belongs to user
-        if ($task->user_id !== $request->user()->id) {
-            abort(403);
+        if ($task->is_recurring && $task->due_date) {
+            $task->update(['next_occurrence' => $task->calculateNextOccurrence()]);
         }
 
+        return redirect()->route('tasks.index')->with('success', 'Task created successfully.');
+    }
+
+    public function show(Task $task): Response
+    {
+        $this->authorize('view', $task);
         $task->load(['project', 'tags', 'timeSessions']);
 
         return Inertia::render('Tasks/Show', [
@@ -104,26 +100,19 @@ class TaskController extends Controller
 
     public function edit(Task $task, Request $request): Response
     {
-        // Authorization: ensure task belongs to user
-        if ($task->user_id !== $request->user()->id) {
-            abort(403);
-        }
-
-        $task->load(['tags']);
+        $this->authorize('update', $task);
+        $task->load(['tags', 'timeSessions']);
 
         return Inertia::render('Tasks/Edit', [
             'task' => (new TaskResource($task))->resolve(),
             'projects' => Project::where('user_id', $request->user()->id)->get(),
-            'tags' => Tag::where('user_id', $request->user()->id)->get(),
+            'tags' => Tag::where('user_id', $request->user()->id)->where('is_archived', false)->get(),
         ]);
     }
 
     public function update(UpdateTaskRequest $request, Task $task): RedirectResponse
     {
-        // Authorization: ensure task belongs to user
-        if ($task->user_id !== $request->user()->id) {
-            abort(403);
-        }
+        $this->authorize('update', $task);
 
         $dto = TaskDTO::fromArray([
             ...$request->validated(),
@@ -136,29 +125,20 @@ class TaskController extends Controller
             $task->tags()->sync($request->tag_ids ?? []);
         }
 
-        return redirect()->route('tasks.index')
-            ->with('success', 'Task updated successfully.');
+        return redirect()->route('tasks.index')->with('success', 'Task updated successfully.');
     }
 
-    public function destroy(Task $task, Request $request): RedirectResponse
+    public function destroy(Task $task): RedirectResponse
     {
-        // Authorization: ensure task belongs to user
-        if ($task->user_id !== $request->user()->id) {
-            abort(403);
-        }
-
+        $this->authorize('delete', $task);
         $task->delete();
 
-        return redirect()->route('tasks.index')
-            ->with('success', 'Task deleted successfully.');
+        return redirect()->route('tasks.index')->with('success', 'Task deleted successfully.');
     }
 
     public function attachTags(Request $request, Task $task): RedirectResponse
     {
-        // Authorization: ensure task belongs to user
-        if ($task->user_id !== $request->user()->id) {
-            abort(403);
-        }
+        $this->authorize('update', $task);
 
         $request->validate([
             'tags' => 'required|array',
@@ -167,38 +147,27 @@ class TaskController extends Controller
 
         $task->tags()->syncWithoutDetaching($request->tags);
 
-        return redirect()->back()
-            ->with('success', 'Tags attached successfully.');
+        return redirect()->back()->with('success', 'Tags attached successfully.');
     }
 
     public function detachTag(Task $task, Tag $tag, Request $request): RedirectResponse
     {
-        // Authorization: ensure task belongs to user
-        if ($task->user_id !== $request->user()->id) {
-            abort(403);
-        }
+        $this->authorize('update', $task);
 
-        // Authorization: ensure tag belongs to user
         if ($tag->user_id !== $request->user()->id) {
             abort(403);
         }
 
         $task->tags()->detach($tag->id);
 
-        return redirect()->back()
-            ->with('success', 'Tag detached successfully.');
+        return redirect()->back()->with('success', 'Tag detached successfully.');
     }
 
-    public function toggleComplete(Task $task, Request $request): RedirectResponse
+    public function toggleComplete(Task $task): RedirectResponse
     {
-        // Authorization: ensure task belongs to user
-        if ($task->user_id !== $request->user()->id) {
-            abort(403);
-        }
-
+        $this->authorize('update', $task);
         $task->update(['completed' => !$task->completed]);
 
-        return redirect()->back()
-            ->with('success', 'Task status updated.');
+        return redirect()->back()->with('success', 'Task status updated.');
     }
 }

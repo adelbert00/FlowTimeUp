@@ -8,7 +8,8 @@ const props = defineProps<{
 }>();
 
 const form = useForm({
-  name: '',
+  first_name: '',
+  last_name: '',
   email: '',
   password: '',
   password_confirmation: '',
@@ -123,32 +124,62 @@ declare global {
     </div>
 
     <form @submit.prevent="submit" class="space-y-4 sm:space-y-5">
-      <!-- Name -->
-      <div>
-        <label for="name" class="block text-sm font-medium text-gray-700 mb-1.5">
-          Full name
-        </label>
-        <div class="relative">
-          <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-            <svg class="w-5 h-5 text-gray-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"/>
-            </svg>
+      <!-- Name Fields Row -->
+      <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+        <!-- First Name -->
+        <div>
+          <label for="first_name" class="block text-sm font-medium text-gray-700 mb-1.5">
+            First name
+          </label>
+          <div class="relative">
+            <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+              <svg class="w-5 h-5 text-gray-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"/>
+              </svg>
+            </div>
+            <input
+              id="first_name"
+              type="text"
+              v-model="form.first_name"
+              required
+              autofocus
+              autocomplete="given-name"
+              placeholder="John"
+              class="w-full pl-10 pr-4 py-2.5 sm:py-3 bg-gray-50/50 border border-gray-300 rounded-lg text-gray-900 placeholder-gray-400 focus:outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-500 transition-colors text-sm sm:text-base"
+              :class="{ 'border-red-500': form.errors.first_name }"
+            />
           </div>
-          <input
-            id="name"
-            type="text"
-            v-model="form.name"
-            required
-            autofocus
-            autocomplete="name"
-            placeholder="John Doe"
-            class="w-full pl-10 pr-4 py-2.5 sm:py-3 bg-gray-50/50 border border-gray-300 rounded-lg text-gray-900 placeholder-gray-400 focus:outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-500 transition-colors text-sm sm:text-base"
-            :class="{ 'border-red-500': form.errors.name }"
-          />
+          <p v-if="form.errors.first_name" class="text-red-400 text-xs sm:text-sm mt-1.5">
+            {{ form.errors.first_name }}
+          </p>
         </div>
-        <p v-if="form.errors.name" class="text-red-400 text-xs sm:text-sm mt-1.5">
-          {{ form.errors.name }}
-        </p>
+
+        <!-- Last Name -->
+        <div>
+          <label for="last_name" class="block text-sm font-medium text-gray-700 mb-1.5">
+            Last name
+          </label>
+          <div class="relative">
+            <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+              <svg class="w-5 h-5 text-gray-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"/>
+              </svg>
+            </div>
+            <input
+              id="last_name"
+              type="text"
+              v-model="form.last_name"
+              required
+              autocomplete="family-name"
+              placeholder="Doe"
+              class="w-full pl-10 pr-4 py-2.5 sm:py-3 bg-gray-50/50 border border-gray-300 rounded-lg text-gray-900 placeholder-gray-400 focus:outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-500 transition-colors text-sm sm:text-base"
+              :class="{ 'border-red-500': form.errors.last_name }"
+            />
+          </div>
+          <p v-if="form.errors.last_name" class="text-red-400 text-xs sm:text-sm mt-1.5">
+            {{ form.errors.last_name }}
+          </p>
+        </div>
       </div>
 
       <!-- Email -->

@@ -29,14 +29,14 @@ class ReportController extends Controller
         $userId = $request->user()->id;
         $format = $request->get('format', 'csv');
 
-        // Filtry
         $projectId = $request->get('project_id');
         $tagId = $request->get('tag_id');
         $startDate = $request->get('start_date');
         $endDate = $request->get('end_date');
         $taskId = $request->get('task_id');
+        $includeBillable = $request->boolean('include_billable', true);
+        $includeNonBillable = $request->boolean('include_non_billable', true);
 
-        // Query dla sesji czasowych
         $query = TimeSession::with(['task.project', 'task.tags'])
             ->whereHas('task', function ($q) use ($userId) {
                 $q->where('user_id', $userId);
@@ -67,16 +67,25 @@ class ReportController extends Controller
             $query->whereDate('start_time', '<=', $endDate);
         }
 
+        if (!$includeBillable && $includeNonBillable) {
+            $query->where('is_billable', false);
+        } elseif ($includeBillable && !$includeNonBillable) {
+            $query->where('is_billable', true);
+        }
+
         $sessions = $query->orderBy('start_time', 'desc')->get();
 
         if ($format === 'csv') {
             return $this->exportCsv($sessions);
         }
 
-        // Dla PDF zwrócimy dane do widoku
         return Inertia::render('Reports/Export', [
             'sessions' => $sessions->map(function ($session) {
                 $duration = $session->start_time->diffInSeconds($session->end_time);
+                $hourlyRate = $session->task->hourly_rate ?? $session->task->project?->hourly_rate ?? 0;
+                $hours = $duration / 3600;
+                $earnings = $session->is_billable ? round($hours * $hourlyRate, 2) : 0;
+                
                 return [
                     'id' => $session->id,
                     'task' => $session->task->title,
@@ -86,6 +95,10 @@ class ReportController extends Controller
                     'end_time' => $session->end_time->format('Y-m-d H:i:s'),
                     'duration' => $this->formatDuration($duration),
                     'duration_seconds' => $duration,
+                    'is_billable' => $session->is_billable,
+                    'hourly_rate' => $hourlyRate,
+                    'currency' => $session->task->currency ?? $session->task->project?->currency ?? 'USD',
+                    'earnings' => $earnings,
                     'notes' => $session->notes ?? '',
                 ];
             }),
@@ -106,10 +119,8 @@ class ReportController extends Controller
         $callback = function () use ($sessions) {
             $file = fopen('php://output', 'w');
 
-            // BOM dla UTF-8 (Excel compatibility)
             fprintf($file, chr(0xEF).chr(0xBB).chr(0xBF));
 
-            // Header
             fputcsv($file, [
                 'Date',
                 'Task',
@@ -119,13 +130,20 @@ class ReportController extends Controller
                 'End Time',
                 'Duration (HH:MM:SS)',
                 'Duration (seconds)',
+                'Billable',
+                'Hourly Rate',
+                'Currency',
+                'Earnings',
                 'Notes',
             ]);
 
-            // Data
             foreach ($sessions as $session) {
                 $duration = $session->start_time->diffInSeconds($session->end_time);
                 $tags = $session->task->tags->pluck('name')->join('; ') ?: '';
+                $hourlyRate = $session->task->hourly_rate ?? $session->task->project?->hourly_rate ?? 0;
+                $hours = $duration / 3600;
+                $earnings = $session->is_billable ? round($hours * $hourlyRate, 2) : 0;
+                $currency = $session->task->currency ?? $session->task->project?->currency ?? 'USD';
 
                 fputcsv($file, [
                     $session->start_time->format('Y-m-d'),
@@ -136,6 +154,10 @@ class ReportController extends Controller
                     $session->end_time->format('Y-m-d H:i:s'),
                     $this->formatDuration($duration),
                     $duration,
+                    $session->is_billable ? 'Yes' : 'No',
+                    $hourlyRate,
+                    $currency,
+                    $earnings,
                     $session->notes ?? '',
                 ]);
             }
@@ -157,21 +179,41 @@ class ReportController extends Controller
 
     private function calculateSummary($sessions): array
     {
-        $totalSeconds = $sessions->sum(function ($session) {
-            return $session->start_time->diffInSeconds($session->end_time);
-        });
-
+        $totalSeconds = 0;
+        $billableSeconds = 0;
+        $nonBillableSeconds = 0;
+        $totalEarnings = 0;
         $byProject = [];
         $byTask = [];
         $byDate = [];
 
         foreach ($sessions as $session) {
             $duration = $session->start_time->diffInSeconds($session->end_time);
+            $totalSeconds += $duration;
+            
+            $hourlyRate = $session->task->hourly_rate ?? $session->task->project?->hourly_rate ?? 0;
+            $hours = $duration / 3600;
+            
+            if ($session->is_billable) {
+                $billableSeconds += $duration;
+                $totalEarnings += $hours * $hourlyRate;
+            } else {
+                $nonBillableSeconds += $duration;
+            }
+            
             $projectName = $session->task->project?->name ?? 'No project';
             $taskName = $session->task->title;
             $date = $session->start_time->format('Y-m-d');
+            $currency = $session->task->currency ?? $session->task->project?->currency ?? 'USD';
 
-            $byProject[$projectName] = ($byProject[$projectName] ?? 0) + $duration;
+            if (!isset($byProject[$projectName])) {
+                $byProject[$projectName] = ['seconds' => 0, 'earnings' => 0, 'currency' => $currency];
+            }
+            $byProject[$projectName]['seconds'] += $duration;
+            if ($session->is_billable) {
+                $byProject[$projectName]['earnings'] += $hours * $hourlyRate;
+            }
+
             $byTask[$taskName] = ($byTask[$taskName] ?? 0) + $duration;
             $byDate[$date] = ($byDate[$date] ?? 0) + $duration;
         }
@@ -180,11 +222,18 @@ class ReportController extends Controller
             'total_time' => $this->formatDuration($totalSeconds),
             'total_seconds' => $totalSeconds,
             'total_sessions' => $sessions->count(),
-            'by_project' => collect($byProject)->map(function ($seconds, $name) {
+            'billable_time' => $this->formatDuration($billableSeconds),
+            'billable_seconds' => $billableSeconds,
+            'non_billable_time' => $this->formatDuration($nonBillableSeconds),
+            'non_billable_seconds' => $nonBillableSeconds,
+            'total_earnings' => round($totalEarnings, 2),
+            'by_project' => collect($byProject)->map(function ($data, $name) {
                 return [
                     'name' => $name,
-                    'duration' => $this->formatDuration($seconds),
-                    'seconds' => $seconds,
+                    'duration' => $this->formatDuration($data['seconds']),
+                    'seconds' => $data['seconds'],
+                    'earnings' => round($data['earnings'], 2),
+                    'currency' => $data['currency'],
                 ];
             })->values(),
             'by_task' => collect($byTask)->map(function ($seconds, $name) {
@@ -208,7 +257,6 @@ class ReportController extends Controller
     {
         $userId = $request->user()->id;
 
-        // Filtry
         $projectId = $request->get('project_id');
         $tagId = $request->get('tag_id');
         $startDate = $request->get('start_date');
@@ -250,6 +298,10 @@ class ReportController extends Controller
         return response()->json([
             'sessions' => $sessions->map(function ($session) {
                 $duration = $session->start_time->diffInSeconds($session->end_time);
+                $hourlyRate = $session->task->hourly_rate ?? $session->task->project?->hourly_rate ?? 0;
+                $hours = $duration / 3600;
+                $earnings = $session->is_billable ? round($hours * $hourlyRate, 2) : 0;
+                
                 return [
                     'id' => $session->id,
                     'task' => $session->task->title,
@@ -259,6 +311,9 @@ class ReportController extends Controller
                     'end_time' => $session->end_time->format('Y-m-d H:i:s'),
                     'duration' => $this->formatDuration($duration),
                     'duration_seconds' => $duration,
+                    'is_billable' => $session->is_billable,
+                    'hourly_rate' => $hourlyRate,
+                    'earnings' => $earnings,
                     'notes' => $session->notes ?? '',
                 ];
             }),

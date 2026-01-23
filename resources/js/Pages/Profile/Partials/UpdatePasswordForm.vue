@@ -39,7 +39,7 @@ const updatePassword = () => {
   <form @submit.prevent="updatePassword" class="space-y-5 max-w-xl">
     <!-- Current Password -->
     <div>
-      <label for="current_password" class="block text-sm font-medium text-gray-700 mb-1.5">
+      <label for="current_password" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1.5">
         Current password
       </label>
       <div class="relative">
@@ -49,13 +49,13 @@ const updatePassword = () => {
           :type="showCurrentPassword ? 'text' : 'password'"
           v-model="form.current_password"
           autocomplete="current-password"
-          class="w-full px-4 py-2.5 bg-gray-50/50 border border-gray-300 rounded-lg text-gray-900 placeholder-gray-400 focus:outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-500 transition-colors pr-12"
+          class="w-full px-4 py-2.5 bg-gray-50/50 dark:bg-gray-700/50 border border-gray-300 dark:border-gray-600 rounded-lg text-gray-900 dark:text-white placeholder-gray-400 dark:placeholder-gray-500 focus:outline-none focus:border-blue-500 dark:focus:border-blue-400 focus:ring-1 focus:ring-blue-500 dark:focus:ring-blue-400 transition-colors pr-12"
           :class="{ 'border-red-500': form.errors.current_password }"
         />
         <button
           type="button"
           @click="showCurrentPassword = !showCurrentPassword"
-          class="absolute inset-y-0 right-0 pr-3 flex items-center text-gray-500 hover:text-gray-700 transition-colors"
+          class="absolute inset-y-0 right-0 pr-3 flex items-center text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-300 transition-colors"
         >
           <svg v-if="!showCurrentPassword" class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/>
@@ -66,14 +66,14 @@ const updatePassword = () => {
           </svg>
         </button>
       </div>
-      <p v-if="form.errors.current_password" class="text-red-400 text-sm mt-1.5">
+      <p v-if="form.errors.current_password" class="text-red-400 dark:text-red-500 text-sm mt-1.5">
         {{ form.errors.current_password }}
       </p>
     </div>
 
     <!-- New Password -->
     <div>
-      <label for="password" class="block text-sm font-medium text-gray-700 mb-1.5">
+      <label for="password" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1.5">
         New password
       </label>
       <div class="relative">
@@ -83,13 +83,13 @@ const updatePassword = () => {
           :type="showNewPassword ? 'text' : 'password'"
           v-model="form.password"
           autocomplete="new-password"
-          class="w-full px-4 py-2.5 bg-gray-50/50 border border-gray-300 rounded-lg text-gray-900 placeholder-gray-400 focus:outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-500 transition-colors pr-12"
+          class="w-full px-4 py-2.5 bg-gray-50/50 dark:bg-gray-700/50 border border-gray-300 dark:border-gray-600 rounded-lg text-gray-900 dark:text-white placeholder-gray-400 dark:placeholder-gray-500 focus:outline-none focus:border-blue-500 dark:focus:border-blue-400 focus:ring-1 focus:ring-blue-500 dark:focus:ring-blue-400 transition-colors pr-12"
           :class="{ 'border-red-500': form.errors.password }"
         />
         <button
           type="button"
           @click="showNewPassword = !showNewPassword"
-          class="absolute inset-y-0 right-0 pr-3 flex items-center text-gray-500 hover:text-gray-700 transition-colors"
+          class="absolute inset-y-0 right-0 pr-3 flex items-center text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-300 transition-colors"
         >
           <svg v-if="!showNewPassword" class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/>
@@ -100,14 +100,14 @@ const updatePassword = () => {
           </svg>
         </button>
       </div>
-      <p v-if="form.errors.password" class="text-red-400 text-sm mt-1.5">
+      <p v-if="form.errors.password" class="text-red-400 dark:text-red-500 text-sm mt-1.5">
         {{ form.errors.password }}
       </p>
     </div>
 
     <!-- Confirm Password -->
     <div>
-      <label for="password_confirmation" class="block text-sm font-medium text-gray-700 mb-1.5">
+      <label for="password_confirmation" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1.5">
         Confirm new password
       </label>
       <div class="relative">
@@ -116,13 +116,13 @@ const updatePassword = () => {
           :type="showConfirmPassword ? 'text' : 'password'"
           v-model="form.password_confirmation"
           autocomplete="new-password"
-          class="w-full px-4 py-2.5 bg-gray-50/50 border border-gray-300 rounded-lg text-gray-900 placeholder-gray-400 focus:outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-500 transition-colors pr-12"
+          class="w-full px-4 py-2.5 bg-gray-50/50 dark:bg-gray-700/50 border border-gray-300 dark:border-gray-600 rounded-lg text-gray-900 dark:text-white placeholder-gray-400 dark:placeholder-gray-500 focus:outline-none focus:border-blue-500 dark:focus:border-blue-400 focus:ring-1 focus:ring-blue-500 dark:focus:ring-blue-400 transition-colors pr-12"
           :class="{ 'border-red-500': form.errors.password_confirmation }"
         />
         <button
           type="button"
           @click="showConfirmPassword = !showConfirmPassword"
-          class="absolute inset-y-0 right-0 pr-3 flex items-center text-gray-500 hover:text-gray-700 transition-colors"
+          class="absolute inset-y-0 right-0 pr-3 flex items-center text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-300 transition-colors"
         >
           <svg v-if="!showConfirmPassword" class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/>
@@ -133,7 +133,7 @@ const updatePassword = () => {
           </svg>
         </button>
       </div>
-      <p v-if="form.errors.password_confirmation" class="text-red-400 text-sm mt-1.5">
+      <p v-if="form.errors.password_confirmation" class="text-red-400 dark:text-red-500 text-sm mt-1.5">
         {{ form.errors.password_confirmation }}
       </p>
     </div>
@@ -143,7 +143,7 @@ const updatePassword = () => {
       <button
         type="submit"
         :disabled="form.processing"
-        class="px-6 py-2.5 bg-blue-600 text-white rounded-lg font-medium hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 focus:ring-offset-white disabled:opacity-50 transition-colors"
+        class="px-6 py-2.5 bg-blue-600 dark:bg-blue-500 text-white rounded-lg font-medium hover:bg-blue-700 dark:hover:bg-blue-600 focus:outline-none focus:ring-2 focus:ring-blue-500 dark:focus:ring-blue-400 focus:ring-offset-2 focus:ring-offset-white dark:focus:ring-offset-gray-800 disabled:opacity-50 transition-colors"
       >
         <span v-if="form.processing">Updating...</span>
         <span v-else>Update password</span>
@@ -155,7 +155,7 @@ const updatePassword = () => {
         leave-active-class="transition ease-in duration-150"
         leave-to-class="opacity-0"
       >
-        <span v-if="form.recentlySuccessful" class="text-sm text-emerald-600 flex items-center gap-1">
+        <span v-if="form.recentlySuccessful" class="text-sm text-emerald-600 dark:text-emerald-400 flex items-center gap-1">
           <svg class="w-4 h-4" fill="currentColor" viewBox="0 0 20 20">
             <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd"/>
           </svg>

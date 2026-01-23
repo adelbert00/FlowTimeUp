@@ -20,12 +20,16 @@ const mobileMenuOpen = ref(false);
     <link rel="canonical" :href="$page.url" />
   </Head>
   
-  <div class="min-h-screen bg-gradient-to-br from-gray-50 via-gray-50 to-gray-100 overflow-hidden">
+  <div class="min-h-screen bg-gradient-to-br from-gray-50 via-gray-50 to-gray-100 overflow-hidden relative">
+    <!-- Full page gradient background -->
+    <div class="absolute inset-0 bg-gradient-to-b from-gray-50/0 via-gray-50 to-gray-100 pointer-events-none" />
+    
     <!-- Decorative elements -->
-    <div class="absolute inset-0 overflow-hidden pointer-events-none">
+    <div class="fixed inset-0 overflow-hidden pointer-events-none">
       <div class="absolute -top-40 -right-40 w-96 h-96 bg-blue-600/20 rounded-full blur-3xl" />
       <div class="absolute top-1/2 -left-40 w-96 h-96 bg-blue-600/20 rounded-full blur-3xl" />
       <div class="absolute -bottom-40 right-1/3 w-96 h-96 bg-cyan-500/10 rounded-full blur-3xl" />
+      <div class="absolute bottom-0 left-0 right-0 h-96 bg-gradient-to-t from-gray-100 to-transparent" />
     </div>
 
     <!-- Navigation -->
@@ -115,7 +119,7 @@ const mobileMenuOpen = ref(false);
         </div>
 
         <!-- Heading -->
-        <h1 class="text-3xl sm:text-5xl xl:text-7xl font-bold text-gray-900 mb-4 sm:mb-6 leading-tight">
+        <h1 class="text-3xl sm:text-5xl xl:text-7xl font-bold font-sans text-gray-900 mb-4 sm:mb-6 leading-tight">
           Track time.<br />
           <span class="bg-gradient-to-r from-blue-500 via-blue-600 to-cyan-500 bg-clip-text text-transparent">
             Stay productive.
@@ -214,7 +218,7 @@ const mobileMenuOpen = ref(false);
           </div>
 
           <!-- Feature 3 -->
-          <div class="bg-white/50 rounded-2xl border border-gray-200/50 p-5 sm:p-6 hover:border-emerald-500/30 transition-colors sm:col-span-2 xl:col-span-1">
+          <div class="bg-white/50 rounded-2xl border border-gray-200/50 p-5 sm:p-6 hover:border-emerald-500/30 transition-colors">
             <div class="w-10 h-10 sm:w-12 sm:h-12 rounded-xl bg-emerald-500/10 flex items-center justify-center mb-4">
               <svg class="w-5 h-5 sm:w-6 sm:h-6 text-emerald-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2"/>
@@ -225,26 +229,299 @@ const mobileMenuOpen = ref(false);
               Create tasks, set priorities, and due dates. Mark complete when done.
             </p>
           </div>
+
+          <!-- Feature 4 -->
+          <div class="bg-white/50 rounded-2xl border border-gray-200/50 p-5 sm:p-6 hover:border-purple-500/30 transition-colors">
+            <div class="w-10 h-10 sm:w-12 sm:h-12 rounded-xl bg-purple-500/10 flex items-center justify-center mb-4">
+              <svg class="w-5 h-5 sm:w-6 sm:h-6 text-purple-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"/>
+              </svg>
+            </div>
+            <h3 class="text-base sm:text-lg font-semibold text-gray-900 mb-2">Manual Time Entry</h3>
+            <p class="text-gray-600 text-xs sm:text-sm">
+              Add time entries manually with start and end times. Perfect for retroactive tracking.
+            </p>
+          </div>
+
+          <!-- Feature 5 -->
+          <div class="bg-white/50 rounded-2xl border border-gray-200/50 p-5 sm:p-6 hover:border-amber-500/30 transition-colors">
+            <div class="w-10 h-10 sm:w-12 sm:h-12 rounded-xl bg-amber-500/10 flex items-center justify-center mb-4">
+              <svg class="w-5 h-5 sm:w-6 sm:h-6 text-amber-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/>
+              </svg>
+            </div>
+            <h3 class="text-base sm:text-lg font-semibold text-gray-900 mb-2">Billable Hours</h3>
+            <p class="text-gray-600 text-xs sm:text-sm">
+              Track billable vs non-billable time. Set hourly rates and calculate earnings automatically.
+            </p>
+          </div>
+
+          <!-- Feature 6 -->
+          <div class="bg-white/50 rounded-2xl border border-gray-200/50 p-5 sm:p-6 hover:border-cyan-500/30 transition-colors">
+            <div class="w-10 h-10 sm:w-12 sm:h-12 rounded-xl bg-cyan-500/10 flex items-center justify-center mb-4">
+              <svg class="w-5 h-5 sm:w-6 sm:h-6 text-cyan-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"/>
+              </svg>
+            </div>
+            <h3 class="text-base sm:text-lg font-semibold text-gray-900 mb-2">Recurring Tasks</h3>
+            <p class="text-gray-600 text-xs sm:text-sm">
+              Create recurring tasks that automatically generate new instances daily, weekly, or monthly.
+            </p>
+          </div>
+
+          <!-- Feature 7 -->
+          <div class="bg-white/50 rounded-2xl border border-gray-200/50 p-5 sm:p-6 hover:border-indigo-500/30 transition-colors">
+            <div class="w-10 h-10 sm:w-12 sm:h-12 rounded-xl bg-indigo-500/10 flex items-center justify-center mb-4">
+              <svg class="w-5 h-5 sm:w-6 sm:h-6 text-indigo-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"/>
+              </svg>
+            </div>
+            <h3 class="text-base sm:text-lg font-semibold text-gray-900 mb-2">Calendar View</h3>
+            <p class="text-gray-600 text-xs sm:text-sm">
+              Visualize your tasks and time entries in a calendar format. See your schedule at a glance.
+            </p>
+          </div>
+
+          <!-- Feature 8 -->
+          <div class="bg-white/50 rounded-2xl border border-gray-200/50 p-5 sm:p-6 hover:border-rose-500/30 transition-colors">
+            <div class="w-10 h-10 sm:w-12 sm:h-12 rounded-xl bg-rose-500/10 flex items-center justify-center mb-4">
+              <svg class="w-5 h-5 sm:w-6 sm:h-6 text-rose-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 17v-2m3 2v-4m3 4v-6m2 10H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/>
+              </svg>
+            </div>
+            <h3 class="text-base sm:text-lg font-semibold text-gray-900 mb-2">Reports & Export</h3>
+            <p class="text-gray-600 text-xs sm:text-sm">
+              Generate detailed reports with filters. Export your data as CSV for analysis and invoicing.
+            </p>
+          </div>
+
+          <!-- Feature 9 -->
+          <div class="bg-white/50 rounded-2xl border border-gray-200/50 p-5 sm:p-6 hover:border-slate-500/30 transition-colors">
+            <div class="w-10 h-10 sm:w-12 sm:h-12 rounded-xl bg-slate-500/10 flex items-center justify-center mb-4">
+              <svg class="w-5 h-5 sm:w-6 sm:h-6 text-slate-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20.354 15.354A9 9 0 018.646 3.646 9.003 9.003 0 0012 21a9.003 9.003 0 008.354-5.646z"/>
+              </svg>
+            </div>
+            <h3 class="text-base sm:text-lg font-semibold text-gray-900 mb-2">Dark Mode</h3>
+            <p class="text-gray-600 text-xs sm:text-sm">
+              Work comfortably in low-light environments with our beautiful dark mode theme.
+            </p>
+          </div>
+        </div>
+      </section>
+
+      <!-- How It Works Section -->
+      <section class="mt-20 sm:mt-32 px-4">
+        <div class="text-center mb-10 sm:mb-16">
+          <h2 class="text-2xl sm:text-3xl xl:text-4xl font-bold text-gray-900 mb-4">
+            How it works
+          </h2>
+          <p class="text-gray-600 max-w-2xl mx-auto text-sm sm:text-base">
+            Get started in minutes. Track your time effortlessly.
+          </p>
+        </div>
+
+        <div class="max-w-4xl mx-auto grid grid-cols-1 md:grid-cols-3 gap-6 sm:gap-8">
+          <!-- Step 1 -->
+          <div class="text-center">
+            <div class="w-16 h-16 sm:w-20 sm:h-20 rounded-full bg-blue-600/10 flex items-center justify-center mx-auto mb-4">
+              <span class="text-2xl sm:text-3xl font-bold text-blue-600">1</span>
+            </div>
+            <h3 class="text-lg sm:text-xl font-semibold text-gray-900 mb-2">Create Tasks</h3>
+            <p class="text-gray-600 text-sm sm:text-base">
+              Add tasks with titles, projects, and priorities. Organize your work efficiently.
+            </p>
+          </div>
+
+          <!-- Step 2 -->
+          <div class="text-center">
+            <div class="w-16 h-16 sm:w-20 sm:h-20 rounded-full bg-blue-600/10 flex items-center justify-center mx-auto mb-4">
+              <span class="text-2xl sm:text-3xl font-bold text-blue-600">2</span>
+            </div>
+            <h3 class="text-lg sm:text-xl font-semibold text-gray-900 mb-2">Start Tracking</h3>
+            <p class="text-gray-600 text-sm sm:text-base">
+              Click start to begin tracking time. The timer runs in the background automatically.
+            </p>
+          </div>
+
+          <!-- Step 3 -->
+          <div class="text-center">
+            <div class="w-16 h-16 sm:w-20 sm:h-20 rounded-full bg-blue-600/10 flex items-center justify-center mx-auto mb-4">
+              <span class="text-2xl sm:text-3xl font-bold text-blue-600">3</span>
+            </div>
+            <h3 class="text-lg sm:text-xl font-semibold text-gray-900 mb-2">Analyze & Export</h3>
+            <p class="text-gray-600 text-sm sm:text-base">
+              View insights on your dashboard and export reports for clients or analysis.
+            </p>
+          </div>
+        </div>
+      </section>
+
+      <!-- Benefits Section -->
+      <section class="mt-20 sm:mt-32 px-4">
+        <div class="max-w-6xl mx-auto bg-gradient-to-r from-blue-600 to-blue-700 rounded-3xl p-8 sm:p-12 text-white relative overflow-hidden">
+          <div class="absolute inset-0 bg-gradient-to-r from-blue-600/50 to-purple-600/50 opacity-50" />
+          <div class="relative z-10">
+            <div class="text-center mb-8 sm:mb-12">
+              <h2 class="text-2xl sm:text-3xl xl:text-4xl font-bold mb-4">
+                Why choose FlowTimeUp?
+              </h2>
+              <p class="text-blue-100 text-sm sm:text-base max-w-2xl mx-auto">
+                Everything you need to track time and boost productivity, all in one place.
+              </p>
+            </div>
+
+            <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 sm:gap-8">
+              <div class="text-center">
+                <div class="text-3xl sm:text-4xl font-bold mb-2">100%</div>
+                <div class="text-blue-100 text-sm sm:text-base">Free Forever</div>
+              </div>
+              <div class="text-center">
+                <div class="text-3xl sm:text-4xl font-bold mb-2">∞</div>
+                <div class="text-blue-100 text-sm sm:text-base">Unlimited Projects</div>
+              </div>
+              <div class="text-center">
+                <div class="text-3xl sm:text-4xl font-bold mb-2">24/7</div>
+                <div class="text-blue-100 text-sm sm:text-base">Always Available</div>
+              </div>
+              <div class="text-center">
+                <div class="text-3xl sm:text-4xl font-bold mb-2">100%</div>
+                <div class="text-blue-100 text-sm sm:text-base">Your Data</div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- Additional Features Section -->
+      <section class="mt-20 sm:mt-32 px-4">
+        <div class="max-w-4xl mx-auto">
+          <div class="grid grid-cols-1 md:grid-cols-2 gap-6 sm:gap-8">
+            <!-- Task Templates -->
+            <div class="bg-white/50 rounded-2xl border border-gray-200/50 p-6 sm:p-8">
+              <div class="flex items-start gap-4">
+                <div class="w-12 h-12 rounded-xl bg-violet-500/10 flex items-center justify-center flex-shrink-0">
+                  <svg class="w-6 h-6 text-violet-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/>
+                  </svg>
+                </div>
+                <div>
+                  <h3 class="text-lg font-semibold text-gray-900 mb-2">Task Templates</h3>
+                  <p class="text-gray-600 text-sm">
+                    Save time with reusable task templates. Create common tasks once and use them repeatedly.
+                  </p>
+                </div>
+              </div>
+            </div>
+
+            <!-- Dashboard Analytics -->
+            <div class="bg-white/50 rounded-2xl border border-gray-200/50 p-6 sm:p-8">
+              <div class="flex items-start gap-4">
+                <div class="w-12 h-12 rounded-xl bg-teal-500/10 flex items-center justify-center flex-shrink-0">
+                  <svg class="w-6 h-6 text-teal-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z"/>
+                  </svg>
+                </div>
+                <div>
+                  <h3 class="text-lg font-semibold text-gray-900 mb-2">Dashboard Analytics</h3>
+                  <p class="text-gray-600 text-sm">
+                    Get insights into your productivity with visual charts and time breakdowns by project.
+                  </p>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- CTA Section -->
+      <section class="mt-20 sm:mt-32 px-4">
+        <div class="max-w-4xl mx-auto text-center bg-gradient-to-r from-blue-600 to-blue-700 rounded-3xl p-8 sm:p-12 text-white">
+          <h2 class="text-2xl sm:text-3xl xl:text-4xl font-bold mb-4">
+            Ready to boost your productivity?
+          </h2>
+          <p class="text-blue-100 text-base sm:text-lg mb-8 max-w-2xl mx-auto">
+            Join thousands of users who are already tracking their time with FlowTimeUp. Get started in seconds.
+          </p>
+          <Link
+            :href="canRegister ? route('register') : route('login')"
+            class="inline-flex items-center gap-2 px-8 py-4 bg-white text-blue-600 rounded-xl font-semibold hover:bg-blue-50 transition-colors shadow-lg"
+          >
+            Start Tracking Free
+            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 7l5 5m0 0l-5 5m5-5H6"/>
+            </svg>
+          </Link>
         </div>
       </section>
     </main>
 
     <!-- Footer -->
-    <footer class="relative z-10 border-t border-gray-200">
-      <div class="container mx-auto px-4 sm:px-6 lg:px-8 py-6 sm:py-8">
-        <div class="flex flex-col sm:flex-row items-center justify-between gap-4">
-          <div class="flex items-center gap-2 sm:gap-3">
-            <div class="w-6 h-6 sm:w-8 sm:h-8 rounded-lg bg-gradient-to-br from-blue-600 to-blue-700 flex items-center justify-center">
-              <svg class="w-3 h-3 sm:w-4 sm:h-4 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"/>
-              </svg>
+    <footer class="relative z-10 border-t border-gray-200 bg-gradient-to-b from-gray-50 to-gray-100 mt-20 sm:mt-32">
+      <div class="container mx-auto px-4 sm:px-6 lg:px-8 py-12 sm:py-16">
+        <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-8 sm:gap-12 mb-8 sm:mb-12">
+          <!-- Brand -->
+          <div>
+            <div class="flex items-center gap-2 sm:gap-3 mb-4">
+              <div class="w-8 h-8 sm:w-10 sm:h-10 rounded-xl bg-gradient-to-br from-blue-600 to-blue-700 flex items-center justify-center">
+                <svg class="w-5 h-5 sm:w-6 sm:h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"/>
+                </svg>
+              </div>
+              <span class="text-lg sm:text-xl font-bold text-gray-900">FlowTimeUp</span>
             </div>
-            <span class="text-gray-600 text-xs sm:text-sm">© 2025 FlowTimeUp. All rights reserved.</span>
+            <p class="text-gray-600 text-sm">
+              Modern time tracking application designed to boost your productivity.
+            </p>
           </div>
-          <div class="flex items-center gap-4 sm:gap-6 text-xs sm:text-sm text-gray-600">
-            <a href="#" class="hover:text-gray-900 transition-colors">Privacy</a>
-            <a href="#" class="hover:text-gray-900 transition-colors">Terms</a>
-            <a href="#" class="hover:text-gray-900 transition-colors">Support</a>
+
+          <!-- Features -->
+          <div>
+            <h3 class="text-sm font-semibold text-gray-900 mb-4">Features</h3>
+            <ul class="space-y-2 text-sm text-gray-600">
+              <li><a href="#features" class="hover:text-gray-900 transition-colors">Time Tracking</a></li>
+              <li><a href="#features" class="hover:text-gray-900 transition-colors">Projects & Tags</a></li>
+              <li><a href="#features" class="hover:text-gray-900 transition-colors">Reports</a></li>
+              <li><a href="#features" class="hover:text-gray-900 transition-colors">Calendar View</a></li>
+            </ul>
+          </div>
+
+          <!-- Resources -->
+          <div>
+            <h3 class="text-sm font-semibold text-gray-900 mb-4">Resources</h3>
+            <ul class="space-y-2 text-sm text-gray-600">
+              <li><Link :href="route('pages.documentation')" class="hover:text-gray-900 transition-colors">Documentation</Link></li>
+              <li><Link :href="route('pages.api-reference')" class="hover:text-gray-900 transition-colors">API Reference</Link></li>
+              <li><Link :href="route('pages.help-center')" class="hover:text-gray-900 transition-colors">Help Center</Link></li>
+              <li><Link :href="route('pages.blog')" class="hover:text-gray-900 transition-colors">Blog</Link></li>
+            </ul>
+          </div>
+
+          <!-- Legal -->
+          <div>
+            <h3 class="text-sm font-semibold text-gray-900 mb-4">Legal</h3>
+            <ul class="space-y-2 text-sm text-gray-600">
+              <li><Link :href="route('pages.privacy-policy')" class="hover:text-gray-900 transition-colors">Privacy Policy</Link></li>
+              <li><Link :href="route('pages.terms-of-service')" class="hover:text-gray-900 transition-colors">Terms of Service</Link></li>
+              <li><Link :href="route('pages.cookie-policy')" class="hover:text-gray-900 transition-colors">Cookie Policy</Link></li>
+              <li><Link :href="route('pages.gdpr')" class="hover:text-gray-900 transition-colors">GDPR</Link></li>
+            </ul>
+          </div>
+        </div>
+
+        <div class="border-t border-gray-200 pt-8 mt-8">
+          <div class="flex flex-col sm:flex-row items-center justify-between gap-4">
+            <div class="flex items-center gap-2 sm:gap-3">
+              <div class="w-6 h-6 sm:w-8 sm:h-8 rounded-lg bg-gradient-to-br from-blue-600 to-blue-700 flex items-center justify-center">
+                <svg class="w-3 h-3 sm:w-4 sm:h-4 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"/>
+                </svg>
+              </div>
+              <span class="text-gray-600 text-xs sm:text-sm">© 2026 FlowTimeUp. All rights reserved.</span>
+            </div>
+            <div class="flex items-center gap-4 sm:gap-6 text-xs sm:text-sm text-gray-600">
+              <Link :href="route('pages.support')" class="hover:text-gray-900 transition-colors">Support</Link>
+            </div>
           </div>
         </div>
       </div>

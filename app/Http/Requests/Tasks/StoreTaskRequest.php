@@ -20,6 +20,12 @@ class StoreTaskRequest extends FormRequest
             'description' => ['nullable', 'string', 'max:1000'],
             'due_date' => ['nullable', 'date', 'after_or_equal:today'],
             'priority' => ['nullable', 'string', Rule::in(['low', 'medium', 'high'])],
+            'hourly_rate' => ['nullable', 'numeric', 'min:0', 'max:9999999.99'],
+            'currency' => ['nullable', 'string', 'size:3'],
+            'is_recurring' => ['boolean'],
+            'recurrence_type' => ['nullable', 'string', Rule::in(['daily', 'weekly', 'monthly'])],
+            'recurrence_interval' => ['nullable', 'integer', 'min:1', 'max:365'],
+            'recurrence_ends_at' => ['nullable', 'date', 'after:due_date'],
             'tag_ids' => ['nullable', 'array'],
             'tag_ids.*' => ['integer', Rule::exists('tags', 'id')->where('user_id', $this->user()->id)],
         ];
@@ -33,6 +39,7 @@ class StoreTaskRequest extends FormRequest
             'project_id.exists' => 'Selected project does not exist.',
             'due_date.after_or_equal' => 'Due date must be today or in the future.',
             'priority.in' => 'Priority must be low, medium, or high.',
+            'recurrence_type.in' => 'Recurrence type must be daily, weekly, or monthly.',
             'tag_ids.*.exists' => 'One or more selected tags do not exist.',
         ];
     }

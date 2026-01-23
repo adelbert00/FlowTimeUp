@@ -17,6 +17,10 @@ class UpdateProjectRequest extends FormRequest
             'name' => ['sometimes', 'required', 'string', 'max:255'],
             'description' => ['nullable', 'string', 'max:1000'],
             'color' => ['nullable', 'string', 'regex:/^#[0-9A-Fa-f]{6}$/'],
+            'hourly_rate' => ['nullable', 'numeric', 'min:0'],
+            'budget' => ['nullable', 'numeric', 'min:0'],
+            'currency' => ['nullable', 'string', 'size:3'],
+            'access' => ['nullable', 'in:public,private'],
         ];
     }
 

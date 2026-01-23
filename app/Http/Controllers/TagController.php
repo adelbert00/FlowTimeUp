@@ -14,17 +14,24 @@ class TagController extends Controller
     public function index(Request $request): Response
     {
         $userId = $request->user()->id;
+        $showArchived = $request->boolean('show_archived', false);
         
-        $tags = Tag::where('user_id', $userId)
+        $query = Tag::where('user_id', $userId)
             ->withCount([
                 'tasks' => function ($query) use ($userId) {
                     $query->where('user_id', $userId);
                 }
-            ])
-            ->get();
+            ]);
+        
+        if (!$showArchived) {
+            $query->where('is_archived', false);
+        }
+        
+        $tags = $query->get();
 
         return Inertia::render('Tags/Index', [
             'tags' => TagResource::collection($tags)->resolve(),
+            'showArchived' => $showArchived,
         ]);
     }
 
@@ -92,5 +99,29 @@ class TagController extends Controller
         $tag->delete();
 
         return redirect()->back()->with('success', 'Tag deleted successfully.');
+    }
+
+    public function archive(Tag $tag, Request $request): RedirectResponse
+    {
+        // Authorization: ensure tag belongs to user
+        if ($tag->user_id !== $request->user()->id) {
+            abort(403);
+        }
+
+        $tag->update(['is_archived' => true]);
+
+        return redirect()->back()->with('success', 'Tag archived successfully.');
+    }
+
+    public function restore(Tag $tag, Request $request): RedirectResponse
+    {
+        // Authorization: ensure tag belongs to user
+        if ($tag->user_id !== $request->user()->id) {
+            abort(403);
+        }
+
+        $tag->update(['is_archived' => false]);
+
+        return redirect()->back()->with('success', 'Tag restored successfully.');
     }
 }

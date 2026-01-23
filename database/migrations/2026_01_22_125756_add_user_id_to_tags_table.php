@@ -12,8 +12,9 @@ return new class extends Migration
     public function up(): void
     {
         Schema::table('tags', function (Blueprint $table) {
+            if (!Schema::hasColumn('tags', 'user_id')) {
             $table->foreignId('user_id')->after('id')->constrained()->cascadeOnDelete();
-            $table->index('user_id');
+            }
         });
     }
 
@@ -23,9 +24,10 @@ return new class extends Migration
     public function down(): void
     {
         Schema::table('tags', function (Blueprint $table) {
+            if (Schema::hasColumn('tags', 'user_id')) {
             $table->dropForeign(['user_id']);
-            $table->dropIndex(['user_id']);
             $table->dropColumn('user_id');
+            }
         });
     }
 };

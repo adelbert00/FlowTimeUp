@@ -9,20 +9,31 @@ return new class extends Migration
     public function up(): void
     {
         Schema::table('projects', function (Blueprint $table) {
-            $table->foreignId('user_id')->after('id')->constrained()->cascadeOnDelete();
-            $table->text('description')->nullable()->after('name');
-            $table->string('color', 7)->nullable()->after('description');
-            
-            $table->index('user_id');
+            if (!Schema::hasColumn('projects', 'user_id')) {
+                $table->foreignId('user_id')->after('id')->constrained()->cascadeOnDelete();
+            }
+            if (!Schema::hasColumn('projects', 'description')) {
+                $table->text('description')->nullable()->after('name');
+            }
+            if (!Schema::hasColumn('projects', 'color')) {
+                $table->string('color', 7)->nullable()->after('description');
+            }
         });
     }
 
     public function down(): void
     {
         Schema::table('projects', function (Blueprint $table) {
-            $table->dropForeign(['user_id']);
-            $table->dropIndex(['user_id']);
-            $table->dropColumn(['user_id', 'description', 'color']);
+            if (Schema::hasColumn('projects', 'user_id')) {
+                $table->dropForeign(['user_id']);
+                $table->dropColumn('user_id');
+            }
+            if (Schema::hasColumn('projects', 'description')) {
+                $table->dropColumn('description');
+            }
+            if (Schema::hasColumn('projects', 'color')) {
+                $table->dropColumn('color');
+            }
         });
     }
 };

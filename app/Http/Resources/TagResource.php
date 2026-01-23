@@ -12,6 +12,7 @@ class TagResource extends JsonResource
         return [
             'id' => $this->id,
             'name' => $this->name,
+            'is_archived' => $this->is_archived ?? false,
             'tasks_count' => $this->tasks_count ?? $this->whenLoaded('tasks', fn() => $this->tasks->count()),
             'created_at' => $this->created_at?->format('Y-m-d H:i:s'),
         ];

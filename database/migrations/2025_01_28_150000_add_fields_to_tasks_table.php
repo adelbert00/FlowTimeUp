@@ -9,29 +9,43 @@ return new class extends Migration
     public function up(): void
     {
         Schema::table('tasks', function (Blueprint $table) {
-            $table->foreignId('user_id')->after('id')->constrained()->cascadeOnDelete();
-            $table->text('description')->nullable()->after('title');
-            $table->date('due_date')->nullable()->after('description');
-            $table->enum('priority', ['low', 'medium', 'high'])->default('medium')->after('due_date');
-            $table->boolean('completed')->default(false)->after('priority');
-            
-            $table->index('user_id');
-            $table->index('project_id');
-            $table->index('due_date');
-            $table->index('completed');
+            if (!Schema::hasColumn('tasks', 'user_id')) {
+                $table->foreignId('user_id')->after('id')->constrained()->cascadeOnDelete();
+            }
+            if (!Schema::hasColumn('tasks', 'description')) {
+                $table->text('description')->nullable()->after('title');
+            }
+            if (!Schema::hasColumn('tasks', 'due_date')) {
+                $table->date('due_date')->nullable()->after('description');
+            }
+            if (!Schema::hasColumn('tasks', 'priority')) {
+                $table->enum('priority', ['low', 'medium', 'high'])->default('medium')->after('due_date');
+            }
+            if (!Schema::hasColumn('tasks', 'completed')) {
+                $table->boolean('completed')->default(false)->after('priority');
+            }
         });
     }
 
     public function down(): void
     {
         Schema::table('tasks', function (Blueprint $table) {
-            $table->dropForeign(['user_id']);
-            $table->dropIndex(['user_id']);
-            $table->dropIndex(['project_id']);
-            $table->dropIndex(['due_date']);
-            $table->dropIndex(['completed']);
-            
-            $table->dropColumn(['user_id', 'description', 'due_date', 'priority', 'completed']);
+            if (Schema::hasColumn('tasks', 'user_id')) {
+                $table->dropForeign(['user_id']);
+                $table->dropColumn('user_id');
+            }
+            if (Schema::hasColumn('tasks', 'description')) {
+                $table->dropColumn('description');
+            }
+            if (Schema::hasColumn('tasks', 'due_date')) {
+                $table->dropColumn('due_date');
+            }
+            if (Schema::hasColumn('tasks', 'priority')) {
+                $table->dropColumn('priority');
+            }
+            if (Schema::hasColumn('tasks', 'completed')) {
+                $table->dropColumn('completed');
+            }
         });
     }
 };
