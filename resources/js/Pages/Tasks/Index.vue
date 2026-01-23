@@ -111,7 +111,7 @@ const handleBulkDelete = (taskIds: number[]) => {
         <div class="grid grid-cols-1 xl:grid-cols-12 gap-4 sm:gap-6">
           <div class="hidden xl:block xl:col-span-4 2xl:col-span-3">
             <div class="xl:sticky xl:top-8">
-              <TaskForm :projects="projects || []" :tags="tags || []" />
+              <TaskForm :projects="projects || []" :tags="tags || []" :collapsible="true" />
             </div>
           </div>
 

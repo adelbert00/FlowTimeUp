@@ -208,30 +208,41 @@ function formatSessionDate(date: string) { return dayjs(date).format('MMM D'); }
             </div>
           </div>
 
-          <div v-if="showManualEntry" class="mt-3 p-3 bg-blue-50 dark:bg-blue-900/20 rounded-lg border border-blue-200 dark:border-blue-800">
-            <div class="text-xs font-medium text-blue-700 dark:text-blue-300 mb-2">Add Manual Time Entry</div>
-            <div class="grid grid-cols-2 gap-2 mb-2">
+          <div v-if="showManualEntry" class="mt-3 p-4 bg-white dark:bg-gray-800 rounded-xl border border-gray-200 dark:border-gray-700 shadow-lg">
+            <div class="flex items-center justify-between mb-3">
+              <h4 class="text-sm font-semibold text-gray-900 dark:text-white flex items-center gap-2">
+                <svg class="w-4 h-4 text-blue-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
+                Add Time Manually
+              </h4>
+              <button @click="showManualEntry = false" class="p-1 text-gray-400 hover:text-gray-600 dark:hover:text-gray-300 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-700">
+                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/></svg>
+              </button>
+            </div>
+            <div class="grid grid-cols-2 gap-3 mb-3">
               <div>
-                <label class="block text-[10px] text-gray-600 dark:text-gray-400 mb-0.5">Start</label>
-                <input v-model="manualForm.start_time" type="datetime-local" class="w-full px-2 py-1 text-xs border border-gray-300 dark:border-gray-600 rounded bg-white dark:bg-gray-800 text-gray-900 dark:text-white" />
+                <label class="block text-xs font-medium text-gray-600 dark:text-gray-400 mb-1">Start</label>
+                <input v-model="manualForm.start_time" type="datetime-local" class="w-full px-3 py-2 text-sm border border-gray-200 dark:border-gray-600 rounded-lg bg-gray-50 dark:bg-gray-700 text-gray-900 dark:text-white focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all" />
               </div>
               <div>
-                <label class="block text-[10px] text-gray-600 dark:text-gray-400 mb-0.5">End</label>
-                <input v-model="manualForm.end_time" type="datetime-local" class="w-full px-2 py-1 text-xs border border-gray-300 dark:border-gray-600 rounded bg-white dark:bg-gray-800 text-gray-900 dark:text-white" />
+                <label class="block text-xs font-medium text-gray-600 dark:text-gray-400 mb-1">End</label>
+                <input v-model="manualForm.end_time" type="datetime-local" class="w-full px-3 py-2 text-sm border border-gray-200 dark:border-gray-600 rounded-lg bg-gray-50 dark:bg-gray-700 text-gray-900 dark:text-white focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all" />
               </div>
             </div>
-            <div class="flex items-center gap-3 mb-2">
-              <label class="flex items-center gap-1.5 text-xs">
-                <input type="checkbox" v-model="manualForm.is_billable" class="w-3 h-3 rounded" />
-                <span class="text-gray-700 dark:text-gray-300">Billable</span>
+            <div class="flex items-center gap-4 mb-3 p-2 bg-gray-50 dark:bg-gray-700/50 rounded-lg">
+              <label class="flex items-center gap-2 cursor-pointer">
+                <input type="checkbox" v-model="manualForm.is_billable" class="w-4 h-4 rounded border-gray-300 text-blue-600 focus:ring-blue-500" />
+                <span class="text-sm text-gray-700 dark:text-gray-300">Billable</span>
               </label>
               <div v-if="manualForm.is_billable" class="flex-1">
-                <input v-model.number="manualForm.billable_rate" type="number" step="0.01" placeholder="Rate (optional)" class="w-full px-2 py-1 text-xs border border-gray-300 dark:border-gray-600 rounded bg-white dark:bg-gray-800 text-gray-900 dark:text-white" />
+                <input v-model.number="manualForm.billable_rate" type="number" step="0.01" placeholder="Hourly rate (optional)" class="w-full px-3 py-1.5 text-sm border border-gray-200 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-800 text-gray-900 dark:text-white focus:ring-2 focus:ring-blue-500 focus:border-transparent" />
               </div>
             </div>
             <div class="flex gap-2">
-              <button @click="showManualEntry = false" class="flex-1 px-2 py-1.5 text-xs bg-gray-200 dark:bg-gray-700 text-gray-700 dark:text-gray-300 rounded hover:bg-gray-300 dark:hover:bg-gray-600">Cancel</button>
-              <button @click="submitManualEntry" :disabled="manualForm.processing" class="flex-1 px-2 py-1.5 text-xs bg-blue-600 text-white rounded hover:bg-blue-700 disabled:opacity-50">Add</button>
+              <button @click="showManualEntry = false" class="flex-1 px-4 py-2 text-sm font-medium bg-gray-100 dark:bg-gray-700 text-gray-700 dark:text-gray-300 rounded-lg hover:bg-gray-200 dark:hover:bg-gray-600 transition-colors">Cancel</button>
+              <button @click="submitManualEntry" :disabled="manualForm.processing" class="flex-1 px-4 py-2 text-sm font-medium bg-blue-600 text-white rounded-lg hover:bg-blue-700 disabled:opacity-50 transition-colors flex items-center justify-center gap-2">
+                <svg v-if="manualForm.processing" class="w-4 h-4 animate-spin" fill="none" viewBox="0 0 24 24"><circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"/><path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"/></svg>
+                {{ manualForm.processing ? 'Adding...' : 'Add Entry' }}
+              </button>
             </div>
           </div>
 

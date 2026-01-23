@@ -17,11 +17,14 @@ interface Tag {
 const props = defineProps<{
   projects?: Project[];
   tags?: Tag[];
+  collapsible?: boolean;
 }>();
 
 const emit = defineEmits<{
   submit: [];
 }>();
+
+const isCollapsed = ref(false);
 
 const form = useForm({
   title: '',
@@ -69,13 +72,27 @@ function submitTask() {
   });
 }
 
+const pendingProjectName = ref<string | null>(null);
+
 function createProject() {
+  pendingProjectName.value = projectForm.name;
   projectForm.post(route('projects.store'), {
     preserveScroll: true,
     onSuccess: () => {
       projectForm.reset();
       showProjectModal.value = false;
-      router.reload({ only: ['projects'] });
+      router.reload({ 
+        only: ['projects'],
+        onSuccess: () => {
+          if (pendingProjectName.value && props.projects) {
+            const newProject = props.projects.find(p => p.name === pendingProjectName.value);
+            if (newProject) {
+              form.project_id = newProject.id;
+            }
+            pendingProjectName.value = null;
+          }
+        }
+      });
     },
   });
 }
@@ -99,16 +116,43 @@ const colorPresets = [
 
 <template>
   <div class="bg-white dark:bg-gray-800 rounded-xl border border-gray-200 dark:border-gray-700 shadow-sm overflow-hidden">
-    <div class="px-4 sm:px-6 py-3 sm:py-4 border-b border-gray-200/50 dark:border-gray-700/50">
+    <div 
+      class="px-4 sm:px-6 py-3 sm:py-4 border-b border-gray-200/50 dark:border-gray-700/50 flex items-center justify-between cursor-pointer hover:bg-gray-50 dark:hover:bg-gray-700/50 transition-colors"
+      :class="{ 'border-b-0': isCollapsed }"
+      @click="isCollapsed = !isCollapsed"
+    >
       <h2 class="text-lg font-semibold font-sans text-gray-900 dark:text-white flex items-center gap-2">
         <svg class="w-5 h-5 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
           <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"/>
         </svg>
         New Task
       </h2>
+      <button 
+        type="button"
+        class="p-1.5 rounded-lg text-gray-500 hover:text-gray-700 dark:hover:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-600 transition-colors"
+        @click.stop="isCollapsed = !isCollapsed"
+      >
+        <svg 
+          class="w-5 h-5 transition-transform duration-200" 
+          :class="{ 'rotate-180': !isCollapsed }"
+          fill="none" 
+          stroke="currentColor" 
+          viewBox="0 0 24 24"
+        >
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 15l7-7 7 7"/>
+        </svg>
+      </button>
     </div>
 
-    <form @submit.prevent="submitTask" class="p-4 sm:p-6 space-y-4 sm:space-y-5">
+    <Transition
+      enter-active-class="transition-all duration-300 ease-out"
+      enter-from-class="max-h-0 opacity-0"
+      enter-to-class="max-h-[2000px] opacity-100"
+      leave-active-class="transition-all duration-200 ease-in"
+      leave-from-class="max-h-[2000px] opacity-100"
+      leave-to-class="max-h-0 opacity-0"
+    >
+      <form v-show="!isCollapsed" @submit.prevent="submitTask" class="p-4 sm:p-6 space-y-4 sm:space-y-5 overflow-hidden">
       <div>
         <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1.5">
           Task name <span class="text-red-400">*</span>
@@ -308,6 +352,7 @@ const colorPresets = [
         <span v-else>Create Task</span>
       </button>
     </form>
+    </Transition>
 
     <Teleport to="body">
       <div v-if="showProjectModal" class="fixed inset-0 z-50 flex items-center justify-center p-4" @click.self="showProjectModal = false">
