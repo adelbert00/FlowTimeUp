@@ -49,15 +49,12 @@ const showMobileActions = ref(false);
 const showManualEntry = ref(false);
 const editingSession = ref<TimeSession | null>(null);
 
-// Use timer store for running state
 const isRunning = computed(() => timerStore.isTaskRunning(props.task.id));
 
-// Show live timer when running, or total accumulated time when stopped
 const formattedTime = computed(() => {
   if (isRunning.value) {
     return timerStore.formattedTime;
   }
-  // For non-running tasks, show their total accumulated time
   return props.task.total_time ? props.task.total_time : '00:00:00';
 });
 
@@ -77,8 +74,6 @@ const editForm = useForm({
   billable_rate: null as number | null,
   description: '',
 });
-
-// formattedTime is now from timer store
 
 const priorityConfig = computed(() => {
   switch (props.task.priority) {
@@ -144,8 +139,6 @@ function formatDuration(start: string, end?: string): string {
 
 function formatSessionTime(date: string) { return dayjs(date).format('HH:mm'); }
 function formatSessionDate(date: string) { return dayjs(date).format('MMM D'); }
-
-// Timer is managed by the store, no cleanup needed here
 </script>
 
 <template>

@@ -1,6 +1,5 @@
 <script setup lang="ts">
 import { computed, ref, onBeforeUnmount } from 'vue';
-import { defineProps } from 'vue';
 import { Task } from '@/stores/tasks';
 import { useTimeSessionsStore } from '@/stores/timeSessions';
 import Modal from '@/Components/Modal.vue';
@@ -19,7 +18,7 @@ const currentTime = ref<Date>(new Date());
 let intervalId: number | null = null;
 const showAddManualTimeModal = ref(false);
 const manualTimeForm = ref({
-  duration: 0, // in minutes
+  duration: '0',
   description: '',
 });
 
@@ -46,6 +45,27 @@ const stopTimer = async () => {
     intervalId = null;
   }
   startTime.value = null;
+};
+
+const addManualTime = async () => {
+  const durationMinutes = Number(manualTimeForm.value.duration) || 0;
+  if (durationMinutes <= 0) return;
+
+  const endTime = new Date();
+  const startTime = new Date(endTime.getTime() - durationMinutes * 60 * 1000);
+
+  await timeSessionsStore.createTimeSession(
+    props.task.id,
+    startTime.toISOString(),
+    endTime.toISOString(),
+    true,
+    null,
+    manualTimeForm.value.description
+  );
+
+  showAddManualTimeModal.value = false;
+  manualTimeForm.value.duration = '0';
+  manualTimeForm.value.description = '';
 };
 
 const formattedTime = computed(() => {
@@ -152,28 +172,3 @@ onBeforeUnmount(() => {
     </div>
   </Modal>
 </template>
-
-<script lang="ts">
-import { useTimeSessionsStore } from '@/stores/timeSessions';
-
-const addManualTime = async () => {
-  const endTime = new Date();
-  const startTime = new Date(endTime.getTime() - manualTimeForm.value.duration * 60 * 1000);
-
-  await timeSessionsStore.createTimeSession(
-    props.task.id,
-    startTime.toISOString(),
-    endTime.toISOString(),
-    true, // is_billable
-    null, // billable_rate
-    manualTimeForm.value.description
-  );
-
-  showAddManualTimeModal.value = false;
-  manualTimeForm.value.duration = 0;
-  manualTimeForm.value.description = '';
-};
-
-onBeforeUnmount(() => {
-  if (intervalId) clearInterval(intervalId);
-});
