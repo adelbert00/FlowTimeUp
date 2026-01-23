@@ -36,9 +36,19 @@ export const useTimeSessionsStore = defineStore('timeSessions', {
     async createTimeSession(
       task_id: number,
       start_time: string,
-      end_time?: string
+      end_time?: string,
+      is_billable?: boolean,
+      billable_rate?: number | null,
+      description?: string
     ) {
-      await axios.post('/time-sessions', { task_id, start_time, end_time });
+      await axios.post('/time-sessions', { 
+        task_id, 
+        start_time, 
+        end_time,
+        is_billable,
+        billable_rate,
+        description
+      });
       this.fetchSessions();
     },
 
