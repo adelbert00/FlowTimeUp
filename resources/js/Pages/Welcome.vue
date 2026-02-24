@@ -71,7 +71,7 @@ const canonicalUrl = typeof window !== 'undefined' ? window.location.origin + (w
           v-if="canLogin && !$page.props.auth.user"
           @click="mobileMenuOpen = !mobileMenuOpen"
           :aria-label="mobileMenuOpen ? 'Close menu' : 'Open menu'"
-          aria-expanded="mobileMenuOpen"
+          :aria-expanded="mobileMenuOpen"
           class="sm:hidden p-2 text-gray-600 hover:text-gray-900 transition-colors"
         >
           <svg v-if="!mobileMenuOpen" class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">

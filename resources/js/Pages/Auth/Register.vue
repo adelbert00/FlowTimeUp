@@ -85,7 +85,7 @@ declare global {
   <GuestLayout>
     <Head title="Create account">
       <link v-if="recaptchaSiteKey" rel="preconnect" href="https://www.google.com" />
-      <link v-if="recaptchaSiteKey" rel="preconnect" href="https://www.gstatic.com" crossorigin />
+      <link v-if="recaptchaSiteKey" rel="preconnect" href="https://www.gstatic.com" crossorigin="" />
     </Head>
 
     <!-- Header -->
@@ -307,7 +307,7 @@ declare global {
       <button
         type="submit"
         :disabled="form.processing"
-        :aria-busy="form.processing"
+        :aria-busy="form.processing ? 'true' : 'false'"
         aria-label="Create account"
         class="w-full py-2.5 sm:py-3 bg-gradient-to-r from-blue-600 to-blue-700 text-white rounded-lg font-medium hover:from-blue-700 hover:to-blue-800 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 focus:ring-offset-white disabled:opacity-50 disabled:cursor-not-allowed transition-all shadow-lg shadow-blue-500/25 text-sm sm:text-base"
       >
