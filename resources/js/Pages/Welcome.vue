@@ -169,7 +169,7 @@ const canonicalUrl = typeof window !== 'undefined' ? window.location.origin + (w
         </div>
       </div>
 
-      <section id="features" class="mt-20 sm:mt-32 px-4">
+      <section id="features" class="mt-20 sm:mt-32 px-4 [content-visibility:auto] [contain-intrinsic-size:0_800px]">
         <div class="text-center mb-10 sm:mb-16">
           <h2 class="text-2xl sm:text-3xl xl:text-4xl font-bold text-gray-900 mb-4">
             Everything you need to track time
@@ -290,7 +290,7 @@ const canonicalUrl = typeof window !== 'undefined' ? window.location.origin + (w
         </div>
       </section>
 
-      <section class="mt-20 sm:mt-32 px-4">
+      <section class="mt-20 sm:mt-32 px-4 [content-visibility:auto] [contain-intrinsic-size:0_400px]">
         <div class="text-center mb-10 sm:mb-16">
           <h2 class="text-2xl sm:text-3xl xl:text-4xl font-bold text-gray-900 mb-4">
             How it works
@@ -333,7 +333,7 @@ const canonicalUrl = typeof window !== 'undefined' ? window.location.origin + (w
         </div>
       </section>
 
-      <section class="mt-20 sm:mt-32 px-4">
+      <section class="mt-20 sm:mt-32 px-4 [content-visibility:auto] [contain-intrinsic-size:0_300px]">
         <div class="max-w-6xl mx-auto bg-gradient-to-r from-blue-600 to-blue-700 rounded-3xl p-8 sm:p-12 text-white relative overflow-hidden">
           <div class="absolute inset-0 bg-gradient-to-r from-blue-600/50 to-purple-600/50 opacity-50" />
           <div class="relative z-10">
@@ -368,7 +368,7 @@ const canonicalUrl = typeof window !== 'undefined' ? window.location.origin + (w
         </div>
       </section>
 
-      <section class="mt-20 sm:mt-32 px-4">
+      <section class="mt-20 sm:mt-32 px-4 [content-visibility:auto] [contain-intrinsic-size:0_350px]">
         <div class="max-w-4xl mx-auto">
           <div class="grid grid-cols-1 md:grid-cols-2 gap-6 sm:gap-8">
             <div class="bg-white/50 rounded-2xl border border-gray-200/50 p-6 sm:p-8">
@@ -406,7 +406,7 @@ const canonicalUrl = typeof window !== 'undefined' ? window.location.origin + (w
         </div>
       </section>
 
-      <section class="mt-20 sm:mt-32 px-4">
+      <section class="mt-20 sm:mt-32 px-4 [content-visibility:auto] [contain-intrinsic-size:0_250px]">
         <div class="max-w-4xl mx-auto text-center bg-gradient-to-r from-blue-600 to-blue-700 rounded-3xl p-8 sm:p-12 text-white">
           <h2 class="text-2xl sm:text-3xl xl:text-4xl font-bold mb-4">
             Ready to boost your productivity?

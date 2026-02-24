@@ -29,19 +29,16 @@ const submit = () => {
   <GuestLayout>
     <Head title="Sign in" />
 
-    <!-- Header -->
     <div class="text-center mb-6 sm:mb-8">
       <h1 class="text-xl sm:text-2xl font-bold text-gray-900">Welcome back</h1>
       <p class="text-gray-600 mt-2 text-sm sm:text-base">Sign in to continue to FlowTimeUp</p>
     </div>
 
-    <!-- Status message -->
     <div v-if="status" class="mb-4 sm:mb-6 p-3 sm:p-4 bg-emerald-500/10 border border-emerald-500/20 rounded-lg">
       <p class="text-xs sm:text-sm text-emerald-600">{{ status }}</p>
     </div>
 
     <form @submit.prevent="submit" class="space-y-4 sm:space-y-5">
-      <!-- Email -->
       <div>
         <label for="email" class="block text-sm font-medium text-gray-700 mb-1.5">
           Email address
@@ -69,7 +66,6 @@ const submit = () => {
         </p>
       </div>
 
-      <!-- Password -->
       <div>
         <label for="password" class="block text-sm font-medium text-gray-700 mb-1.5">
           Password
@@ -110,7 +106,6 @@ const submit = () => {
         </p>
       </div>
 
-      <!-- Remember & Forgot -->
       <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3 sm:gap-0">
         <label class="flex items-center gap-2 cursor-pointer">
           <input
@@ -130,7 +125,6 @@ const submit = () => {
         </Link>
       </div>
 
-      <!-- Submit -->
       <button
         type="submit"
         :disabled="form.processing"
@@ -146,8 +140,7 @@ const submit = () => {
         <span v-else>Sign in</span>
       </button>
 
-      <!-- Divider -->
-      <div class="relative my-4 sm:my-6">
+      <div class="relative my-4 sm:my-6 [content-visibility:auto] [contain-intrinsic-size:0_120px]">
         <div class="absolute inset-0 flex items-center">
           <div class="w-full border-t border-gray-200" />
         </div>
@@ -156,7 +149,6 @@ const submit = () => {
         </div>
       </div>
 
-      <!-- Register link -->
       <Link
         :href="route('register')"
         class="block w-full py-2.5 sm:py-3 text-center border border-gray-300 text-gray-700 rounded-lg font-medium hover:bg-gray-100/50 hover:border-gray-300 transition-colors text-sm sm:text-base"

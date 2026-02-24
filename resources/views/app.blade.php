@@ -5,34 +5,35 @@
         <meta name="viewport" content="width=device-width, initial-scale=1">
         <meta name="csrf-token" content="{{ csrf_token() }}">
 
-        <!-- SEO Meta Tags -->
         <x-seo-head />
-
-        <!-- Fonts (async to avoid render-blocking) -->
+        
         <link rel="preconnect" href="https://fonts.bunny.net" crossorigin>
-        <link rel="preload" href="https://fonts.bunny.net/css?family=inter:400,500,600,700&family=jetbrains-mono:400,500,600,700&display=swap" as="style" onload="this.onload=null;this.rel='stylesheet'">
+        <link rel="preload" href="https://fonts.bunny.net/css?family=inter:400,600&family=jetbrains-mono:400&display=swap" as="style" media="(max-width: 768px)" onload="this.media='all';this.onload=null;this.rel='stylesheet'">
+        <link rel="preload" href="https://fonts.bunny.net/css?family=inter:400,500,600,700&family=jetbrains-mono:400,500,600,700&display=swap" as="style" media="(min-width: 769px)" onload="this.media='all';this.onload=null;this.rel='stylesheet'">
         <noscript><link href="https://fonts.bunny.net/css?family=inter:400,500,600,700&family=jetbrains-mono:400,500,600,700&display=swap" rel="stylesheet"></noscript>
 
         <!-- Favicon -->
         <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%236366f1' stroke-width='2'><circle cx='12' cy='12' r='10'/><path d='M12 6v6l4 2'/></svg>">
 
-        <!-- Google Analytics -->
         @if(config('services.google.analytics_id'))
-        <script async src="https://www.googletagmanager.com/gtag/js?id={{ config('services.google.analytics_id') }}"></script>
         <script>
+            window.VITE_GOOGLE_ANALYTICS_ID = '{{ config('services.google.analytics_id') }}';
             window.dataLayer = window.dataLayer || [];
             function gtag(){dataLayer.push(arguments);}
-            gtag('js', new Date());
-            gtag('config', '{{ config('services.google.analytics_id') }}', {
-                page_path: window.location.pathname,
-            });
-            
-            // Make gtag available globally for Inertia tracking
             window.gtag = gtag;
-        </script>
-        <script>
-            // Set GA ID for client-side tracking
-            window.VITE_GOOGLE_ANALYTICS_ID = '{{ config('services.google.analytics_id') }}';
+            function loadGA() {
+                var s = document.createElement('script');
+                s.async = true;
+                s.src = 'https://www.googletagmanager.com/gtag/js?id=' + window.VITE_GOOGLE_ANALYTICS_ID;
+                document.head.appendChild(s);
+                gtag('js', new Date());
+                gtag('config', window.VITE_GOOGLE_ANALYTICS_ID, { page_path: window.location.pathname });
+            }
+            if ('requestIdleCallback' in window) {
+                requestIdleCallback(loadGA, { timeout: 2000 });
+            } else {
+                setTimeout(loadGA, 1500);
+            }
         </script>
         @endif
 
