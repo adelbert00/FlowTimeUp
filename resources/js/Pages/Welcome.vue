@@ -2,7 +2,7 @@
 import { Head, Link } from '@inertiajs/vue3';
 import { ref } from 'vue';
 
-defineProps<{
+const props = defineProps<{
   canLogin?: boolean;
   canRegister?: boolean;
   laravelVersion?: string;
@@ -10,6 +10,7 @@ defineProps<{
 }>();
 
 const mobileMenuOpen = ref(false);
+const canonicalUrl = typeof window !== 'undefined' ? window.location.origin + (window.location.pathname || '/') : '';
 </script>
 
 <template>
@@ -17,7 +18,7 @@ const mobileMenuOpen = ref(false);
     <title>FlowTimeUp - Track Your Time | Modern Time Tracking Application</title>
     <meta name="description" content="FlowTimeUp - Modern time tracking application. Track your time across tasks and projects with an intuitive interface. Boost productivity with precise time tracking and insightful reports." />
     <meta name="keywords" content="time tracking, task management, productivity, project management, time tracker" />
-    <link rel="canonical" :href="$page.url" />
+    <link rel="canonical" :href="canonicalUrl" />
   </Head>
   
   <div class="min-h-screen bg-gradient-to-br from-gray-50 via-gray-50 to-gray-100 overflow-hidden relative">
@@ -69,6 +70,8 @@ const mobileMenuOpen = ref(false);
         <button
           v-if="canLogin && !$page.props.auth.user"
           @click="mobileMenuOpen = !mobileMenuOpen"
+          :aria-label="mobileMenuOpen ? 'Close menu' : 'Open menu'"
+          aria-expanded="mobileMenuOpen"
           class="sm:hidden p-2 text-gray-600 hover:text-gray-900 transition-colors"
         >
           <svg v-if="!mobileMenuOpen" class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -104,7 +107,7 @@ const mobileMenuOpen = ref(false);
 
     <main class="relative z-10 container mx-auto px-4 sm:px-6 lg:px-8 pt-8 sm:pt-16 pb-16 sm:pb-24">
       <div class="max-w-4xl mx-auto text-center">
-        <div class="inline-flex items-center gap-2 px-3 sm:px-4 py-2 bg-blue-100 border border-blue-200 rounded-full text-blue-600 text-xs sm:text-sm font-medium mb-6 sm:mb-8">
+        <div class="inline-flex items-center gap-2 px-3 sm:px-4 py-2 bg-blue-600/10 border border-blue-600/30 rounded-full text-blue-700 text-xs sm:text-sm font-medium mb-6 sm:mb-8">
           <span class="w-2 h-2 bg-emerald-400 rounded-full animate-pulse" />
           Free time tracking for everyone
         </div>
@@ -156,8 +159,8 @@ const mobileMenuOpen = ref(false);
               <div class="font-mono text-2xl sm:text-4xl font-bold text-emerald-400">
                 00:45:23<span class="text-emerald-400/50">.42</span>
               </div>
-              <button class="w-12 h-12 sm:w-14 sm:h-14 rounded-full bg-red-500 hover:bg-red-600 flex items-center justify-center transition-colors shadow-lg shadow-red-500/25 flex-shrink-0">
-                <svg class="w-5 h-5 sm:w-6 sm:h-6 text-white" fill="currentColor" viewBox="0 0 20 20">
+              <button aria-label="Stop timer" class="w-12 h-12 sm:w-14 sm:h-14 rounded-full bg-red-500 hover:bg-red-600 flex items-center justify-center transition-colors shadow-lg shadow-red-500/25 flex-shrink-0">
+                <svg class="w-5 h-5 sm:w-6 sm:h-6 text-white" fill="currentColor" viewBox="0 0 20 20" aria-hidden="true">
                   <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM8 7a1 1 0 00-1 1v4a1 1 0 001 1h4a1 1 0 001-1V8a1 1 0 00-1-1H8z" clip-rule="evenodd"/>
                 </svg>
               </button>
