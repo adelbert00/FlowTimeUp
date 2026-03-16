@@ -16,7 +16,7 @@ class UpdateTaskRequest extends FormRequest
     {
         return [
             'title' => ['sometimes', 'required', 'string', 'max:255'],
-            'project_id' => ['nullable', 'integer', 'exists:projects,id'],
+            'project_id' => ['nullable', 'integer', Rule::exists('projects', 'id')->where('user_id', $this->user()->id)],
             'description' => ['nullable', 'string', 'max:1000'],
             'due_date' => ['nullable', 'date'],
             'priority' => ['nullable', 'string', Rule::in(['low', 'medium', 'high'])],

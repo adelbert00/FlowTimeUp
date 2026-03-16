@@ -2,12 +2,16 @@
 
 namespace App\Http\Controllers;
 
+use App\Http\Requests\TimeSessions\StoreTimeSessionRequest;
 use App\Models\TimeSession;
 use App\Models\Task;
+use App\Services\TimeTrackingService;
 use Illuminate\Http\Request;
 
 class TimeSessionController extends Controller
 {
+    public function __construct(private readonly TimeTrackingService $timeTracking) {}
+
     public function index(Request $request)
     {
         $sessions = TimeSession::whereHas('task', function ($query) use ($request) {
@@ -23,23 +27,14 @@ class TimeSessionController extends Controller
         ]);
     }
 
-    public function store(Request $request)
+    public function store(StoreTimeSessionRequest $request)
     {
-        $validated = $request->validate([
-            'task_id' => 'required|exists:tasks,id',
-            'start_time' => 'required|date',
-            'end_time' => 'nullable|date|after_or_equal:start_time',
-            'is_billable' => 'boolean',
-            'billable_rate' => 'nullable|numeric|min:0',
-            'description' => 'nullable|string|max:1000',
-        ]);
-
-        $task = Task::findOrFail($validated['task_id']);
-        $this->authorize('update', $task);
-
+        $validated = $request->validated();
         $validated['is_billable'] = $validated['is_billable'] ?? true;
 
         TimeSession::create($validated);
+
+        $this->timeTracking->invalidateCache($request->user()->id);
 
         return redirect()->back()->with('success', 'Time session created!');
     }
@@ -73,14 +68,18 @@ class TimeSessionController extends Controller
 
         $timeSession->update($validated);
 
+        $this->timeTracking->invalidateCache($request->user()->id);
+
         return redirect()->back()->with('success', 'Time session updated!');
     }
 
-    public function destroy(TimeSession $timeSession)
+    public function destroy(TimeSession $timeSession, Request $request)
     {
         $timeSession->load('task');
         $this->authorize('delete', $timeSession);
         $timeSession->delete();
+
+        $this->timeTracking->invalidateCache($request->user()->id);
 
         return redirect()->back()->with('success', 'Time session deleted!');
     }

@@ -16,7 +16,7 @@ class StoreTaskRequest extends FormRequest
     {
         return [
             'title' => ['required', 'string', 'max:255'],
-            'project_id' => ['nullable', 'integer', 'exists:projects,id'],
+            'project_id' => ['nullable', 'integer', Rule::exists('projects', 'id')->where('user_id', $this->user()->id)],
             'description' => ['nullable', 'string', 'max:1000'],
             'due_date' => ['nullable', 'date', 'after_or_equal:today'],
             'priority' => ['nullable', 'string', Rule::in(['low', 'medium', 'high'])],

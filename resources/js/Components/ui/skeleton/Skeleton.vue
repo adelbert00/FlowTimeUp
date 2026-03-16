@@ -11,8 +11,6 @@ const props = defineProps<SkeletonProps>();
 
 <template>
   <div
-    :class="
-      cn('animate-pulse rounded-md bg-slate-100 dark:bg-white', props.class)
-    "
+    :class="cn('shimmer rounded-md h-4', props.class)"
   />
 </template>

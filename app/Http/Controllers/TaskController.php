@@ -9,6 +9,7 @@ use App\Http\Resources\TaskResource;
 use App\Models\Project;
 use App\Models\Task;
 use App\Models\Tag;
+use App\Services\TimeTrackingService;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Inertia\Inertia;
@@ -16,6 +17,8 @@ use Inertia\Response;
 
 class TaskController extends Controller
 {
+    public function __construct(private readonly TimeTrackingService $timeTracking) {}
+
     public function index(Request $request): Response
     {
         $query = Task::with(['project', 'tags', 'timeSessions'])
@@ -85,6 +88,8 @@ class TaskController extends Controller
             $task->update(['next_occurrence' => $task->calculateNextOccurrence()]);
         }
 
+        $this->timeTracking->invalidateCache($request->user()->id);
+
         return redirect()->route('tasks.index')->with('success', 'Task created successfully.');
     }
 
@@ -125,13 +130,17 @@ class TaskController extends Controller
             $task->tags()->sync($request->tag_ids ?? []);
         }
 
+        $this->timeTracking->invalidateCache($request->user()->id);
+
         return redirect()->route('tasks.index')->with('success', 'Task updated successfully.');
     }
 
-    public function destroy(Task $task): RedirectResponse
+    public function destroy(Task $task, Request $request): RedirectResponse
     {
         $this->authorize('delete', $task);
         $task->delete();
+
+        $this->timeTracking->invalidateCache($request->user()->id);
 
         return redirect()->route('tasks.index')->with('success', 'Task deleted successfully.');
     }

@@ -8,6 +8,7 @@ use App\Models\Task;
 use App\Models\TaskTemplate;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
+use Illuminate\Validation\Rule;
 use Inertia\Inertia;
 use Inertia\Response;
 
@@ -59,10 +60,10 @@ class TaskTemplateController extends Controller
             'name' => 'required|string|max:255',
             'title' => 'required|string|max:255',
             'description' => 'nullable|string|max:1000',
-            'project_id' => 'nullable|integer|exists:projects,id',
+            'project_id' => ['nullable', 'integer', Rule::exists('projects', 'id')->where('user_id', $request->user()->id)],
             'priority' => 'required|in:low,medium,high',
             'tag_ids' => 'nullable|array',
-            'tag_ids.*' => 'integer|exists:tags,id,user_id,' . $request->user()->id,
+            'tag_ids.*' => ['integer', Rule::exists('tags', 'id')->where('user_id', $request->user()->id)],
         ]);
 
         TaskTemplate::create([
@@ -107,10 +108,10 @@ class TaskTemplateController extends Controller
             'name' => 'required|string|max:255',
             'title' => 'required|string|max:255',
             'description' => 'nullable|string|max:1000',
-            'project_id' => 'nullable|integer|exists:projects,id',
+            'project_id' => ['nullable', 'integer', Rule::exists('projects', 'id')->where('user_id', $request->user()->id)],
             'priority' => 'required|in:low,medium,high',
             'tag_ids' => 'nullable|array',
-            'tag_ids.*' => 'integer|exists:tags,id,user_id,' . $request->user()->id,
+            'tag_ids.*' => ['integer', Rule::exists('tags', 'id')->where('user_id', $request->user()->id)],
         ]);
 
         $taskTemplate->update($validated);

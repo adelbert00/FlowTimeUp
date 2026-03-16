@@ -1,3 +1,110 @@
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
+
+@layer base {
+  :root {
+    --color-surface: 248 248 250;
+    --color-surface-raised: 255 255 255;
+    --color-surface-overlay: 241 241 247;
+    --color-border: 226 226 234;
+    --color-border-strong: 200 200 212;
+    --color-text-primary: 18 18 24;
+    --color-text-secondary: 108 108 124;
+    --color-text-muted: 152 152 168;
+    --color-accent: 99 102 241;
+    --color-accent-hover: 79 70 229;
+    --color-accent-subtle: 238 240 255;
+    --color-accent-text: 67 56 202;
+    --color-success: 34 197 94;
+    --color-success-subtle: 240 253 244;
+    --color-warning: 234 179 8;
+    --color-warning-subtle: 254 252 232;
+    --color-danger: 239 68 68;
+    --color-danger-subtle: 254 242 242;
+  }
+
+  .dark {
+    --color-surface: 10 10 15;
+    --color-surface-raised: 20 20 28;
+    --color-surface-overlay: 30 30 42;
+    --color-border: 40 40 56;
+    --color-border-strong: 60 60 80;
+    --color-text-primary: 248 248 252;
+    --color-text-secondary: 160 160 180;
+    --color-text-muted: 100 100 120;
+    --color-accent: 129 140 248;
+    --color-accent-hover: 165 180 252;
+    --color-accent-subtle: 30 28 60;
+    --color-accent-text: 165 180 252;
+    --color-success: 74 222 128;
+    --color-success-subtle: 5 46 22;
+    --color-warning: 250 204 21;
+    --color-warning-subtle: 66 32 6;
+    --color-danger: 252 165 165;
+    --color-danger-subtle: 69 10 10;
+  }
+}
+
+@layer utilities {
+  .shimmer {
+    background: linear-gradient(
+      90deg,
+      rgb(var(--color-surface-overlay)) 25%,
+      rgb(var(--color-border)) 50%,
+      rgb(var(--color-surface-overlay)) 75%
+    );
+    background-size: 200% 100%;
+    animation: shimmer 1.5s infinite;
+  }
+
+  .nav-indicator {
+    position: relative;
+  }
+
+  .nav-indicator::before {
+    content: '';
+    position: absolute;
+    left: 0;
+    top: 50%;
+    transform: translateY(-50%);
+    width: 3px;
+    height: 60%;
+    border-radius: 0 2px 2px 0;
+    background: linear-gradient(
+      180deg,
+      rgb(var(--color-accent)),
+      rgb(var(--color-accent-hover))
+    );
+    opacity: 0;
+    transition: opacity 0.15s ease, height 0.15s ease;
+  }
+
+  .nav-indicator.active::before {
+    opacity: 1;
+    height: 70%;
+  }
+}
+
+@keyframes shimmer {
+  0% { background-position: 200% 0; }
+  100% { background-position: -200% 0; }
+}
+
+@keyframes fade-up {
+  from { opacity: 0; transform: translateY(6px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+@keyframes scale-in {
+  from { opacity: 0; transform: scale(0.97); }
+  to { opacity: 1; transform: scale(1); }
+}
+
+.animate-fade-up {
+  animation: fade-up 0.2s ease-out;
+}
+
+.animate-scale-in {
+  animation: scale-in 0.15s ease-out;
+}

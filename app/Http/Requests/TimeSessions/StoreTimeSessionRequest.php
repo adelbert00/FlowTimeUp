@@ -3,6 +3,7 @@
 namespace App\Http\Requests\TimeSessions;
 
 use Illuminate\Foundation\Http\FormRequest;
+use Illuminate\Validation\Rule;
 
 class StoreTimeSessionRequest extends FormRequest
 {
@@ -14,9 +15,12 @@ class StoreTimeSessionRequest extends FormRequest
     public function rules(): array
     {
         return [
-            'task_id' => ['required', 'integer', 'exists:tasks,id'],
+            'task_id' => ['required', 'integer', Rule::exists('tasks', 'id')->where('user_id', $this->user()->id)],
             'start_time' => ['required', 'date'],
             'end_time' => ['nullable', 'date', 'after_or_equal:start_time'],
+            'is_billable' => ['boolean'],
+            'billable_rate' => ['nullable', 'numeric', 'min:0'],
+            'description' => ['nullable', 'string', 'max:1000'],
             'notes' => ['nullable', 'string', 'max:500'],
         ];
     }
