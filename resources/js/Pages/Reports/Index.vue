@@ -3,11 +3,7 @@ import { Head, router } from '@inertiajs/vue3';
 import MainLayout from '@/Layouts/MainLayout.vue';
 import { ref, watch } from 'vue';
 import CustomDatePicker from '@/Components/CustomDatePicker.vue';
-import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/Components/ui/card';
-import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/Components/ui/table';
-import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/Components/ui/tabs';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/Components/ui/select';
-import { Checkbox } from '@/Components/ui/checkbox';
 import { Button } from '@/Components/ui/button';
 import { Download, FileText, BarChart3, Tag as TagIcon, Folder } from 'lucide-vue-next';
 
@@ -35,6 +31,8 @@ interface Props {
 }
 
 const props = defineProps<Props>();
+
+const activeTab = ref('projects');
 
 const filterState = ref({
   project_id: props.filters.project_id?.toString() || 'all',
@@ -114,12 +112,11 @@ const exportReport = (format: 'csv' | 'pdf') => {
           </div>
         </div>
 
-        <Card>
-          <CardHeader>
-            <CardTitle>Filters</CardTitle>
-            <CardDescription>Adjust the time range and categories to refine your report.</CardDescription>
-          </CardHeader>
-          <CardContent>
+        <div class="bg-white dark:bg-gray-800 rounded-xl border border-gray-200 dark:border-gray-700 shadow-sm overflow-hidden mb-6">
+          <div class="p-6">
+            <h2 class="text-lg font-semibold mb-1">Filters</h2>
+            <p class="text-sm text-muted-foreground mb-6">Adjust the time range and categories to refine your report.</p>
+            
             <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
               <div class="space-y-2">
                 <label class="text-sm font-medium">Project</label>
@@ -163,103 +160,109 @@ const exportReport = (format: 'csv' | 'pdf') => {
             </div>
 
             <div class="flex items-center gap-6 mt-6">
-              <div class="flex items-center space-x-2">
-                <Checkbox id="billable" v-model:checked="filterState.include_billable" />
-                <label for="billable" class="text-sm font-medium leading-none cursor-pointer">Billable</label>
-              </div>
-              <div class="flex items-center space-x-2">
-                <Checkbox id="non-billable" v-model:checked="filterState.include_non_billable" />
-                <label for="non-billable" class="text-sm font-medium leading-none cursor-pointer">Non-billable</label>
-              </div>
+              <label class="flex items-center gap-2 cursor-pointer">
+                <input type="checkbox" v-model="filterState.include_billable" class="rounded border-gray-300 text-primary focus:ring-primary" />
+                <span class="text-sm font-medium">Billable</span>
+              </label>
+              <label class="flex items-center gap-2 cursor-pointer">
+                <input type="checkbox" v-model="filterState.include_non_billable" class="rounded border-gray-300 text-primary focus:ring-primary" />
+                <span class="text-sm font-medium">Non-billable</span>
+              </label>
             </div>
-          </CardContent>
-        </Card>
+          </div>
+        </div>
 
-        <Tabs default-value="projects" class="w-full">
-          <TabsList class="grid w-full max-w-md grid-cols-2">
-            <TabsTrigger value="projects" class="flex items-center gap-2">
+        <div class="space-y-6">
+          <div class="flex bg-muted p-1 rounded-lg w-full max-w-md">
+            <button 
+              @click="activeTab = 'projects'"
+              :class="['flex-1 flex items-center justify-center gap-2 px-3 py-1.5 text-sm font-medium rounded-md transition-all', activeTab === 'projects' ? 'bg-background shadow-sm text-foreground' : 'text-muted-foreground hover:text-foreground']"
+            >
               <Folder class="h-4 w-4" />
               By Projects
-            </TabsTrigger>
-            <TabsTrigger value="tags" class="flex items-center gap-2">
+            </button>
+            <button 
+              @click="activeTab = 'tags'"
+              :class="['flex-1 flex items-center justify-center gap-2 px-3 py-1.5 text-sm font-medium rounded-md transition-all', activeTab === 'tags' ? 'bg-background shadow-sm text-foreground' : 'text-muted-foreground hover:text-foreground']"
+            >
               <TagIcon class="h-4 w-4" />
               By Tags
-            </TabsTrigger>
-          </TabsList>
+            </button>
+          </div>
 
-          <TabsContent value="projects" class="mt-6">
-            <Card>
-              <CardHeader>
-                <CardTitle class="flex items-center gap-2">
-                  <BarChart3 class="h-5 w-5 text-primary" />
-                  Project Breakdown
-                </CardTitle>
-              </CardHeader>
-              <CardContent>
-                <Table>
-                  <TableHeader>
-                    <TableRow>
-                      <TableHead>Project Name</TableHead>
-                      <TableHead class="text-right">Total Duration</TableHead>
-                      <TableHead class="text-right">Estimated Earnings</TableHead>
-                    </TableRow>
-                  </TableHeader>
-                  <TableBody>
-                    <TableRow v-for="item in projectSummary" :key="item.id">
-                      <TableCell class="font-medium">
-                        <div class="flex items-center gap-2">
-                          <div class="w-3 h-3 rounded-full" :style="{ backgroundColor: item.color || '#94a3b8' }"></div>
-                          {{ item.name }}
-                        </div>
-                      </TableCell>
-                      <TableCell class="text-right">{{ formatDuration(item.duration) }}</TableCell>
-                      <TableCell class="text-right">{{ formatCurrency(item.earnings) }}</TableCell>
-                    </TableRow>
-                    <TableRow v-if="projectSummary.length === 0">
-                      <TableCell colspan="3" class="h-24 text-center text-muted-foreground">
-                        No data available for the selected filters.
-                      </TableCell>
-                    </TableRow>
-                  </TableBody>
-                </Table>
-              </CardContent>
-            </Card>
-          </TabsContent>
+          <div v-if="activeTab === 'projects'" class="bg-white dark:bg-gray-800 rounded-xl border border-gray-200 dark:border-gray-700 shadow-sm overflow-hidden">
+            <div class="p-6 border-b border-gray-100 dark:border-gray-700">
+              <h3 class="text-lg font-semibold flex items-center gap-2">
+                <BarChart3 class="h-5 w-5 text-primary" />
+                Project Breakdown
+              </h3>
+            </div>
+            <div class="overflow-x-auto">
+              <table class="w-full text-left border-collapse">
+                <thead>
+                  <tr class="bg-gray-50/50 dark:bg-gray-700/50 text-xs font-semibold text-muted-foreground uppercase tracking-wider">
+                    <th class="px-6 py-4">Project Name</th>
+                    <th class="px-6 py-4 text-right">Total Duration</th>
+                    <th class="px-6 py-4 text-right">Estimated Earnings</th>
+                  </tr>
+                </thead>
+                <tbody class="divide-y divide-gray-100 dark:divide-gray-700">
+                  <tr v-for="item in projectSummary" :key="item.id" class="hover:bg-gray-50/50 dark:hover:bg-gray-700/50 transition-colors">
+                    <td class="px-6 py-4 font-medium text-sm">
+                      <div class="flex items-center gap-2">
+                        <div class="w-3 h-3 rounded-full" :style="{ backgroundColor: item.color || '#94a3b8' }"></div>
+                        {{ item.name }}
+                      </div>
+                    </td>
+                    <td class="px-6 py-4 text-right text-sm">{{ formatDuration(item.duration) }}</td>
+                    <td class="px-6 py-4 text-right text-sm">{{ formatCurrency(item.earnings) }}</td>
+                  </tr>
+                  <tr v-if="projectSummary.length === 0">
+                    <td colspan="3" class="px-6 py-12 text-center text-muted-foreground text-sm">
+                      No data available for the selected filters.
+                    </td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
+          </div>
 
-          <TabsContent value="tags" class="mt-6">
-            <Card>
-              <CardHeader>
-                <CardTitle class="flex items-center gap-2">
-                  <TagIcon class="h-5 w-5 text-primary" />
-                  Tag Breakdown
-                </CardTitle>
-              </CardHeader>
-              <CardContent>
-                <Table>
-                  <TableHeader>
-                    <TableRow>
-                      <TableHead>Tag Name</TableHead>
-                      <TableHead class="text-right">Total Duration</TableHead>
-                      <TableHead class="text-right">Estimated Earnings</TableHead>
-                    </TableRow>
-                  </TableHeader>
-                  <TableBody>
-                    <TableRow v-for="item in tagSummary" :key="item.id">
-                      <TableCell class="font-medium">#{{ item.name }}</TableCell>
-                      <TableCell class="text-right">{{ formatDuration(item.duration) }}</TableCell>
-                      <TableCell class="text-right">{{ formatCurrency(item.earnings) }}</TableCell>
-                    </TableRow>
-                    <TableRow v-if="tagSummary.length === 0">
-                      <TableCell colspan="3" class="h-24 text-center text-muted-foreground">
-                        No data available for the selected filters.
-                      </TableCell>
-                    </TableRow>
-                  </TableBody>
-                </Table>
-              </CardContent>
-            </Card>
-          </TabsContent>
-        </Tabs>
+          <div v-if="activeTab === 'tags'" class="bg-white dark:bg-gray-800 rounded-xl border border-gray-200 dark:border-gray-700 shadow-sm overflow-hidden">
+            <div class="p-6 border-b border-gray-100 dark:border-gray-700">
+              <h3 class="text-lg font-semibold flex items-center gap-2">
+                <TagIcon class="h-5 w-5 text-primary" />
+                Tag Breakdown
+              </h3>
+            </div>
+            <div class="overflow-x-auto">
+              <table class="w-full text-left border-collapse">
+                <thead>
+                  <tr class="bg-gray-50/50 dark:bg-gray-700/50 text-xs font-semibold text-muted-foreground uppercase tracking-wider">
+                    <th class="px-6 py-4">Tag Name</th>
+                    <th class="px-6 py-4 text-right">Total Duration</th>
+                    <th class="px-6 py-4 text-right">Estimated Earnings</th>
+                  </tr>
+                </thead>
+                <tbody class="divide-y divide-gray-100 dark:divide-gray-700">
+                  <tr v-for="item in tagSummary" :key="item.id" class="hover:bg-gray-50/50 dark:hover:bg-gray-700/50 transition-colors">
+                    <td class="px-6 py-4 font-medium text-sm">#{{ item.name }}</td>
+                    <td class="px-6 py-4 text-right text-sm">{{ formatDuration(item.duration) }}</td>
+                    <td class="px-6 py-4 text-right text-sm">{{ formatCurrency(item.earnings) }}</td>
+                  </tr>
+                  <tr v-if="tagSummary.length === 0">
+                    <td colspan="3" class="px-6 py-12 text-center text-muted-foreground text-sm">
+                      No data available for the selected filters.
+                    </td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </MainLayout>
+</template>
       </div>
     </div>
   </MainLayout>
