@@ -2,7 +2,10 @@
 
 namespace App\Services;
 
+use App\Models\TimeSession;
 use Illuminate\Support\Collection;
+use Illuminate\Support\Facades\DB;
+use Carbon\Carbon;
 
 class ReportService
 {
@@ -15,11 +18,145 @@ class ReportService
         return sprintf('%02d:%02d:%02d', $hours, $minutes, $secs);
     }
 
+    public function getSummary(int $userId, ?string $startDate = null, ?string $endDate = null): array
+    {
+        $query = TimeSession::query()
+            ->join('tasks', 'time_sessions.task_id', '=', 'tasks.id')
+            ->leftJoin('projects', 'tasks.project_id', '=', 'projects.id')
+            ->where('time_sessions.user_id', $userId)
+            ->whereNotNull('time_sessions.end_time');
+
+        if ($startDate) {
+            $query->where('time_sessions.start_time', '>=', Carbon::parse($startDate)->startOfDay());
+        }
+
+        if ($endDate) {
+            $query->where('time_sessions.start_time', '<=', Carbon::parse($endDate)->endOfDay());
+        }
+
+        // Ogólne statystyki
+        $stats = (clone $query)
+            ->selectRaw('
+                COUNT(*) as total_sessions,
+                SUM(TIMESTAMPDIFF(SECOND, time_sessions.start_time, time_sessions.end_time)) as total_seconds,
+                SUM(CASE WHEN time_sessions.is_billable = 1 THEN TIMESTAMPDIFF(SECOND, time_sessions.start_time, time_sessions.end_time) ELSE 0 END) as billable_seconds,
+                SUM(CASE WHEN time_sessions.is_billable = 1 THEN (TIMESTAMPDIFF(SECOND, time_sessions.start_time, time_sessions.end_time) / 3600.0) * COALESCE(time_sessions.billable_rate, tasks.hourly_rate, 0) ELSE 0 END) as total_earnings
+            ')
+            ->first();
+
+        $totalSeconds = (int)($stats->total_seconds ?? 0);
+        $billableSeconds = (int)($stats->billable_seconds ?? 0);
+
+        // Grupowanie po projektach
+        $byProject = (clone $query)
+            ->selectRaw('
+                projects.id,
+                COALESCE(projects.name, "No Project") as name,
+                SUM(TIMESTAMPDIFF(SECOND, time_sessions.start_time, time_sessions.end_time)) as seconds,
+                SUM(CASE WHEN time_sessions.is_billable = 1 THEN (TIMESTAMPDIFF(SECOND, time_sessions.start_time, time_sessions.end_time) / 3600.0) * COALESCE(time_sessions.billable_rate, tasks.hourly_rate, 0) ELSE 0 END) as earnings,
+                COALESCE(tasks.currency, "USD") as currency
+            ')
+            ->groupBy('projects.id', 'projects.name', 'tasks.currency')
+            ->get()
+            ->map(fn($row) => [
+                'id' => $row->id,
+                'name' => $row->name,
+                'duration' => $this->formatDuration($row->seconds),
+                'seconds' => (int)$row->seconds,
+                'earnings' => round((float)$row->earnings, 2),
+                'currency' => $row->currency,
+            ]);
+
+        // Grupowanie po tagach
+        $byTag = TimeSession::query()
+            ->join('tasks', 'time_sessions.task_id', '=', 'tasks.id')
+            ->join('tag_task', 'tasks.id', '=', 'tag_task.task_id')
+            ->join('tags', 'tag_task.tag_id', '=', 'tags.id')
+            ->where('time_sessions.user_id', $userId)
+            ->whereNotNull('time_sessions.end_time');
+
+        if ($startDate) {
+            $byTag->where('time_sessions.start_time', '>=', Carbon::parse($startDate)->startOfDay());
+        }
+        if ($endDate) {
+            $byTag->where('time_sessions.start_time', '<=', Carbon::parse($endDate)->endOfDay());
+        }
+
+        $byTag = $byTag
+            ->selectRaw('
+                tags.id,
+                tags.name,
+                SUM(TIMESTAMPDIFF(SECOND, time_sessions.start_time, time_sessions.end_time)) as seconds
+            ')
+            ->groupBy('tags.id', 'tags.name')
+            ->get()
+            ->map(fn($row) => [
+                'id' => $row->id,
+                'name' => $row->name,
+                'duration' => $this->formatDuration($row->seconds),
+                'seconds' => (int)$row->seconds,
+            ])
+            ->sortByDesc('seconds')
+            ->values();
+
+        // Grupowanie po zadaniach
+        $byTask = (clone $query)
+            ->selectRaw('
+                tasks.id,
+                tasks.title as name,
+                SUM(TIMESTAMPDIFF(SECOND, time_sessions.start_time, time_sessions.end_time)) as seconds
+            ')
+            ->groupBy('tasks.id', 'tasks.title')
+            ->orderByDesc('seconds')
+            ->limit(10)
+            ->get()
+            ->map(fn($row) => [
+                'id' => $row->id,
+                'name' => $row->name,
+                'duration' => $this->formatDuration($row->seconds),
+                'seconds' => (int)$row->seconds,
+            ]);
+
+        // Grupowanie po dacie
+        $byDate = (clone $query)
+            ->selectRaw('
+                DATE(time_sessions.start_time) as date,
+                SUM(TIMESTAMPDIFF(SECOND, time_sessions.start_time, time_sessions.end_time)) as seconds
+            ')
+            ->groupBy('date')
+            ->orderByDesc('date')
+            ->get()
+            ->map(fn($row) => [
+                'date' => $row->date,
+                'duration' => $this->formatDuration($row->seconds),
+                'seconds' => (int)$row->seconds,
+            ]);
+
+        return [
+            'total_time' => $this->formatDuration($totalSeconds),
+            'total_seconds' => $totalSeconds,
+            'total_sessions' => (int)($stats->total_sessions ?? 0),
+            'billable_time' => $this->formatDuration($billableSeconds),
+            'billable_seconds' => $billableSeconds,
+            'non_billable_time' => $this->formatDuration($totalSeconds - $billableSeconds),
+            'non_billable_seconds' => $totalSeconds - $billableSeconds,
+            'total_earnings' => round((float)($stats->total_earnings ?? 0), 2),
+            'by_project' => $byProject,
+            'by_tag' => $byTag,
+            'by_task' => $byTask,
+            'by_date' => $byDate,
+        ];
+    }
+
+    /**
+     * @deprecated Use getSummary for better performance
+     */
     public function calculateSummary(Collection $sessions): array
     {
+        // Zachowano dla wstecznej kompatybilności, jeśli jest gdzieś używane, 
+        // ale zaleca się przejście na getSummary()
         $totalSeconds = 0;
         $billableSeconds = 0;
-        $nonBillableSeconds = 0;
         $totalEarnings = 0;
         $byProject = [];
         $byTask = [];
@@ -29,15 +166,12 @@ class ReportService
             $duration = $session->start_time->diffInSeconds($session->end_time);
             $totalSeconds += $duration;
 
-            $hourlyRate = $session->task->hourly_rate ?? $session->task->project?->hourly_rate ?? 0;
+            $hourlyRate = $session->billable_rate ?? $session->task->hourly_rate ?? 0;
             $hours = $duration / 3600;
-            $currency = $session->task->currency ?? $session->task->project?->currency ?? 'USD';
-
+            
             if ($session->is_billable) {
                 $billableSeconds += $duration;
                 $totalEarnings += $hours * $hourlyRate;
-            } else {
-                $nonBillableSeconds += $duration;
             }
 
             $projectName = $session->task->project?->name ?? 'No project';
@@ -45,7 +179,7 @@ class ReportService
             $date = $session->start_time->format('Y-m-d');
 
             if (!isset($byProject[$projectName])) {
-                $byProject[$projectName] = ['seconds' => 0, 'earnings' => 0, 'currency' => $currency];
+                $byProject[$projectName] = ['seconds' => 0, 'earnings' => 0, 'currency' => $session->task->currency ?? 'USD'];
             }
             $byProject[$projectName]['seconds'] += $duration;
             if ($session->is_billable) {
@@ -62,39 +196,33 @@ class ReportService
             'total_sessions' => $sessions->count(),
             'billable_time' => $this->formatDuration($billableSeconds),
             'billable_seconds' => $billableSeconds,
-            'non_billable_time' => $this->formatDuration($nonBillableSeconds),
-            'non_billable_seconds' => $nonBillableSeconds,
+            'non_billable_time' => $this->formatDuration($totalSeconds - $billableSeconds),
+            'non_billable_seconds' => $totalSeconds - $billableSeconds,
             'total_earnings' => round($totalEarnings, 2),
-            'by_project' => collect($byProject)->map(function ($data, $name) {
-                return [
-                    'name' => $name,
-                    'duration' => $this->formatDuration($data['seconds']),
-                    'seconds' => $data['seconds'],
-                    'earnings' => round($data['earnings'], 2),
-                    'currency' => $data['currency'],
-                ];
-            })->values(),
-            'by_task' => collect($byTask)->map(function ($seconds, $name) {
-                return [
-                    'name' => $name,
-                    'duration' => $this->formatDuration($seconds),
-                    'seconds' => $seconds,
-                ];
-            })->sortByDesc('seconds')->take(10)->values(),
-            'by_date' => collect($byDate)->map(function ($seconds, $date) {
-                return [
-                    'date' => $date,
-                    'duration' => $this->formatDuration($seconds),
-                    'seconds' => $seconds,
-                ];
-            })->sortByDesc('date')->values(),
+            'by_project' => collect($byProject)->map(fn($data, $name) => [
+                'name' => $name,
+                'duration' => $this->formatDuration($data['seconds']),
+                'seconds' => $data['seconds'],
+                'earnings' => round($data['earnings'], 2),
+                'currency' => $data['currency'],
+            ])->values(),
+            'by_task' => collect($byTask)->map(fn($seconds, $name) => [
+                'name' => $name,
+                'duration' => $this->formatDuration($seconds),
+                'seconds' => $seconds,
+            ])->sortByDesc('seconds')->take(10)->values(),
+            'by_date' => collect($byDate)->map(fn($seconds, $date) => [
+                'date' => $date,
+                'duration' => $this->formatDuration($seconds),
+                'seconds' => $seconds,
+            ])->sortByDesc('date')->values(),
         ];
     }
 
     public function formatSessionForExport($session): array
     {
         $duration = $session->start_time->diffInSeconds($session->end_time);
-        $hourlyRate = $session->task->hourly_rate ?? $session->task->project?->hourly_rate ?? 0;
+        $hourlyRate = $session->billable_rate ?? $session->task->hourly_rate ?? 0;
         $hours = $duration / 3600;
         $earnings = $session->is_billable ? round($hours * $hourlyRate, 2) : 0;
 

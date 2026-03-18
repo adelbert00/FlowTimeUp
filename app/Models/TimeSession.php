@@ -12,6 +12,7 @@ class TimeSession extends Model
 
     protected $fillable = [
         'task_id',
+        'user_id',
         'start_time',
         'end_time',
         'is_billable',
@@ -19,6 +20,11 @@ class TimeSession extends Model
         'description',
         'notes',
     ];
+
+    public function user()
+    {
+        return $this->belongsTo(User::class);
+    }
     
     protected $casts = [
         'start_time' => 'datetime:Y-m-d H:i:s.u',
