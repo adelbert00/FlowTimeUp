@@ -3,118 +3,91 @@ import { Head, router } from '@inertiajs/vue3';
 import MainLayout from '@/Layouts/MainLayout.vue';
 import { ref, watch } from 'vue';
 import CustomDatePicker from '@/Components/CustomDatePicker.vue';
+import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/Components/ui/card';
+import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/Components/ui/table';
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/Components/ui/tabs';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/Components/ui/select';
+import { Checkbox } from '@/Components/ui/checkbox';
 import { Button } from '@/Components/ui/button';
-import { Input } from '@/Components/ui/input';
-import { Label } from '@/Components/ui/label';
+import { Download, FileText, BarChart3, Tag as TagIcon, Folder } from 'lucide-vue-next';
 
-interface Project {
-  id: number;
+interface SummaryData {
+  id: number | string;
   name: string;
+  duration: number;
+  earnings: number;
   color?: string;
 }
 
-interface Tag {
-  id: number;
-  name: string;
-}
-
-interface SummaryItem {
-  id?: number;
-  name: string;
-  duration: string;
-  seconds: number;
-  earnings?: number;
-  currency?: string;
-  date?: string;
-}
-
-interface Summary {
-  total_time: string;
-  total_seconds: number;
-  total_sessions: number;
-  billable_time: string;
-  billable_seconds: number;
-  non_billable_time: string;
-  non_billable_seconds: number;
-  total_earnings: number;
-  by_project: SummaryItem[];
-  by_tag: SummaryItem[];
-  by_task: SummaryItem[];
-  by_date: SummaryItem[];
-}
-
-const props = defineProps<{
-  projects: Project[];
-  tags: Tag[];
-  summary: Summary;
+interface Props {
+  projects: any[];
+  tags: any[];
+  projectSummary: SummaryData[];
+  tagSummary: SummaryData[];
   filters: {
-    project_id?: string;
-    tag_id?: string;
-    start_date?: string;
-    end_date?: string;
-    include_billable?: string;
-    include_non_billable?: string;
+    project_id: string | number | null;
+    tag_id: string | number | null;
+    start_date: string;
+    end_date: string;
+    include_billable: boolean | string;
+    include_non_billable: boolean | string;
   };
-}>();
-
-const projectId = ref<number | null>(props.filters.project_id ? parseInt(props.filters.project_id) : null);
-const tagId = ref<number | null>(props.filters.tag_id ? parseInt(props.filters.tag_id) : null);
-const startDate = ref<string>(props.filters.start_date || '');
-const endDate = ref<string>(props.filters.end_date || '');
-const includeBillable = ref(props.filters.include_billable !== 'false');
-const includeNonBillable = ref(props.filters.include_non_billable !== 'false');
-const activeTab = ref('projects');
-
-if (!startDate.value || !endDate.value) {
-  const today = new Date();
-  const thirtyDaysAgo = new Date();
-  thirtyDaysAgo.setDate(today.getDate() - 30);
-  if (!startDate.value) startDate.value = thirtyDaysAgo.toISOString().split('T')[0];
-  if (!endDate.value) endDate.value = today.toISOString().split('T')[0];
 }
+
+const props = defineProps<Props>();
+
+const filterState = ref({
+  project_id: props.filters.project_id?.toString() || 'all',
+  tag_id: props.filters.tag_id?.toString() || 'all',
+  start_date: props.filters.start_date,
+  end_date: props.filters.end_date,
+  include_billable: String(props.filters.include_billable) === 'true',
+  include_non_billable: String(props.filters.include_non_billable) === 'true',
+});
+
+const formatDuration = (seconds: number) => {
+  const h = Math.floor(seconds / 3600);
+  const m = Math.floor((seconds % 3600) / 60);
+  return `${h}h ${m}m`;
+};
+
+const formatCurrency = (amount: number) => {
+  return new Intl.NumberFormat('en-US', { style: 'currency', currency: 'USD' }).format(amount);
+};
 
 const updateFilters = () => {
   router.get(route('reports.index'), {
-    project_id: projectId.value,
-    tag_id: tagId.value,
-    start_date: startDate.value,
-    end_date: endDate.value,
-    include_billable: includeBillable.value,
-    include_non_billable: includeNonBillable.value,
+    project_id: filterState.value.project_id === 'all' ? null : filterState.value.project_id,
+    tag_id: filterState.value.tag_id === 'all' ? null : filterState.value.tag_id,
+    start_date: filterState.value.start_date,
+    end_date: filterState.value.end_date,
+    include_billable: filterState.value.include_billable,
+    include_non_billable: filterState.value.include_non_billable,
   }, {
     preserveState: true,
+    preserveScroll: true,
     replace: true,
   });
 };
 
-watch([projectId, tagId, startDate, endDate, includeBillable, includeNonBillable], () => {
-  updateFilters();
-});
+watch(() => filterState.value, updateFilters, { deep: true });
 
-const exportCsv = () => {
+const exportReport = (format: 'csv' | 'pdf') => {
   const params = new URLSearchParams();
-  if (projectId.value) params.append('project_id', projectId.value.toString());
-  if (tagId.value) params.append('tag_id', tagId.value.toString());
-  if (startDate.value) params.append('start_date', startDate.value);
-  if (endDate.value) params.append('end_date', endDate.value);
-  params.append('include_billable', includeBillable.value.toString());
-  params.append('include_non_billable', includeNonBillable.value.toString());
-  params.append('format', 'csv');
+  if (filterState.value.project_id !== 'all') params.append('project_id', filterState.value.project_id);
+  if (filterState.value.tag_id !== 'all') params.append('tag_id', filterState.value.tag_id);
+  params.append('start_date', filterState.value.start_date);
+  params.append('end_date', filterState.value.end_date);
+  params.append('include_billable', filterState.value.include_billable.toString());
+  params.append('include_non_billable', filterState.value.include_non_billable.toString());
+  params.append('format', format);
 
-  window.location.href = route('reports.export') + '?' + params.toString();
-};
-
-const exportPdf = () => {
-  const params = new URLSearchParams();
-  if (projectId.value) params.append('project_id', projectId.value.toString());
-  if (tagId.value) params.append('tag_id', tagId.value.toString());
-  if (startDate.value) params.append('start_date', startDate.value);
-  if (endDate.value) params.append('end_date', endDate.value);
-  params.append('include_billable', includeBillable.value.toString());
-  params.append('include_non_billable', includeNonBillable.value.toString());
-  params.append('format', 'pdf');
-
-  window.open(route('reports.export') + '?' + params.toString(), '_blank');
+  const url = route('reports.export') + '?' + params.toString();
+  if (format === 'csv') {
+    window.location.href = url;
+  } else {
+    window.open(url, '_blank');
+  }
 };
 </script>
 
@@ -122,191 +95,171 @@ const exportPdf = () => {
   <Head title="Reports" />
 
   <MainLayout>
-    <div class="min-h-screen bg-slate-50 dark:bg-slate-950 py-8 px-4 sm:px-6 lg:px-8">
+    <div class="min-h-screen bg-background p-6 lg:p-8">
       <div class="max-w-7xl mx-auto space-y-8">
         <div class="flex flex-col md:flex-row md:items-center justify-between gap-4">
           <div>
-            <h1 class="text-3xl font-bold text-slate-900 dark:text-slate-50">Reports</h1>
-            <p class="text-slate-500 dark:text-slate-400 mt-1">Insight into your productivity and earnings.</p>
+            <h1 class="text-3xl font-bold tracking-tight">Reports</h1>
+            <p class="text-muted-foreground">Analyze your time tracking and earnings across projects and tags.</p>
           </div>
-          <div class="flex items-center gap-3">
-            <Button variant="outline" @click="exportCsv" class="bg-white dark:bg-slate-900 border-slate-200 dark:border-slate-800">
-              Export CSV
+          <div class="flex items-center gap-2">
+            <Button variant="outline" @click="exportReport('csv')">
+              <Download class="mr-2 h-4 w-4" />
+              CSV
             </Button>
-            <Button @click="exportPdf" class="bg-blue-600 hover:bg-blue-700 text-white">
-              Export PDF
+            <Button variant="destructive" @click="exportReport('pdf')">
+              <FileText class="mr-2 h-4 w-4" />
+              PDF
             </Button>
           </div>
         </div>
 
-        <div class="grid grid-cols-1 lg:grid-cols-4 gap-8">
-          <div class="lg:col-span-1 space-y-6">
-            <div class="bg-white dark:bg-slate-900 rounded-xl border border-slate-200 dark:border-slate-800 p-6 shadow-sm">
-              <h3 class="font-semibold text-slate-900 dark:text-slate-50 mb-4">Filters</h3>
-              <div class="space-y-4">
-                <div class="space-y-2">
-                  <Label>Project</Label>
-                  <select
-                    v-model="projectId"
-                    class="w-full flex h-10 rounded-md border border-slate-200 bg-white px-3 py-2 text-sm ring-offset-white focus:outline-none focus:ring-2 focus:ring-slate-950 focus:ring-offset-2 dark:border-slate-800 dark:bg-slate-950 dark:ring-offset-slate-950 dark:focus:ring-slate-300"
-                  >
-                    <option :value="null">All Projects</option>
-                    <option v-for="p in projects" :key="p.id" :value="p.id">{{ p.name }}</option>
-                  </select>
-                </div>
-
-                <div class="space-y-2">
-                  <Label>Tag</Label>
-                  <select
-                    v-model="tagId"
-                    class="w-full flex h-10 rounded-md border border-slate-200 bg-white px-3 py-2 text-sm ring-offset-white focus:outline-none focus:ring-2 focus:ring-slate-950 focus:ring-offset-2 dark:border-slate-800 dark:bg-slate-950 dark:ring-offset-slate-950 dark:focus:ring-slate-300"
-                  >
-                    <option :value="null">All Tags</option>
-                    <option v-for="t in tags" :key="t.id" :value="t.id">#{{ t.name }}</option>
-                  </select>
-                </div>
-
-                <div class="space-y-2">
-                  <Label>Start Date</Label>
-                  <CustomDatePicker v-model="startDate" />
-                </div>
-
-                <div class="space-y-2">
-                  <Label>End Date</Label>
-                  <CustomDatePicker v-model="endDate" />
-                </div>
-
-                <div class="pt-2 space-y-3">
-                  <div class="flex items-center space-x-2">
-                    <input type="checkbox" id="billable" v-model="includeBillable" class="rounded border-slate-300 text-blue-600 focus:ring-blue-600 dark:bg-slate-950 dark:border-slate-800" />
-                    <Label for="billable" class="cursor-pointer">Include Billable</Label>
-                  </div>
-                  <div class="flex items-center space-x-2">
-                    <input type="checkbox" id="non-billable" v-model="includeNonBillable" class="rounded border-slate-300 text-blue-600 focus:ring-blue-600 dark:bg-slate-950 dark:border-slate-800" />
-                    <Label for="non-billable" class="cursor-pointer">Include Non-Billable</Label>
-                  </div>
-                </div>
+        <Card>
+          <CardHeader>
+            <CardTitle>Filters</CardTitle>
+            <CardDescription>Adjust the time range and categories to refine your report.</CardDescription>
+          </CardHeader>
+          <CardContent>
+            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+              <div class="space-y-2">
+                <label class="text-sm font-medium">Project</label>
+                <Select v-model="filterState.project_id">
+                  <SelectTrigger>
+                    <SelectValue placeholder="All Projects" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="all">All Projects</SelectItem>
+                    <SelectItem v-for="p in projects" :key="p.id" :value="p.id.toString()">
+                      {{ p.name }}
+                    </SelectItem>
+                  </SelectContent>
+                </Select>
               </div>
-            </div>
-          </div>
 
-          <div class="lg:col-span-3 space-y-8">
-            <div class="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-4 gap-4">
-              <div class="bg-white dark:bg-slate-900 p-6 rounded-xl border border-slate-200 dark:border-slate-800 shadow-sm">
-                <p class="text-sm font-medium text-slate-500 dark:text-slate-400">Total Time</p>
-                <h4 class="text-2xl font-bold mt-2">{{ summary.total_time }}</h4>
+              <div class="space-y-2">
+                <label class="text-sm font-medium">Tag</label>
+                <Select v-model="filterState.tag_id">
+                  <SelectTrigger>
+                    <SelectValue placeholder="All Tags" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="all">All Tags</SelectItem>
+                    <SelectItem v-for="t in tags" :key="t.id" :value="t.id.toString()">
+                      #{{ t.name }}
+                    </SelectItem>
+                  </SelectContent>
+                </Select>
               </div>
-              <div class="bg-white dark:bg-slate-900 p-6 rounded-xl border border-slate-200 dark:border-slate-800 shadow-sm">
-                <p class="text-sm font-medium text-slate-500 dark:text-slate-400">Billable Time</p>
-                <h4 class="text-2xl font-bold mt-2 text-blue-600">{{ summary.billable_time }}</h4>
+
+              <div class="space-y-2">
+                <label class="text-sm font-medium">Start Date</label>
+                <CustomDatePicker v-model="filterState.start_date" />
               </div>
-              <div class="bg-white dark:bg-slate-900 p-6 rounded-xl border border-slate-200 dark:border-slate-800 shadow-sm">
-                <p class="text-sm font-medium text-slate-500 dark:text-slate-400">Total Sessions</p>
-                <h4 class="text-2xl font-bold mt-2">{{ summary.total_sessions }}</h4>
-              </div>
-              <div class="bg-white dark:bg-slate-900 p-6 rounded-xl border border-slate-200 dark:border-slate-800 shadow-sm">
-                <p class="text-sm font-medium text-slate-500 dark:text-slate-400">Total Earnings</p>
-                <h4 class="text-2xl font-bold mt-2 text-emerald-600">{{ summary.total_earnings }} {{ summary.by_project[0]?.currency || 'USD' }}</h4>
+
+              <div class="space-y-2">
+                <label class="text-sm font-medium">End Date</label>
+                <CustomDatePicker v-model="filterState.end_date" />
               </div>
             </div>
 
-            <div class="bg-white dark:bg-slate-900 rounded-xl border border-slate-200 dark:border-slate-800 shadow-sm overflow-hidden">
-              <div class="border-b border-slate-200 dark:border-slate-800">
-                <nav class="flex -mb-px px-6 gap-6">
-                  <button 
-                    @click="activeTab = 'projects'"
-                    :class="[activeTab === 'projects' ? 'border-blue-600 text-blue-600' : 'border-transparent text-slate-500 hover:text-slate-700 hover:border-slate-300 dark:text-slate-400 dark:hover:text-slate-300']"
-                    class="py-4 px-1 border-b-2 font-medium text-sm transition-colors"
-                  >
-                    Projects
-                  </button>
-                  <button 
-                    @click="activeTab = 'tags'"
-                    :class="[activeTab === 'tags' ? 'border-blue-600 text-blue-600' : 'border-transparent text-slate-500 hover:text-slate-700 hover:border-slate-300 dark:text-slate-400 dark:hover:text-slate-300']"
-                    class="py-4 px-1 border-b-2 font-medium text-sm transition-colors"
-                  >
-                    Tags
-                  </button>
-                  <button 
-                    @click="activeTab = 'tasks'"
-                    :class="[activeTab === 'tasks' ? 'border-blue-600 text-blue-600' : 'border-transparent text-slate-500 hover:text-slate-700 hover:border-slate-300 dark:text-slate-400 dark:hover:text-slate-300']"
-                    class="py-4 px-1 border-b-2 font-medium text-sm transition-colors"
-                  >
-                    Tasks
-                  </button>
-                </nav>
+            <div class="flex items-center gap-6 mt-6">
+              <div class="flex items-center space-x-2">
+                <Checkbox id="billable" v-model:checked="filterState.include_billable" />
+                <label for="billable" class="text-sm font-medium leading-none cursor-pointer">Billable</label>
               </div>
-
-              <div class="p-6">
-                <div v-if="activeTab === 'projects'" class="overflow-x-auto">
-                  <table class="w-full text-sm text-left">
-                    <thead class="text-xs uppercase text-slate-500 dark:text-slate-400 border-b border-slate-200 dark:border-slate-800">
-                      <tr>
-                        <th class="py-3 font-semibold">Project</th>
-                        <th class="py-3 font-semibold">Duration</th>
-                        <th class="py-3 font-semibold text-right">Earnings</th>
-                      </tr>
-                    </thead>
-                    <tbody class="divide-y divide-slate-100 dark:divide-slate-800">
-                      <tr v-for="p in summary.by_project" :key="p.id || p.name">
-                        <td class="py-4 font-medium text-slate-900 dark:text-slate-50">{{ p.name }}</td>
-                        <td class="py-4">{{ p.duration }}</td>
-                        <td class="py-4 text-right font-semibold text-emerald-600">{{ p.earnings }} {{ p.currency }}</td>
-                      </tr>
-                      <tr v-if="summary.by_project.length === 0">
-                        <td colspan="3" class="py-8 text-center text-slate-500">No project data for this period.</td>
-                      </tr>
-                    </tbody>
-                  </table>
-                </div>
-
-                <div v-if="activeTab === 'tags'" class="overflow-x-auto">
-                  <table class="w-full text-sm text-left">
-                    <thead class="text-xs uppercase text-slate-500 dark:text-slate-400 border-b border-slate-200 dark:border-slate-800">
-                      <tr>
-                        <th class="py-3 font-semibold">Tag</th>
-                        <th class="py-3 font-semibold">Duration</th>
-                      </tr>
-                    </thead>
-                    <tbody class="divide-y divide-slate-100 dark:divide-slate-800">
-                      <tr v-for="t in summary.by_tag" :key="t.id || t.name">
-                        <td class="py-4 font-medium text-slate-900 dark:text-slate-50">
-                          <span class="inline-flex items-center px-2 py-1 rounded-md bg-slate-100 dark:bg-slate-800 text-xs text-slate-600 dark:text-slate-400">
-                            #{{ t.name }}
-                          </span>
-                        </td>
-                        <td class="py-4">{{ t.duration }}</td>
-                      </tr>
-                      <tr v-if="summary.by_tag.length === 0">
-                        <td colspan="2" class="py-8 text-center text-slate-500">No tag data for this period.</td>
-                      </tr>
-                    </tbody>
-                  </table>
-                </div>
-
-                <div v-if="activeTab === 'tasks'" class="overflow-x-auto">
-                  <table class="w-full text-sm text-left">
-                    <thead class="text-xs uppercase text-slate-500 dark:text-slate-400 border-b border-slate-200 dark:border-slate-800">
-                      <tr>
-                        <th class="py-3 font-semibold">Task</th>
-                        <th class="py-3 font-semibold">Duration</th>
-                      </tr>
-                    </thead>
-                    <tbody class="divide-y divide-slate-100 dark:divide-slate-800">
-                      <tr v-for="task in summary.by_task" :key="task.id || task.name">
-                        <td class="py-4 font-medium text-slate-900 dark:text-slate-50">{{ task.name }}</td>
-                        <td class="py-4">{{ task.duration }}</td>
-                      </tr>
-                      <tr v-if="summary.by_task.length === 0">
-                        <td colspan="2" class="py-8 text-center text-slate-500">No task data for this period.</td>
-                      </tr>
-                    </tbody>
-                  </table>
-                </div>
+              <div class="flex items-center space-x-2">
+                <Checkbox id="non-billable" v-model:checked="filterState.include_non_billable" />
+                <label for="non-billable" class="text-sm font-medium leading-none cursor-pointer">Non-billable</label>
               </div>
             </div>
-          </div>
-        </div>
+          </CardContent>
+        </Card>
+
+        <Tabs default-value="projects" class="w-full">
+          <TabsList class="grid w-full max-w-md grid-cols-2">
+            <TabsTrigger value="projects" class="flex items-center gap-2">
+              <Folder class="h-4 w-4" />
+              By Projects
+            </TabsTrigger>
+            <TabsTrigger value="tags" class="flex items-center gap-2">
+              <TagIcon class="h-4 w-4" />
+              By Tags
+            </TabsTrigger>
+          </TabsList>
+
+          <TabsContent value="projects" class="mt-6">
+            <Card>
+              <CardHeader>
+                <CardTitle class="flex items-center gap-2">
+                  <BarChart3 class="h-5 w-5 text-primary" />
+                  Project Breakdown
+                </CardTitle>
+              </CardHeader>
+              <CardContent>
+                <Table>
+                  <TableHeader>
+                    <TableRow>
+                      <TableHead>Project Name</TableHead>
+                      <TableHead class="text-right">Total Duration</TableHead>
+                      <TableHead class="text-right">Estimated Earnings</TableHead>
+                    </TableRow>
+                  </TableHeader>
+                  <TableBody>
+                    <TableRow v-for="item in projectSummary" :key="item.id">
+                      <TableCell class="font-medium">
+                        <div class="flex items-center gap-2">
+                          <div class="w-3 h-3 rounded-full" :style="{ backgroundColor: item.color || '#94a3b8' }"></div>
+                          {{ item.name }}
+                        </div>
+                      </TableCell>
+                      <TableCell class="text-right">{{ formatDuration(item.duration) }}</TableCell>
+                      <TableCell class="text-right">{{ formatCurrency(item.earnings) }}</TableCell>
+                    </TableRow>
+                    <TableRow v-if="projectSummary.length === 0">
+                      <TableCell colspan="3" class="h-24 text-center text-muted-foreground">
+                        No data available for the selected filters.
+                      </TableCell>
+                    </TableRow>
+                  </TableBody>
+                </Table>
+              </CardContent>
+            </Card>
+          </TabsContent>
+
+          <TabsContent value="tags" class="mt-6">
+            <Card>
+              <CardHeader>
+                <CardTitle class="flex items-center gap-2">
+                  <TagIcon class="h-5 w-5 text-primary" />
+                  Tag Breakdown
+                </CardTitle>
+              </CardHeader>
+              <CardContent>
+                <Table>
+                  <TableHeader>
+                    <TableRow>
+                      <TableHead>Tag Name</TableHead>
+                      <TableHead class="text-right">Total Duration</TableHead>
+                      <TableHead class="text-right">Estimated Earnings</TableHead>
+                    </TableRow>
+                  </TableHeader>
+                  <TableBody>
+                    <TableRow v-for="item in tagSummary" :key="item.id">
+                      <TableCell class="font-medium">#{{ item.name }}</TableCell>
+                      <TableCell class="text-right">{{ formatDuration(item.duration) }}</TableCell>
+                      <TableCell class="text-right">{{ formatCurrency(item.earnings) }}</TableCell>
+                    </TableRow>
+                    <TableRow v-if="tagSummary.length === 0">
+                      <TableCell colspan="3" class="h-24 text-center text-muted-foreground">
+                        No data available for the selected filters.
+                      </TableCell>
+                    </TableRow>
+                  </TableBody>
+                </Table>
+              </CardContent>
+            </Card>
+          </TabsContent>
+        </Tabs>
       </div>
     </div>
   </MainLayout>
