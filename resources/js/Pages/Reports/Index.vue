@@ -81,8 +81,10 @@ const exportReport = (format: 'csv' | 'pdf') => {
   const params = new URLSearchParams();
   if (filterState.value.project_id !== 'all') params.append('project_id', filterState.value.project_id);
   if (filterState.value.tag_id !== 'all') params.append('tag_id', filterState.value.tag_id);
-  params.append('start_date', filterState.value.start_date);
-  params.append('end_date', filterState.value.end_date);
+  
+  if (filterState.value.start_date) params.append('start_date', filterState.value.start_date);
+  if (filterState.value.end_date) params.append('end_date', filterState.value.end_date);
+  
   params.append('include_billable', filterState.value.include_billable.toString());
   params.append('include_non_billable', filterState.value.include_non_billable.toString());
   params.append('format', format);
