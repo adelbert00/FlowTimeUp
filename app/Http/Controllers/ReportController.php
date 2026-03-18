@@ -9,6 +9,7 @@ use App\Services\ReportService;
 use Illuminate\Http\Request;
 use Inertia\Inertia;
 use Inertia\Response as InertiaResponse;
+use Barryvdh\DomPDF\Facade\Pdf;
 
 class ReportController extends Controller
 {
@@ -41,6 +42,17 @@ class ReportController extends Controller
 
         if ($format === 'csv') {
             return $this->exportCsv($sessions);
+        }
+
+        if ($format === 'pdf') {
+            $formattedSessions = $sessions->map(fn($s) => $this->reportService->formatSessionForExport($s));
+            $summary = $this->reportService->calculateSummary($sessions);
+            $pdf = Pdf::loadView('reports.pdf', [
+                'sessions' => $formattedSessions,
+                'summary' => $summary,
+            ]);
+
+            return $pdf->download('flowtimeup-report-' . date('Y-m-d-His') . '.pdf');
         }
 
         return Inertia::render('Reports/Export', [

@@ -3,7 +3,7 @@
 namespace App\Http\Requests\TimeSessions;
 
 use Illuminate\Foundation\Http\FormRequest;
-use Illuminate\Validation\Rule;
+use App\Models\Task;
 
 class StoreTimeSessionRequest extends FormRequest
 {
@@ -15,24 +15,22 @@ class StoreTimeSessionRequest extends FormRequest
     public function rules(): array
     {
         return [
-            'task_id' => ['required', 'integer', Rule::exists('tasks', 'id')->where('user_id', $this->user()->id)],
-            'start_time' => ['required', 'date'],
-            'end_time' => ['nullable', 'date', 'after_or_equal:start_time'],
-            'is_billable' => ['boolean'],
-            'billable_rate' => ['nullable', 'numeric', 'min:0'],
-            'description' => ['nullable', 'string', 'max:1000'],
-            'notes' => ['nullable', 'string', 'max:500'],
-        ];
-    }
-
-    public function messages(): array
-    {
-        return [
-            'task_id.required' => 'Task is required.',
-            'task_id.exists' => 'Selected task does not exist.',
-            'start_time.required' => 'Start time is required.',
-            'start_time.date' => 'Start time must be a valid date.',
-            'end_time.after_or_equal' => 'End time must be after or equal to start time.',
+            'task_id' => [
+                'required',
+                'exists:tasks,id',
+                function ($attribute, $value, $fail) {
+                    $task = Task::find($value);
+                    if (!$task || $task->user_id !== auth()->id()) {
+                        $fail('The selected task is invalid.');
+                    }
+                },
+            ],
+            'user_id' => 'required|exists:users,id',
+            'start_time' => 'required|date',
+            'end_time' => 'nullable|date|after_or_equal:start_time',
+            'is_billable' => 'boolean',
+            'billable_rate' => 'nullable|numeric|min:0',
+            'description' => 'nullable|string|max:1000',
         ];
     }
 }
