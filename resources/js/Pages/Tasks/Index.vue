@@ -64,28 +64,15 @@ const handleDelete = (taskId: number) => {
 };
 
 const handleBulkDelete = (taskIds: number[]) => {
-  taskIds.forEach((id, index) => {
-    setTimeout(() => {
-      router.delete(route('tasks.destroy', id), {
-        preserveScroll: true,
-        only: index === taskIds.length - 1 ? ['tasks'] : [],
-      });
-    }, index * 100);
+  router.delete(route('bulk.tasks.destroy'), {
+    data: { ids: taskIds },
+    preserveScroll: true,
   });
 };
 
-const handleBulkUpdate = (payload: { ids: number[], project_id?: number | null, is_billable?: boolean }) => {
-  // Use sequential updates for tasks (simulated bulk)
-  payload.ids.forEach((id, index) => {
-    setTimeout(() => {
-      router.put(route('tasks.update', id), {
-        project_id: payload.project_id,
-        is_billable: payload.is_billable
-      }, {
-        preserveScroll: true,
-        only: index === payload.ids.length - 1 ? ['tasks'] : [],
-      });
-    }, index * 100);
+const handleBulkUpdate = (payload: { ids: number[], project_id?: number | null, completed?: boolean }) => {
+  router.patch(route('bulk.tasks.update'), payload, {
+    preserveScroll: true,
   });
 };
 </script>

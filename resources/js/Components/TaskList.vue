@@ -53,7 +53,7 @@ const props = defineProps<{
 const emit = defineEmits<{
   delete: [taskId: number];
   'bulk-delete': [taskIds: number[]];
-  'bulk-update': [payload: { ids: number[], project_id?: number | null, is_billable?: boolean }];
+  'bulk-update': [payload: { ids: number[], project_id?: number | null, completed?: boolean }];
 }>();
 
 const selectedTaskIds = ref<number[]>([]);
@@ -88,7 +88,7 @@ const selectedStatus = ref<string>(
   : ''
 );
 
-const canBulkDelete = computed(() => selectedTaskIds.value.length >= 1);
+const canBulkActions = computed(() => selectedTaskIds.value.length >= 1);
 
 let searchTimeout: number | null = null;
 watch(searchQuery, (newValue) => {
@@ -125,7 +125,7 @@ function clearFilters() {
 }
 
 function openBulkDeleteModal() {
-  if (!canBulkDelete.value) return;
+  if (!canBulkActions.value) return;
   showConfirmModal.value = true;
   confirmMessage.value = `Are you sure you want to delete ${selectedTaskIds.value.length} task${selectedTaskIds.value.length > 1 ? 's' : ''}? This action cannot be undone.`;
   confirmAction = () => {
@@ -375,11 +375,26 @@ const totalTime = computed(() => {
               </div>
             </div>
 
-            <div class="flex items-center gap-2">
-              <button 
-                @click="openBulkProjectModal"
-                class="flex items-center gap-2 px-3 py-2 bg-white/5 hover:bg-white/10 text-white rounded-xl text-xs font-bold transition-colors border border-white/10"
-              >
+          <button 
+            @click="bulkMarkCompleted(true)"
+            class="flex items-center gap-2 px-3 py-2 bg-emerald-500/10 hover:bg-emerald-500/20 text-emerald-400 rounded-xl text-xs font-bold transition-colors border border-emerald-500/10"
+          >
+            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/></svg>
+            <span class="hidden md:inline">Complete</span>
+          </button>
+
+          <button 
+            @click="bulkMarkCompleted(false)"
+            class="flex items-center gap-2 px-3 py-2 bg-amber-500/10 hover:bg-amber-500/20 text-amber-400 rounded-xl text-xs font-bold transition-colors border border-amber-500/10"
+          >
+            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"/></svg>
+            <span class="hidden md:inline">Active</span>
+          </button>
+
+          <button 
+            @click="openBulkProjectModal"
+            class="flex items-center gap-2 px-3 py-2 bg-white/5 hover:bg-white/10 text-white rounded-xl text-xs font-bold transition-colors border border-white/10"
+          >
                 <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 7v10a2 2 0 002 2h14a2 2 0 002-2V9a2 2 0 00-2-2h-6l-2-2H5a2 2 0 00-2 2z"/></svg>
                 <span class="hidden md:inline">Project</span>
               </button>

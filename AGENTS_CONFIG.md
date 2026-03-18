@@ -1,13 +1,19 @@
 # FlowTimeUp Multi-Agent System (MAS) Configuration
 
-## 👥 Agent Roles & Models
+## 👥 Agent Roles & Models (Updated for Rate-Limit Safety)
 
-| Role | Name | Primary Model | Responsibility |
-| :--- | :--- | :--- | :--- |
-| **Orchestrator** | **Claw (Manager)** | `google/gemini-3-flash-preview` | Task delegation, MAS coordination, Final reviews. |
-| **Frontend Expert** | **Agent-Vue** | `claude-3.5-sonnet` | Vue 3, Inertia.js, TailwindCSS, Shadcn-Vue, TypeScript alignment. |
-| **Backend Architect** | **Agent-Laravel** | `gpt-4o` | Laravel 11, Eloquent, Controllers, API Design, Security, Migrations. |
-| **Quality Guardian** | **Agent-QA** | `claude-3-opus` | Pest Tests, Bug Hunting, Edge-case validation, Documentation review. |
+| Role | Name | Primary Model | Backup Model | Responsibility |
+| :--- | :--- | :--- | :--- | :--- |
+| **Orchestrator** | **Claw (Manager)** | `google/gemini-3-flash-preview` | `google/gemini-1.5-flash` | Delegation, Coordination, Final reviews. |
+| **Frontend Expert** | **Agent-Vue** | `google/gemini-1.5-pro` | `google/gemini-1.5-flash` | Vue 3, Shadcn, TS alignment. |
+| **Backend Architect** | **Agent-Laravel** | `google/gemini-3-flash-preview` | `google/gemini-1.5-flash` | Laravel 11, SQL, API, Migrations. |
+| **Quality Guardian** | **Agent-QA** | `google/gemini-1.5-flash` | N/A | Pest Tests, Edge-cases (Low-cost). |
+
+## 💰 Token & Rate-Limit Guardrails
+1. **Flash-First Strategy:** Always use `flash` models for research, repetitive coding, or simple test writing.
+2. **Pro-on-Demand:** Use `gemini-1.5-pro` ONLY for complex UI refactoring or debugging deep logic issues.
+3. **Context Flushing:** Reset session context (`/compact` or branch switch) after every completed Sprint to avoid "bloated" history costs.
+4. **Summary Requirement:** Agents must provide a concise summary before yielding, allowing the Manager to drop heavy intermediate logs.
 
 ## 🛠 Project Stack Context (V1.2 Audit)
 - **Backend:** Laravel 11.31 + PHP 8.2+

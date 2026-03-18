@@ -51,6 +51,10 @@ Route::middleware(['auth', 'verified'])->group(function () {
     Route::resource('projects', ProjectController::class);
     
     Route::resource('tasks', TaskController::class);
+    Route::prefix('bulk/tasks')->name('bulk.tasks.')->group(function () {
+        Route::patch('/', [\App\Http\Controllers\TaskBulkController::class, 'update'])->name('update');
+        Route::delete('/', [\App\Http\Controllers\TaskBulkController::class, 'destroy'])->name('destroy');
+    });
     Route::post('/tasks/{task}/toggle-complete', [TaskController::class, 'toggleComplete'])->name('tasks.toggleComplete');
     Route::post('/tasks/{task}/tags', [TaskController::class, 'attachTags'])->name('tasks.attachTags');
     Route::delete('/tasks/{task}/tags/{tag}', [TaskController::class, 'detachTag'])->name('tasks.detachTag');

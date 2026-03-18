@@ -115,23 +115,24 @@ function getStrokeOffset(index: number): number {
         </div>
       </div>
 
-      <div class="bg-gradient-to-r from-accent/5 via-accent/10 to-accent/5 rounded-xl p-6 border border-accent/20">
-        <div class="grid grid-cols-1 sm:grid-cols-3 gap-8 text-center">
-          <div>
-            <p class="text-secondary text-sm mb-1 uppercase tracking-wider font-semibold">Total time</p>
-            <p class="text-primary text-3xl font-bold font-mono">{{ stats.total_time }}</p>
+      <div class="bg-surface-raised rounded-2xl p-8 border border-border shadow-sm relative overflow-hidden group">
+        <div class="absolute top-0 right-0 w-64 h-64 bg-accent/5 rounded-full -mr-32 -mt-32 blur-3xl group-hover:bg-accent/10 transition-colors duration-700"></div>
+        <div class="grid grid-cols-1 sm:grid-cols-3 gap-12 text-center relative z-10">
+          <div class="space-y-2">
+            <p class="text-secondary text-xs uppercase tracking-[0.2em] font-bold">Total time</p>
+            <p class="text-primary text-4xl font-black font-mono tracking-tighter">{{ stats.total_time }}</p>
           </div>
 
-          <div>
-            <p class="text-secondary text-sm mb-1 uppercase tracking-wider font-semibold">Top Project</p>
-            <p class="text-primary text-2xl font-semibold">
+          <div class="space-y-2">
+            <p class="text-secondary text-xs uppercase tracking-[0.2em] font-bold">Top Project</p>
+            <p class="text-primary text-2xl font-bold truncate px-4">
               {{ top_project?.name || '--' }}
             </p>
           </div>
 
-          <div>
-            <p class="text-secondary text-sm mb-1 uppercase tracking-wider font-semibold">Top Client</p>
-            <p class="text-primary text-2xl font-semibold">--</p>
+          <div class="space-y-2">
+            <p class="text-secondary text-xs uppercase tracking-[0.2em] font-bold">Today Focus</p>
+            <p class="text-primary text-2xl font-bold font-mono tracking-tight">{{ stats.today_time }}</p>
           </div>
         </div>
       </div>
