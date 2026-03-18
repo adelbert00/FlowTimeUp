@@ -40,7 +40,6 @@ const handlePrint = () => {
 };
 
 onMounted(() => {
-  // Automatycznie drukuj po załadowaniu
   setTimeout(() => {
     handlePrint();
   }, 500);
@@ -51,10 +50,9 @@ onMounted(() => {
   <Head title="Time Tracking Report" />
 
   <div class="min-h-screen bg-white p-8 print:p-4">
-    <div class="max-w-4xl mx-auto">
-      <!-- Header -->
+    <div class="max-w-4xl mx-auto text-black">
       <div class="mb-8 print:mb-6">
-        <h1 class="text-3xl font-bold text-gray-900 mb-2">Time Tracking Report</h1>
+        <h1 class="text-3xl font-bold mb-2">Time Tracking Report</h1>
         <p class="text-gray-600">
           Generated on {{ new Date().toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' }) }}
         </p>
@@ -63,21 +61,20 @@ onMounted(() => {
         </div>
       </div>
 
-      <!-- Summary -->
       <div class="bg-gray-50 rounded-lg p-6 mb-8 print:mb-6 print:break-inside-avoid">
-        <h2 class="text-xl font-semibold text-gray-900 mb-4">Summary</h2>
+        <h2 class="text-xl font-semibold mb-4">Summary</h2>
         <div class="grid grid-cols-3 gap-4">
           <div>
             <p class="text-sm text-gray-600">Total Time</p>
-            <p class="text-2xl font-bold text-gray-900">{{ summary.total_time }}</p>
+            <p class="text-2xl font-bold">{{ summary.total_time }}</p>
           </div>
           <div>
             <p class="text-sm text-gray-600">Total Sessions</p>
-            <p class="text-2xl font-bold text-gray-900">{{ summary.total_sessions }}</p>
+            <p class="text-2xl font-bold">{{ summary.total_sessions }}</p>
           </div>
           <div>
             <p class="text-sm text-gray-600">Average per Session</p>
-            <p class="text-2xl font-bold text-gray-900">
+            <p class="text-2xl font-bold">
               {{ summary.total_sessions > 0 
                 ? Math.floor(summary.total_seconds / summary.total_sessions / 3600) + ':' + 
                   String(Math.floor((summary.total_seconds / summary.total_sessions % 3600) / 60)).padStart(2, '0') + ':' + 
@@ -88,14 +85,13 @@ onMounted(() => {
         </div>
       </div>
 
-      <!-- By Project -->
       <div v-if="summary.by_project.length > 0" class="mb-8 print:mb-6 print:break-inside-avoid">
-        <h2 class="text-xl font-semibold text-gray-900 mb-4">Time by Project</h2>
+        <h2 class="text-xl font-semibold mb-4">Time by Project</h2>
         <table class="w-full border-collapse">
           <thead>
             <tr class="bg-gray-100">
-              <th class="border border-gray-300 px-4 py-2 text-left text-sm font-semibold text-gray-900">Project</th>
-              <th class="border border-gray-300 px-4 py-2 text-right text-sm font-semibold text-gray-900">Time</th>
+              <th class="border border-gray-300 px-4 py-2 text-left text-sm font-semibold">Project</th>
+              <th class="border border-gray-300 px-4 py-2 text-right text-sm font-semibold">Time</th>
             </tr>
           </thead>
           <tbody>
@@ -107,18 +103,17 @@ onMounted(() => {
         </table>
       </div>
 
-      <!-- Sessions Table -->
       <div class="mb-8 print:mb-6 print:break-inside-avoid">
-        <h2 class="text-xl font-semibold text-gray-900 mb-4">Time Sessions</h2>
+        <h2 class="text-xl font-semibold mb-4">Time Sessions</h2>
         <table class="w-full border-collapse text-sm">
           <thead>
             <tr class="bg-gray-100">
-              <th class="border border-gray-300 px-3 py-2 text-left text-xs font-semibold text-gray-900">Date</th>
-              <th class="border border-gray-300 px-3 py-2 text-left text-xs font-semibold text-gray-900">Task</th>
-              <th class="border border-gray-300 px-3 py-2 text-left text-xs font-semibold text-gray-900">Project</th>
-              <th class="border border-gray-300 px-3 py-2 text-left text-xs font-semibold text-gray-900">Tags</th>
-              <th class="border border-gray-300 px-3 py-2 text-right text-xs font-semibold text-gray-900">Duration</th>
-              <th class="border border-gray-300 px-3 py-2 text-left text-xs font-semibold text-gray-900">Notes</th>
+              <th class="border border-gray-300 px-3 py-2 text-left text-xs font-semibold">Date</th>
+              <th class="border border-gray-300 px-3 py-2 text-left text-xs font-semibold">Task</th>
+              <th class="border border-gray-300 px-3 py-2 text-left text-xs font-semibold">Project</th>
+              <th class="border border-gray-300 px-3 py-2 text-left text-xs font-semibold">Tags</th>
+              <th class="border border-gray-300 px-3 py-2 text-right text-xs font-semibold">Duration</th>
+              <th class="border border-gray-300 px-3 py-2 text-left text-xs font-semibold">Notes</th>
             </tr>
           </thead>
           <tbody>
@@ -134,7 +129,6 @@ onMounted(() => {
         </table>
       </div>
 
-      <!-- Print button (hidden when printing) -->
       <div class="text-center print:hidden">
         <button
           @click="handlePrint"
@@ -145,19 +139,16 @@ onMounted(() => {
       </div>
     </div>
   </div>
-
-  <style>
-    @media print {
-      @page {
-        margin: 1cm;
-      }
-      body {
-        -webkit-print-color-adjust: exact;
-        print-color-adjust: exact;
-      }
-      .print\\:break-inside-avoid {
-        break-inside: avoid;
-      }
-    }
-  </style>
 </template>
+
+<style>
+@media print {
+  @page {
+    margin: 1cm;
+  }
+  body {
+    -webkit-print-color-adjust: exact;
+    print-color-adjust: exact;
+  }
+}
+</style>
