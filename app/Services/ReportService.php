@@ -21,9 +21,9 @@ class ReportService
     public function getSummary(int $userId, ?string $startDate = null, ?string $endDate = null): array
     {
         $connectionType = config('database.default');
-        
+
         // Define duration expression based on DB driver
-        $durationExpr = $connectionType === 'pgsql' 
+        $durationExpr = $connectionType === 'pgsql'
             ? 'EXTRACT(EPOCH FROM (time_sessions.end_time - time_sessions.start_time))'
             : 'TIMESTAMPDIFF(SECOND, time_sessions.start_time, time_sessions.end_time)';
 
@@ -46,13 +46,13 @@ class ReportService
             ->selectRaw("
                 COUNT(*) as total_sessions,
                 SUM($durationExpr) as total_seconds,
-                SUM(CASE WHEN time_sessions.is_billable = 1 THEN $durationExpr ELSE 0 END) as billable_seconds,
-                SUM(CASE WHEN time_sessions.is_billable = 1 THEN ($durationExpr / 3600.0) * COALESCE(time_sessions.billable_rate, tasks.hourly_rate, 0) ELSE 0 END) as total_earnings
+                SUM(CASE WHEN time_sessions.is_billable = true THEN $durationExpr ELSE 0 END) as billable_seconds,
+                SUM(CASE WHEN time_sessions.is_billable = true THEN ($durationExpr / 3600.0) * COALESCE(time_sessions.billable_rate, tasks.hourly_rate, 0) ELSE 0 END) as total_earnings
             ")
             ->first();
 
-        $totalSeconds = (int)($stats->total_seconds ?? 0);
-        $billableSeconds = (int)($stats->billable_seconds ?? 0);
+        $totalSeconds = (int) ($stats->total_seconds ?? 0);
+        $billableSeconds = (int) ($stats->billable_seconds ?? 0);
 
         // Group by Project
         $byProject = (clone $query)
@@ -60,7 +60,7 @@ class ReportService
                 projects.id,
                 COALESCE(projects.name, 'No Project') as name,
                 SUM($durationExpr) as seconds,
-                SUM(CASE WHEN time_sessions.is_billable = 1 THEN ($durationExpr / 3600.0) * COALESCE(time_sessions.billable_rate, tasks.hourly_rate, 0) ELSE 0 END) as earnings,
+                SUM(CASE WHEN time_sessions.is_billable = true THEN ($durationExpr / 3600.0) * COALESCE(time_sessions.billable_rate, tasks.hourly_rate, 0) ELSE 0 END) as earnings,
                 COALESCE(tasks.currency, 'USD') as currency
             ")
             ->groupBy('projects.id', 'projects.name', 'tasks.currency')
@@ -69,8 +69,8 @@ class ReportService
                 'id' => $row->id,
                 'name' => $row->name,
                 'duration' => $this->formatDuration($row->seconds),
-                'seconds' => (int)$row->seconds,
-                'earnings' => round((float)$row->earnings, 2),
+                'seconds' => (int) $row->seconds,
+                'earnings' => round((float) $row->earnings, 2),
                 'currency' => $row->currency,
             ]);
 
@@ -101,7 +101,7 @@ class ReportService
                 'id' => $row->id,
                 'name' => $row->name,
                 'duration' => $this->formatDuration($row->seconds),
-                'seconds' => (int)$row->seconds,
+                'seconds' => (int) $row->seconds,
             ])
             ->sortByDesc('seconds')
             ->values();
@@ -121,7 +121,7 @@ class ReportService
                 'id' => $row->id,
                 'name' => $row->name,
                 'duration' => $this->formatDuration($row->seconds),
-                'seconds' => (int)$row->seconds,
+                'seconds' => (int) $row->seconds,
             ]);
 
         // Group by Date
@@ -137,18 +137,18 @@ class ReportService
             ->map(fn($row) => [
                 'date' => $row->date,
                 'duration' => $this->formatDuration($row->seconds),
-                'seconds' => (int)$row->seconds,
+                'seconds' => (int) $row->seconds,
             ]);
 
         return [
             'total_time' => $this->formatDuration($totalSeconds),
             'total_seconds' => $totalSeconds,
-            'total_sessions' => (int)($stats->total_sessions ?? 0),
+            'total_sessions' => (int) ($stats->total_sessions ?? 0),
             'billable_time' => $this->formatDuration($billableSeconds),
             'billable_seconds' => $billableSeconds,
             'non_billable_time' => $this->formatDuration($totalSeconds - $billableSeconds),
             'non_billable_seconds' => $totalSeconds - $billableSeconds,
-            'total_earnings' => round((float)($stats->total_earnings ?? 0), 2),
+            'total_earnings' => round((float) ($stats->total_earnings ?? 0), 2),
             'by_project' => $byProject,
             'by_tag' => $byTag,
             'by_task' => $byTask,
@@ -171,7 +171,7 @@ class ReportService
 
             $hourlyRate = $session->billable_rate ?? $session->task->hourly_rate ?? 0;
             $hours = $duration / 3600;
-            
+
             if ($session->is_billable) {
                 $billableSeconds += $duration;
                 $totalEarnings += $hours * $hourlyRate;
