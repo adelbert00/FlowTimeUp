@@ -5,6 +5,7 @@ use Inertia\Inertia;
 use App\Http\Controllers\TaskController;
 use App\Http\Controllers\ProjectController;
 use App\Http\Controllers\TimeSessionController;
+use App\Http\Controllers\TimeSessionBulkController;
 use App\Http\Controllers\TagController;
 use App\Http\Controllers\ProfileController;
 use App\Http\Controllers\DashboardController;
@@ -55,6 +56,10 @@ Route::middleware(['auth', 'verified'])->group(function () {
     Route::delete('/tasks/{task}/tags/{tag}', [TaskController::class, 'detachTag'])->name('tasks.detachTag');
     
     Route::resource('time-sessions', TimeSessionController::class);
+    Route::prefix('bulk/time-sessions')->name('bulk.time-sessions.')->group(function () {
+        Route::patch('/', [TimeSessionBulkController::class, 'update'])->name('update');
+        Route::delete('/', [TimeSessionBulkController::class, 'destroy'])->name('destroy');
+    });
     
     Route::resource('tags', TagController::class);
     Route::post('/tags/{tag}/archive', [TagController::class, 'archive'])->name('tags.archive');
