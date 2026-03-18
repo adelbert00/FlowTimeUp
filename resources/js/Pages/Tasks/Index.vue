@@ -64,13 +64,15 @@ const handleDelete = (taskId: number) => {
 };
 
 const handleBulkDelete = (taskIds: number[]) => {
-  taskIds.forEach((id, index) => {
-    setTimeout(() => {
-      router.delete(route('tasks.destroy', id), {
-        preserveScroll: true,
-        only: index === taskIds.length - 1 ? ['tasks'] : [],
-      });
-    }, index * 100);
+  router.delete(route('bulk.tasks.destroy'), {
+    data: { ids: taskIds },
+    preserveScroll: true,
+  });
+};
+
+const handleBulkUpdate = (payload: { ids: number[], project_id?: number | null, completed?: boolean }) => {
+  router.patch(route('bulk.tasks.update'), payload, {
+    preserveScroll: true,
   });
 };
 </script>
@@ -79,57 +81,62 @@ const handleBulkDelete = (taskIds: number[]) => {
   <Head title="Tasks" />
 
   <MainLayout>
-    <div class="min-h-screen bg-gradient-to-br from-gray-50 via-gray-50 to-gray-100 dark:from-gray-900 dark:via-gray-900 dark:to-gray-800">
-      <div class="container mx-auto px-4 sm:px-6 md:px-10 lg:px-8 py-6 sm:py-8 max-w-7xl pt-20 sm:pt-24 md:pt-28 xl:pt-8">
-        <div class="flex items-center justify-between mb-6 sm:mb-8">
-          <div>
-            <h1 class="text-2xl sm:text-3xl font-bold font-sans text-gray-900 dark:text-white mb-1 sm:mb-2">Time Tracker</h1>
-            <p class="text-gray-600 dark:text-gray-400 text-sm sm:text-base">Track time and manage your tasks efficiently</p>
-          </div>
-          
-          <button
-            @click="showMobileForm = !showMobileForm"
-            class="xl:hidden flex items-center gap-2 px-3 sm:px-4 py-2 bg-blue-600 text-white rounded-lg text-sm font-medium hover:bg-blue-700 transition-colors"
-          >
-            <svg v-if="!showMobileForm" class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"/>
-            </svg>
-            <svg v-else class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/>
-            </svg>
-            <span class="hidden sm:inline">{{ showMobileForm ? 'Close' : 'New Task' }}</span>
-          </button>
+    <div class="space-y-6 animate-fade-up">
+      <div class="flex items-center justify-between">
+        <div>
+          <h1 class="text-3xl font-black text-primary tracking-tighter uppercase">Time Tracker</h1>
+          <p class="text-secondary text-xs font-bold uppercase tracking-widest mt-1">Focus & Productivity Hub</p>
         </div>
-
-        <div
-          v-if="showMobileForm"
-          class="xl:hidden mb-6"
+        
+        <button
+          @click="showMobileForm = !showMobileForm"
+          class="xl:hidden flex items-center gap-2 px-5 py-2.5 bg-accent text-accent-text rounded-xl text-xs font-black uppercase tracking-widest hover:bg-accent-hover transition-all shadow-lg shadow-accent/20 active:scale-95"
         >
+          <svg v-if="!showMobileForm" class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M12 4v16m8-8H4"/>
+          </svg>
+          <svg v-else class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M6 18L18 6M6 6l12 12"/>
+          </svg>
+          <span>{{ showMobileForm ? 'Close' : 'New Task' }}</span>
+        </button>
+      </div>
+
+      <div
+        v-if="showMobileForm"
+        class="xl:hidden animate-scale-in"
+      >
+        <div class="bg-surface-raised rounded-2xl border border-border p-6 shadow-sm">
           <TaskForm :projects="projects || []" :tags="tags || []" @submit="showMobileForm = false" />
         </div>
+      </div>
 
-        <div class="grid grid-cols-1 xl:grid-cols-12 gap-4 sm:gap-6">
-          <div class="hidden xl:block xl:col-span-4 2xl:col-span-3">
-            <div class="xl:sticky xl:top-8">
-              <TaskForm :projects="projects || []" :tags="tags || []" :collapsible="true" />
+      <div class="grid grid-cols-1 xl:grid-cols-12 gap-8">
+        <div class="hidden xl:block xl:col-span-4 2xl:col-span-3">
+          <div class="xl:sticky xl:top-20 space-y-6">
+            <div class="bg-surface-raised rounded-2xl border border-border p-6 shadow-sm relative overflow-hidden">
+              <div class="absolute top-0 right-0 w-24 h-24 bg-accent/5 rounded-full -mr-12 -mt-12 blur-2xl"></div>
+              <h3 class="text-[10px] font-black text-secondary uppercase tracking-[0.2em] mb-6">Create Session</h3>
+              <TaskForm :projects="projects || []" :tags="tags || []" :collapsible="false" />
             </div>
           </div>
+        </div>
 
-          <div class="xl:col-span-8 2xl:col-span-9">
-            <TaskList
-              :tasks="tasks.data"
-              :pagination="{
-                current_page: tasks.current_page,
-                last_page: tasks.last_page,
-                per_page: tasks.per_page,
-                total: tasks.total,
-              }"
-              :filters="filters"
-              :projects="projects"
-              @delete="handleDelete"
-              @bulk-delete="handleBulkDelete"
-            />
-          </div>
+        <div class="xl:col-span-8 2xl:col-span-9">
+          <TaskList
+            :tasks="tasks.data"
+            :pagination="{
+              current_page: tasks.current_page,
+              last_page: tasks.last_page,
+              per_page: tasks.per_page,
+              total: tasks.total,
+            }"
+            :filters="filters"
+            :projects="projects"
+            @delete="handleDelete"
+            @bulk-delete="handleBulkDelete"
+            @bulk-update="handleBulkUpdate"
+          />
         </div>
       </div>
     </div>

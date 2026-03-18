@@ -103,211 +103,180 @@ function quickAddTag() {
   <Head title="Tags" />
 
   <MainLayout>
-    <div class="min-h-screen bg-gray-50 dark:bg-gray-900">
-      <div class="px-4 sm:px-6 lg:px-8 py-6 max-w-[1200px] mx-auto pt-20 sm:pt-24 md:pt-28 xl:pt-6 xl:py-6">
-        <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-6">
-          <h1 class="text-2xl font-bold font-sans text-gray-900 dark:text-white">Tags</h1>
-        </div>
-
-        <div class="bg-white dark:bg-gray-800 rounded-lg border border-gray-200 dark:border-gray-700 p-4 mb-4 flex flex-wrap items-center gap-4">
-          <div class="relative">
-            <button
-              @click="toggleShowArchived"
-              class="flex items-center gap-2 px-3 py-1.5 border border-gray-300 dark:border-gray-600 rounded text-sm bg-white dark:bg-gray-700 text-gray-700 dark:text-gray-200 hover:bg-gray-50 dark:hover:bg-gray-600"
-            >
-              {{ showArchivedFilter ? 'Show all' : 'Show active' }}
-              <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"/>
-              </svg>
-            </button>
-          </div>
-          
-          <div class="flex-1 min-w-[200px] max-w-[300px]">
-            <div class="relative">
-              <svg class="w-5 h-5 text-gray-400 absolute left-3 top-1/2 -translate-y-1/2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/>
-              </svg>
-              <input
-                v-model="searchQuery"
-                type="text"
-                placeholder="Search by name"
-                class="w-full pl-10 pr-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg text-sm bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-200 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500"
-              />
-            </div>
-          </div>
-          
-          <div class="flex-1"></div>
-          
-          <div class="flex items-center gap-2">
-            <input
-              v-model="quickAddName"
-              @keyup.enter="quickAddTag"
-              type="text"
-              placeholder="Add new tag"
-              class="px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg text-sm bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-200 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500 w-[200px]"
-            />
-            <button
-              @click="quickAddTag"
-              :disabled="!quickAddName.trim()"
-              class="px-4 py-2 bg-blue-600 text-white rounded-lg font-medium hover:bg-blue-700 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
-            >
-              ADD
-            </button>
-          </div>
-        </div>
-
-        <div class="bg-white dark:bg-gray-800 rounded-lg border border-gray-200 dark:border-gray-700 overflow-hidden">
-          <div class="bg-gray-50 dark:bg-gray-700 border-b border-gray-200 dark:border-gray-600 px-4 py-3">
-            <span class="text-sm font-medium text-gray-600 dark:text-gray-300">Tags</span>
-          </div>
-          
-          <div class="overflow-x-auto">
-            <table class="w-full">
-              <thead>
-                <tr class="border-b border-gray-200 dark:border-gray-700">
-                  <th class="px-4 py-3 text-left w-12">
-                    <input type="checkbox" class="rounded border-gray-300 dark:border-gray-600" />
-                  </th>
-                  <th class="px-4 py-3 text-left text-xs font-semibold text-gray-600 dark:text-gray-400 uppercase tracking-wider">
-                    Name
-                  </th>
-                  <th class="px-4 py-3 w-32"></th>
-                </tr>
-              </thead>
-              <tbody class="divide-y divide-gray-200 dark:divide-gray-700">
-                <tr 
-                  v-for="tag in filteredTags"
-                  :key="tag.id"
-                  class="hover:bg-gray-50 dark:hover:bg-gray-700/50 transition-colors group"
-                  :class="{ 'opacity-60': tag.is_archived }"
-                >
-                  <td class="px-4 py-3">
-                    <input type="checkbox" class="rounded border-gray-300 dark:border-gray-600" />
-                  </td>
-                  <td class="px-4 py-3">
-                    <div class="flex items-center gap-2">
-                      <span class="text-gray-900 dark:text-white">{{ tag.name }}</span>
-                      <span v-if="tag.is_archived" class="text-xs text-gray-500 dark:text-gray-400 bg-gray-100 dark:bg-gray-700 px-2 py-0.5 rounded">
-                        Archived
-                      </span>
-                    </div>
-                  </td>
-                  <td class="px-4 py-3">
-                    <div class="flex items-center gap-1 justify-end opacity-0 group-hover:opacity-100 transition-opacity">
-                      <button
-                        @click="openEditModal(tag)"
-                        class="p-2 rounded-lg text-gray-500 dark:text-gray-400 hover:text-blue-600 dark:hover:text-blue-400 hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors"
-                        title="Edit"
-                      >
-                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"/>
-                        </svg>
-                      </button>
-                      <button
-                        v-if="!tag.is_archived"
-                        @click="archiveTag(tag)"
-                        class="p-2 rounded-lg text-gray-500 dark:text-gray-400 hover:text-amber-600 dark:hover:text-amber-400 hover:bg-amber-50 dark:hover:bg-amber-900/30 transition-colors"
-                        title="Archive"
-                      >
-                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 8h14M5 8a2 2 0 110-4h14a2 2 0 110 4M5 8v10a2 2 0 002 2h10a2 2 0 002-2V8m-9 4h4"/>
-                        </svg>
-                      </button>
-                      <button
-                        v-else
-                        @click="restoreTag(tag)"
-                        class="p-2 rounded-lg text-gray-500 dark:text-gray-400 hover:text-emerald-600 dark:hover:text-emerald-400 hover:bg-emerald-50 dark:hover:bg-emerald-900/30 transition-colors"
-                        title="Restore"
-                      >
-                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"/>
-                        </svg>
-                      </button>
-                      <button
-                        @click="deleteTag(tag)"
-                        class="p-2 rounded-lg text-gray-500 dark:text-gray-400 hover:text-red-500 hover:bg-red-50 dark:hover:bg-red-900/30 transition-colors"
-                        title="Delete"
-                      >
-                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 5v.01M12 12v.01M12 19v.01M12 6a1 1 0 110-2 1 1 0 010 2zm0 7a1 1 0 110-2 1 1 0 010 2zm0 7a1 1 0 110-2 1 1 0 010 2z"/>
-                        </svg>
-                      </button>
-                    </div>
-                  </td>
-                </tr>
-              </tbody>
-            </table>
-          </div>
-
-          <div v-if="filteredTags.length === 0" class="flex flex-col items-center justify-center py-12">
-            <div class="w-16 h-16 rounded-full bg-gray-100 dark:bg-gray-700 flex items-center justify-center mb-4">
-              <svg class="w-8 h-8 text-gray-500 dark:text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 7h.01M7 3h5c.512 0 1.024.195 1.414.586l7 7a2 2 0 010 2.828l-7 7a2 2 0 01-2.828 0l-7-7A1.994 1.994 0 013 12V7a4 4 0 014-4z"/>
-              </svg>
-            </div>
-            <p class="text-gray-600 dark:text-gray-300 text-lg font-medium">No tags yet</p>
-            <p class="text-gray-500 dark:text-gray-400 text-sm mt-1">Create tags to categorize your tasks</p>
-          </div>
-        </div>
-
-        <Teleport to="body">
-          <div
-            v-if="showModal"
-            class="fixed inset-0 z-50 flex items-center justify-center p-4"
-            @click.self="showModal = false"
+    <div class="space-y-6 animate-fade-up">
+      <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+        <h1 class="text-2xl font-bold font-sans text-primary">Tags</h1>
+        
+        <div class="flex items-center gap-2 group">
+          <input
+            v-model="quickAddName"
+            @keyup.enter="quickAddTag"
+            type="text"
+            placeholder="Quick add tag..."
+            class="px-4 py-2.5 bg-surface-raised border border-border rounded-xl text-sm text-primary placeholder-muted focus:outline-none focus:ring-2 focus:ring-accent transition-all w-[240px]"
+          />
+          <button
+            @click="quickAddTag"
+            :disabled="!quickAddName.trim()"
+            class="px-6 py-2.5 bg-accent text-accent-text rounded-xl font-bold text-xs uppercase tracking-widest hover:bg-accent-hover disabled:opacity-50 disabled:cursor-not-allowed transition-all shadow-lg shadow-accent/20 active:scale-95"
           >
-            <div class="absolute inset-0 bg-black/60 backdrop-blur-sm" />
+            Add
+          </button>
+        </div>
+      </div>
+
+      <!-- Toolbar -->
+      <div class="bg-surface-raised rounded-2xl border border-border p-4 shadow-sm flex flex-wrap items-center gap-4">
+        <button
+          @click="toggleShowArchived"
+          class="flex items-center gap-2 px-4 py-2 bg-surface-overlay border border-border rounded-xl text-[10px] font-black uppercase tracking-widest text-secondary hover:text-primary transition-all"
+        >
+          <svg class="w-3.5 h-3.5 text-accent" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10"/></svg>
+          {{ showArchivedFilter ? 'Show All' : 'Active Only' }}
+        </button>
+        
+        <div class="flex-1 min-w-[240px] max-w-md">
+          <div class="relative group">
+            <svg class="w-4 h-4 text-muted absolute left-4 top-1/2 -translate-y-1/2 group-focus-within:text-accent transition-colors" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/></svg>
+            <input
+              v-model="searchQuery"
+              type="text"
+              placeholder="Search tags..."
+              class="w-full pl-11 pr-4 py-2 bg-surface-overlay border border-border rounded-xl text-sm text-primary placeholder-muted focus:outline-none focus:ring-2 focus:ring-accent transition-all"
+            />
+          </div>
+        </div>
+      </div>
+
+      <!-- Tags Grid/List -->
+      <div class="bg-surface-raised rounded-2xl border border-border shadow-sm overflow-hidden">
+        <div class="bg-surface-overlay/30 px-6 py-4 border-b border-border flex items-center justify-between">
+          <span class="text-[10px] font-black text-primary uppercase tracking-[0.2em]">Management</span>
+          <span class="text-[10px] font-black text-muted bg-surface-overlay px-2 py-1 rounded border border-border uppercase tracking-widest">{{ filteredTags.length }} Tags</span>
+        </div>
+        
+        <div class="overflow-x-auto">
+          <table class="w-full text-left">
+            <thead>
+              <tr class="bg-surface-overlay/50 text-[10px] font-black text-secondary uppercase tracking-[0.2em]">
+                <th class="px-6 py-4 border-b border-border w-12">
+                  <div class="flex justify-center">
+                    <input type="checkbox" class="w-4 h-4 rounded border-border bg-surface-overlay text-accent focus:ring-accent" />
+                  </div>
+                </th>
+                <th class="px-6 py-4 border-b border-border">Tag Identity</th>
+                <th class="px-6 py-4 border-b border-border w-32"></th>
+              </tr>
+            </thead>
+            <tbody class="divide-y divide-border">
+              <tr 
+                v-for="tag in filteredTags"
+                :key="tag.id"
+                class="hover:bg-surface-overlay/30 transition-colors group"
+                :class="{ 'opacity-50 grayscale': tag.is_archived }"
+              >
+                <td class="px-6 py-5">
+                  <div class="flex justify-center">
+                    <input type="checkbox" class="w-4 h-4 rounded border-border bg-surface-overlay text-accent focus:ring-accent" />
+                  </div>
+                </td>
+                <td class="px-6 py-5">
+                  <div class="flex items-center gap-3">
+                    <div class="p-2 bg-surface-overlay rounded-lg border border-border group-hover:border-accent/30 transition-all">
+                      <svg class="w-4 h-4 text-accent" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M7 7h.01M7 3h5c.512 0 1.024.195 1.414.586l7 7a2 2 0 010 2.828l-7 7a2 2 0 01-2.828 0l-7-7A1.994 1.994 0 013 12V7a4 4 0 014-4z"/></svg>
+                    </div>
+                    <div class="flex flex-col">
+                      <span class="font-bold text-primary text-sm group-hover:text-accent transition-colors">#{{ tag.name }}</span>
+                      <span v-if="tag.is_archived" class="text-[9px] font-black text-muted uppercase tracking-widest mt-0.5">Archived Content</span>
+                    </div>
+                  </div>
+                </td>
+                <td class="px-6 py-5 text-right">
+                  <div class="flex items-center justify-end gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
+                    <button @click="openEditModal(tag)" class="p-2 rounded-lg text-muted hover:text-accent hover:bg-surface-overlay transition-all" title="Edit">
+                      <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"/></svg>
+                    </button>
+                    
+                    <button v-if="!tag.is_archived" @click="archiveTag(tag)" class="p-2 rounded-lg text-muted hover:text-warning hover:bg-warning/10 transition-all" title="Archive">
+                      <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 8h14M5 8a2 2 0 110-4h14a2 2 0 110 4M5 8v10a2 2 0 002 2h10a2 2 0 002-2V8m-9 4h4"/></svg>
+                    </button>
+                    <button v-else @click="restoreTag(tag)" class="p-2 rounded-lg text-muted hover:text-success hover:bg-success/10 transition-all" title="Restore">
+                      <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"/></svg>
+                    </button>
+
+                    <button @click="deleteTag(tag)" class="p-2 rounded-lg text-muted hover:text-danger hover:bg-danger/10 transition-all" title="Delete">
+                      <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"/></svg>
+                    </button>
+                  </div>
+                </td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+
+        <div v-if="filteredTags.length === 0" class="flex flex-col items-center justify-center py-20 bg-surface-overlay/10">
+          <div class="w-16 h-16 rounded-2xl bg-surface-overlay flex items-center justify-center mb-6 border border-border group">
+            <svg class="w-8 h-8 text-muted group-hover:text-accent transition-colors" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 7h.01M7 3h5c.512 0 1.024.195 1.414.586l7 7a2 2 0 010 2.828l-7 7a2 2 0 01-2.828 0l-7-7A1.994 1.994 0 013 12V7a4 4 0 014-4z"/></svg>
+          </div>
+          <p class="text-primary font-bold text-lg">No tags found</p>
+          <p class="text-secondary text-sm mb-8">Tags help you categorize sessions for better reporting.</p>
+        </div>
+      </div>
+
+      <Teleport to="body">
+        <div v-if="showModal" class="fixed inset-0 z-50 flex items-center justify-center p-4 animate-scale-in" @click.self="showModal = false">
+          <div class="absolute inset-0 bg-black/60 backdrop-blur-sm" />
+          
+          <div class="relative bg-surface-raised rounded-2xl shadow-2xl max-w-md w-full border border-border overflow-hidden">
+            <div class="absolute top-0 left-0 right-0 h-1.5 bg-accent shadow-sm" />
             
-            <div class="relative bg-white dark:bg-gray-800 rounded-2xl shadow-2xl max-w-md w-full border border-gray-200 dark:border-gray-700 overflow-hidden">
-              <div class="absolute top-0 left-0 right-0 h-1 bg-blue-600" />
-              
-              <div class="p-5 sm:p-6">
-                <h3 class="text-lg sm:text-xl font-semibold font-sans text-gray-900 dark:text-white mb-4">
+            <div class="p-8">
+              <div class="flex items-center justify-between mb-8">
+                <h3 class="text-xl font-black text-primary uppercase tracking-tighter">
                   {{ editingTag ? 'Edit Tag' : 'New Tag' }}
                 </h3>
-                
-                <form @submit.prevent="submit" class="space-y-4">
-                  <div>
-                    <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1.5">
-                      Tag name
-                    </label>
-                    <div class="relative">
-                      <span class="absolute left-4 top-1/2 -translate-y-1/2 text-gray-500 dark:text-gray-400">#</span>
-                      <input
-                        v-model="form.name"
-                        type="text"
-                        placeholder="e.g., urgent, design, bug"
-                        class="w-full pl-8 pr-4 py-2.5 bg-gray-50 dark:bg-gray-700 border border-gray-300 dark:border-gray-600 rounded-lg text-gray-900 dark:text-white placeholder-gray-400 focus:outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-500"
-                        :class="{ 'border-red-500': form.errors.name }"
-                      />
-                    </div>
-                    <p v-if="form.errors.name" class="text-red-400 text-sm mt-1">
-                      {{ form.errors.name }}
-                    </p>
-                  </div>
-
-                  <div class="flex gap-3 mt-6">
-                    <button
-                      type="button"
-                      @click="showModal = false"
-                      class="flex-1 px-4 py-2.5 bg-gray-100 dark:bg-gray-700 text-gray-700 dark:text-gray-300 border border-gray-200 dark:border-gray-600 rounded-lg font-medium hover:bg-gray-200 dark:hover:bg-gray-600 transition-colors"
-                    >
-                      Cancel
-                    </button>
-                    <button
-                      type="submit"
-                      :disabled="form.processing"
-                      class="flex-1 px-4 py-2.5 bg-blue-600 text-white rounded-lg font-medium hover:bg-blue-700 disabled:opacity-50 transition-colors"
-                    >
-                      {{ editingTag ? 'Save Changes' : 'Create Tag' }}
-                    </button>
-                  </div>
-                </form>
+                <button @click="showModal = false" class="p-2 text-muted hover:text-primary transition-colors">
+                  <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M6 18L18 6M6 6l12 12"/></svg>
+                </button>
               </div>
+              
+              <form @submit.prevent="submit" class="space-y-6">
+                <div class="space-y-2">
+                  <label class="text-[10px] font-black text-secondary uppercase tracking-[0.2em]">Tag Name</label>
+                  <div class="relative group">
+                    <span class="absolute left-4 top-1/2 -translate-y-1/2 text-accent font-black">#</span>
+                    <input
+                      v-model="form.name"
+                      type="text"
+                      placeholder="urgent, creative, billable..."
+                      class="w-full pl-9 pr-4 py-3 bg-surface-overlay border border-border rounded-xl text-primary placeholder-muted focus:outline-none focus:ring-2 focus:ring-accent transition-all"
+                      :class="{ 'border-danger': form.errors.name }"
+                    />
+                  </div>
+                  <p v-if="form.errors.name" class="text-danger text-[10px] font-bold uppercase tracking-wider">{{ form.errors.name }}</p>
+                </div>
+
+                <div class="flex gap-4 pt-4">
+                  <button
+                    type="button"
+                    @click="showModal = false"
+                    class="flex-1 px-6 py-3.5 bg-surface-overlay text-primary border border-border rounded-xl font-bold text-xs uppercase tracking-widest hover:bg-border transition-all"
+                  >
+                    Cancel
+                  </button>
+                  <button
+                    type="submit"
+                    :disabled="form.processing"
+                    class="flex-1 px-6 py-3.5 bg-accent text-accent-text rounded-xl font-bold text-xs uppercase tracking-widest hover:bg-accent-hover disabled:opacity-50 transition-all shadow-lg shadow-accent/20 active:scale-95"
+                  >
+                    {{ editingTag ? 'Save Changes' : 'Create Tag' }}
+                  </button>
+                </div>
+              </form>
             </div>
           </div>
-        </Teleport>
-      </div>
+        </div>
+      </Teleport>
     </div>
   </MainLayout>
 </template>
