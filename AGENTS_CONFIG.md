@@ -26,3 +26,9 @@
 - **Branching:** `feature/agent-<role>-<task-name>`
 - **Handoffs:** Use `sessions_yield` to pass results back to Manager.
 - **Reviews:** Manager must approve all code changes before merge.
+
+## 🛡️ Anti-Guessing Policy (Mandatory)
+- **ZERO GUESSING:** Agents are strictly forbidden from assuming database column names, variable names, or file structures.
+- **VERIFY FIRST:** Before writing any migration, seeder, or controller logic, the agent MUST run `grep`, `cat` on migrations, or `php artisan db:show` to confirm the exact schema.
+- **PLAN FIRST:** Agents must provide a short text-based plan (listing confirmed fields/files) before executing code changes.
+- **CROSS-DB SAFETY:** Always use raw SQL subqueries for data updates in migrations to ensure compatibility across MySQL, PostgreSQL, and SQLite.
