@@ -25,7 +25,9 @@
 ## 🚦 Workflow Policy
 - **Branching:** `feature/agent-<role>-<task-name>`
 - **Handoffs:** Use `sessions_yield` to pass results back to Manager.
-- **Reviews:** Manager must approve all code changes before merge.
+- **Reviews:** Manager MUST ASK user for approval before any merge to `main`.
+- **Mergeless by default:** Agents are strictly forbidden from merging to `main` without explicit human-in-the-loop (HITL) confirmation.
+- **Production Safety:** `main` branch is considered PRODUCTION. No direct pushes or automated merges.
 
 ## 🛡️ Anti-Guessing Policy (Mandatory)
 - **ZERO GUESSING:** Agents are strictly forbidden from assuming database column names, variable names, or file structures.
