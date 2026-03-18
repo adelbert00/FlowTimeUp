@@ -53,9 +53,27 @@ const props = defineProps<{
 const emit = defineEmits<{
   delete: [taskId: number];
   'bulk-delete': [taskIds: number[]];
+  'bulk-update': [payload: { ids: number[], project_id?: number | null, is_billable?: boolean }];
 }>();
 
 const selectedTaskIds = ref<number[]>([]);
+const showBulkProjectModal = ref(false);
+const selectedBulkProjectId = ref<number | null>(null);
+
+function openBulkProjectModal() {
+  if (selectedTaskIds.value.length === 0) return;
+  showBulkProjectModal.value = true;
+}
+
+function applyBulkProject() {
+  emit('bulk-update', {
+    ids: [...selectedTaskIds.value],
+    project_id: selectedBulkProjectId.value
+  });
+  showBulkProjectModal.value = false;
+  selectedTaskIds.value = [];
+}
+
 const showConfirmModal = ref(false);
 const confirmMessage = ref('');
 const showFilters = ref(false);
@@ -155,169 +173,122 @@ const hasActiveFilters = computed(() => {
   return searchQuery.value || selectedProject.value || selectedPriority.value || selectedStatus.value;
 });
 
-// Calculate total time from all tasks using pre-calculated values from API
 const totalTime = computed(() => {
   let totalSeconds = 0;
-  
   props.tasks.forEach(task => {
-    // Use pre-calculated total_time_seconds from API if available
     if (task.total_time_seconds) {
       totalSeconds += task.total_time_seconds;
     }
   });
-  
   const hours = Math.floor(totalSeconds / 3600);
   const minutes = Math.floor((totalSeconds % 3600) / 60);
   const seconds = totalSeconds % 60;
-  
   return `${String(hours).padStart(2, '0')}:${String(minutes).padStart(2, '0')}:${String(seconds).padStart(2, '0')}`;
 });
 </script>
 
 <template>
-  <div class="space-y-3 sm:space-y-4">
-    <div class="bg-white dark:bg-gray-800 rounded-xl border border-gray-200 dark:border-gray-700 shadow-sm p-3 sm:p-4">
+  <div class="space-y-4">
+    <div class="bg-surface-raised rounded-xl border border-border shadow-sm p-4">
       <div class="flex flex-col sm:flex-row gap-3">
         <div class="flex-1 relative">
-          <svg class="w-4 h-4 sm:w-5 sm:h-5 text-gray-400 absolute left-3 top-1/2 -translate-y-1/2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <svg class="w-4 h-4 text-muted absolute left-3 top-1/2 -translate-y-1/2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/>
           </svg>
           <input
             v-model="searchQuery"
             type="text"
             placeholder="Search tasks..."
-            class="w-full pl-9 sm:pl-10 pr-4 py-2 sm:py-2.5 border border-gray-300 dark:border-gray-600 rounded-lg text-sm bg-white dark:bg-gray-700 text-gray-900 dark:text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+            class="w-full pl-10 pr-4 py-2 border border-border rounded-lg text-sm bg-surface-overlay text-primary placeholder-muted focus:outline-none focus:ring-2 focus:ring-accent transition-all"
           />
         </div>
         
         <button
           @click="showFilters = !showFilters"
-          class="flex items-center justify-center gap-2 px-3 sm:px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg text-sm font-medium text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors"
-          :class="{ 'bg-blue-50 dark:bg-blue-900/30 border-blue-300 dark:border-blue-700 text-blue-700 dark:text-blue-400': hasActiveFilters }"
+          class="flex items-center justify-center gap-2 px-4 py-2 border border-border rounded-lg text-sm font-bold transition-all"
+          :class="hasActiveFilters ? 'bg-accent/10 border-accent text-accent' : 'text-secondary bg-surface-raised hover:bg-surface-overlay'"
         >
           <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 4a1 1 0 011-1h16a1 1 0 011 1v2.586a1 1 0 01-.293.707l-6.414 6.414a1 1 0 00-.293.707V17l-4 4v-6.586a1 1 0 00-.293-.707L3.293 7.293A1 1 0 013 6.586V4z"/>
           </svg>
           <span class="hidden sm:inline">Filters</span>
-          <span v-if="hasActiveFilters" class="w-2 h-2 bg-blue-500 rounded-full"></span>
+          <span v-if="hasActiveFilters" class="w-2 h-2 bg-accent rounded-full"></span>
         </button>
       </div>
       
-      <div v-if="showFilters" class="mt-3 pt-3 border-t border-gray-200 dark:border-gray-700 grid grid-cols-1 sm:grid-cols-3 gap-3">
+      <div v-if="showFilters" class="mt-4 pt-4 border-t border-border grid grid-cols-1 sm:grid-cols-3 gap-4 animate-fade-up">
         <div>
-          <label class="block text-xs font-medium text-gray-600 dark:text-gray-400 mb-1">Status</label>
-          <div class="relative">
-            <select
-              v-model="selectedStatus"
-              @change="applyFilters"
-              class="w-full px-3 py-2 pr-10 border border-gray-300 dark:border-gray-600 rounded-lg text-sm bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-blue-500 appearance-none cursor-pointer"
-            >
-              <option value="">All tasks</option>
-              <option value="active">Active</option>
-              <option value="completed">Completed</option>
-            </select>
-            <div class="absolute inset-y-0 right-0 flex items-center pr-3 pointer-events-none">
-              <svg class="w-4 h-4 text-gray-400 dark:text-gray-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"/>
-              </svg>
-            </div>
-          </div>
-        </div>
-        
-        <div>
-          <label class="block text-xs font-medium text-gray-600 dark:text-gray-400 mb-1">Priority</label>
-          <div class="relative">
-            <select
-              v-model="selectedPriority"
-              @change="applyFilters"
-              class="w-full px-3 py-2 pr-10 border border-gray-300 dark:border-gray-600 rounded-lg text-sm bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-blue-500 appearance-none cursor-pointer"
-            >
-              <option value="">All priorities</option>
-              <option value="high">High</option>
-              <option value="medium">Medium</option>
-              <option value="low">Low</option>
-            </select>
-            <div class="absolute inset-y-0 right-0 flex items-center pr-3 pointer-events-none">
-              <svg class="w-4 h-4 text-gray-400 dark:text-gray-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"/>
-              </svg>
-            </div>
-          </div>
-        </div>
-        
-        <div>
-          <label class="block text-xs font-medium text-gray-600 dark:text-gray-400 mb-1">Project</label>
-          <div class="relative">
-            <select
-              v-model="selectedProject"
-              @change="applyFilters"
-              class="w-full px-3 py-2 pr-10 border border-gray-300 dark:border-gray-600 rounded-lg text-sm bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-blue-500 appearance-none cursor-pointer"
-            >
-              <option :value="null">All projects</option>
-              <option v-for="project in projects" :key="project.id" :value="project.id">
-                {{ project.name }}
-              </option>
-            </select>
-            <div class="absolute inset-y-0 right-0 flex items-center pr-3 pointer-events-none">
-              <svg class="w-4 h-4 text-gray-400 dark:text-gray-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"/>
-              </svg>
-            </div>
-          </div>
-        </div>
-        
-        <div class="sm:col-span-3 flex justify-end">
-          <button
-            v-if="hasActiveFilters"
-            @click="clearFilters"
-            class="text-sm text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white underline"
+          <label class="block text-xs font-bold text-muted uppercase tracking-wider mb-1.5">Status</label>
+          <select
+            v-model="selectedStatus"
+            @change="applyFilters"
+            class="w-full px-3 py-2 border border-border rounded-lg text-sm bg-surface-overlay text-primary focus:outline-none focus:ring-2 focus:ring-accent appearance-none cursor-pointer"
           >
-            Clear all filters
-          </button>
+            <option value="">All tasks</option>
+            <option value="active">Active</option>
+            <option value="completed">Completed</option>
+          </select>
+        </div>
+        
+        <div>
+          <label class="block text-xs font-bold text-muted uppercase tracking-wider mb-1.5">Priority</label>
+          <select
+            v-model="selectedPriority"
+            @change="applyFilters"
+            class="w-full px-3 py-2 border border-border rounded-lg text-sm bg-surface-overlay text-primary focus:outline-none focus:ring-2 focus:ring-accent appearance-none cursor-pointer"
+          >
+            <option value="">All priorities</option>
+            <option value="high">High</option>
+            <option value="medium">Medium</option>
+            <option value="low">Low</option>
+          </select>
+        </div>
+        
+        <div>
+          <label class="block text-xs font-bold text-muted uppercase tracking-wider mb-1.5">Project</label>
+          <select
+            v-model="selectedProject"
+            @change="applyFilters"
+            class="w-full px-3 py-2 border border-border rounded-lg text-sm bg-surface-overlay text-primary focus:outline-none focus:ring-2 focus:ring-accent appearance-none cursor-pointer"
+          >
+            <option :value="null">All projects</option>
+            <option v-for="project in projects" :key="project.id" :value="project.id">
+              {{ project.name }}
+            </option>
+          </select>
         </div>
       </div>
     </div>
     
-    <div class="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 bg-white/50 dark:bg-gray-800/50 backdrop-blur-sm p-3 sm:p-4 rounded-xl border border-gray-200/50 dark:border-gray-700/50">
-      <div class="flex items-center gap-3 sm:gap-4">
-        <div class="flex items-center gap-2">
+    <div class="flex flex-col sm:flex-row items-center justify-between gap-4 bg-surface-raised p-4 rounded-xl border border-border shadow-sm">
+      <div class="flex items-center gap-4">
+        <div class="flex items-center gap-3">
           <CustomCheckbox
             :checked="selectedTaskIds.length === tasks.length && tasks.length > 0"
             :indeterminate="selectedTaskIds.length > 0 && selectedTaskIds.length < tasks.length"
             @change="(checked: boolean) => selectAll(checked)"
           />
-          <span class="text-xs sm:text-sm text-gray-600 dark:text-gray-400 cursor-pointer" @click="selectAll()">Select all</span>
+          <span class="text-sm font-bold text-primary cursor-pointer select-none" @click="selectAll()">Select all</span>
         </div>
-
-        <button
-          v-if="canBulkDelete"
-          @click="openBulkDeleteModal"
-          class="flex items-center gap-1 sm:gap-2 px-2 sm:px-3 py-1 sm:py-1.5 bg-red-500/10 text-red-500 rounded-lg text-xs sm:text-sm font-medium hover:bg-red-500/20 transition-colors"
-        >
-          <svg class="w-3.5 h-3.5 sm:w-4 sm:h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"/>
-          </svg>
-          <span class="hidden sm:inline">Delete</span> ({{ selectedTaskIds.length }})
-        </button>
       </div>
 
-      <div class="flex items-center gap-4 sm:gap-6 flex-wrap">
+      <div class="flex items-center gap-6">
         <div class="flex items-center gap-2">
-          <svg class="w-4 h-4 text-gray-500 dark:text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <svg class="w-4 h-4 text-accent" fill="none" stroke="currentColor" viewBox="0 0 24 24">
             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"/>
           </svg>
-          <div class="text-xs sm:text-sm">
-            <span class="text-gray-600 dark:text-gray-400">Total time:</span>
-            <span class="ml-1 font-mono font-semibold text-gray-900 dark:text-white">{{ totalTime }}</span>
+          <div class="text-sm">
+            <span class="text-secondary font-medium">Total:</span>
+            <span class="ml-1 font-mono font-bold text-primary">{{ totalTime }}</span>
           </div>
         </div>
-        <div class="text-xs sm:text-sm text-gray-600 dark:text-gray-400">
+        <div class="text-sm text-secondary font-medium">
           {{ pagination.total }} task{{ pagination.total !== 1 ? 's' : '' }}
         </div>
       </div>
     </div>
 
-    <div v-if="tasks.length > 0" class="space-y-2 sm:space-y-3">
+    <div v-if="tasks.length > 0" class="space-y-3 pb-24">
       <TaskCard
         v-for="task in tasks"
         :key="task.id"
@@ -336,55 +307,141 @@ const totalTime = computed(() => {
       />
     </div>
 
-    <div v-else class="flex flex-col items-center justify-center py-12 sm:py-16 bg-white/30 dark:bg-gray-800/30 rounded-xl border border-gray-200/50 dark:border-gray-700/50 border-dashed">
-      <div class="w-12 h-12 sm:w-16 sm:h-16 rounded-full bg-gray-100 dark:bg-gray-700 flex items-center justify-center mb-4">
-        <svg class="w-6 h-6 sm:w-8 sm:h-8 text-gray-500 dark:text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+    <div v-else class="flex flex-col items-center justify-center py-16 bg-surface-raised rounded-xl border border-border border-dashed shadow-sm">
+      <div class="w-16 h-16 rounded-full bg-surface-overlay flex items-center justify-center mb-4 border border-border">
+        <svg class="w-8 h-8 text-muted" fill="none" stroke="currentColor" viewBox="0 0 24 24">
           <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2"/>
         </svg>
       </div>
-      <p class="text-gray-600 dark:text-gray-300 text-base sm:text-lg font-medium">
+      <p class="text-primary text-lg font-bold">
         {{ hasActiveFilters ? 'No tasks found' : 'No tasks yet' }}
       </p>
-      <p class="text-gray-500 dark:text-gray-400 text-xs sm:text-sm mt-1">
+      <p class="text-secondary text-sm mt-1">
         {{ hasActiveFilters ? 'Try adjusting your filters' : 'Create your first task to get started' }}
       </p>
       <button
         v-if="hasActiveFilters"
         @click="clearFilters"
-        class="mt-4 px-4 py-2 bg-blue-600 text-white rounded-lg text-sm font-medium hover:bg-blue-700 transition-colors"
+        class="mt-6 px-6 py-2 bg-accent text-white rounded-xl text-sm font-bold hover:bg-accent-hover transition-colors shadow-sm"
       >
         Clear filters
       </button>
     </div>
 
-    <div v-if="pagination.last_page > 1" class="flex items-center justify-center gap-2 pt-4">
+    <div v-if="pagination.last_page > 1" class="flex items-center justify-center gap-2 pt-8">
       <button
         :disabled="pagination.current_page === 1"
         @click="router.get(route('tasks.index'), { ...filters, page: pagination.current_page - 1 })"
-        class="px-3 sm:px-4 py-1.5 sm:py-2 rounded-lg text-xs sm:text-sm font-medium transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
-        :class="pagination.current_page === 1 ? 'bg-gray-100 dark:bg-gray-700 text-gray-500 dark:text-gray-400' : 'bg-gray-100 dark:bg-gray-700 text-gray-700 dark:text-gray-300 hover:bg-gray-200 dark:hover:bg-gray-600'"
+        class="px-4 py-2 rounded-xl text-sm font-bold transition-all disabled:opacity-50 disabled:cursor-not-allowed"
+        :class="pagination.current_page === 1 ? 'bg-surface-overlay text-muted' : 'bg-surface-raised text-primary border border-border hover:bg-surface-overlay shadow-sm'"
       >
         Previous
       </button>
       
-      <div class="flex items-center gap-1 px-2 sm:px-4">
-        <span class="text-gray-600 dark:text-gray-400 text-xs sm:text-sm">Page</span>
-        <span class="text-gray-900 dark:text-white font-medium text-xs sm:text-sm">{{ pagination.current_page }}</span>
-        <span class="text-gray-600 dark:text-gray-400 text-xs sm:text-sm">of</span>
-        <span class="text-gray-900 dark:text-white font-medium text-xs sm:text-sm">{{ pagination.last_page }}</span>
+      <div class="flex items-center gap-2 px-4">
+        <span class="text-primary font-bold text-sm">{{ pagination.current_page }}</span>
+        <span class="text-muted text-sm font-medium">/</span>
+        <span class="text-secondary text-sm font-medium">{{ pagination.last_page }}</span>
       </div>
 
       <button
         :disabled="pagination.current_page === pagination.last_page"
         @click="router.get(route('tasks.index'), { ...filters, page: pagination.current_page + 1 })"
-        class="px-3 sm:px-4 py-1.5 sm:py-2 rounded-lg text-xs sm:text-sm font-medium transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
-        :class="pagination.current_page === pagination.last_page ? 'bg-gray-100 dark:bg-gray-700 text-gray-500 dark:text-gray-400' : 'bg-gray-100 dark:bg-gray-700 text-gray-700 dark:text-gray-300 hover:bg-gray-200 dark:hover:bg-gray-600'"
+        class="px-4 py-2 rounded-xl text-sm font-bold transition-all disabled:opacity-50 disabled:cursor-not-allowed"
+        :class="pagination.current_page === pagination.last_page ? 'bg-surface-overlay text-muted' : 'bg-surface-raised text-primary border border-border hover:bg-surface-overlay shadow-sm'"
       >
         Next
       </button>
     </div>
 
     <Teleport to="body">
+      <Transition
+        enter-active-class="transition-all duration-300 ease-out"
+        enter-from-class="translate-y-full opacity-0"
+        enter-to-class="translate-y-0 opacity-100"
+        leave-active-class="transition-all duration-200 ease-in"
+        leave-from-class="translate-y-0 opacity-100"
+        leave-to-class="translate-y-full opacity-0"
+      >
+        <div v-if="selectedTaskIds.length > 0" class="fixed bottom-6 left-1/2 -translate-x-1/2 z-[60] w-[min(calc(100vw-2rem),600px)]">
+          <div class="bg-[#121218] shadow-2xl rounded-2xl border border-white/10 p-4 flex items-center justify-between gap-4">
+            <div class="flex items-center gap-3">
+              <div class="w-8 h-8 rounded-lg bg-accent text-white flex items-center justify-center font-bold text-sm">
+                {{ selectedTaskIds.length }}
+              </div>
+              <div class="hidden sm:block">
+                <p class="text-white text-sm font-bold">Tasks Selected</p>
+                <p class="text-white/40 text-[10px] uppercase tracking-wider font-bold">Bulk Actions</p>
+              </div>
+            </div>
+
+            <div class="flex items-center gap-2">
+              <button 
+                @click="openBulkProjectModal"
+                class="flex items-center gap-2 px-3 py-2 bg-white/5 hover:bg-white/10 text-white rounded-xl text-xs font-bold transition-colors border border-white/10"
+              >
+                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 7v10a2 2 0 002 2h14a2 2 0 002-2V9a2 2 0 00-2-2h-6l-2-2H5a2 2 0 00-2 2z"/></svg>
+                <span class="hidden md:inline">Project</span>
+              </button>
+              
+              <button 
+                @click="openBulkDeleteModal"
+                class="flex items-center gap-2 px-3 py-2 bg-red-500/10 hover:bg-red-500/20 text-red-400 rounded-xl text-xs font-bold transition-colors border border-red-500/10"
+              >
+                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"/></svg>
+                <span class="hidden md:inline">Delete</span>
+              </button>
+
+              <div class="w-px h-6 bg-white/10 mx-1"></div>
+
+              <button 
+                @click="selectedTaskIds = []"
+                class="p-2 text-white/40 hover:text-white transition-colors"
+              >
+                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/></svg>
+              </button>
+            </div>
+          </div>
+        </div>
+      </Transition>
+
+      <div
+        v-if="showBulkProjectModal"
+        class="fixed inset-0 z-[70] flex items-center justify-center p-4"
+        @click.self="showBulkProjectModal = false"
+      >
+        <div class="absolute inset-0 bg-black/60 backdrop-blur-sm" />
+        <div class="relative bg-surface-raised rounded-2xl shadow-2xl max-w-sm w-full border border-border p-6 animate-scale-in">
+          <h3 class="text-lg font-bold text-primary mb-4">Move to Project</h3>
+          <div class="space-y-2 mb-6 max-h-[300px] overflow-y-auto pr-1 custom-scrollbar">
+            <div 
+              v-for="project in projects" 
+              :key="project.id"
+              @click="selectedBulkProjectId = project.id"
+              class="flex items-center gap-3 p-3 rounded-xl border cursor-pointer transition-all"
+              :class="selectedBulkProjectId === project.id ? 'border-accent bg-accent-subtle shadow-sm' : 'border-border hover:border-accent/30 hover:bg-surface-overlay'"
+            >
+              <div class="w-3 h-3 rounded-full" :style="{ backgroundColor: project.color || '#6366f1' }"></div>
+              <span class="text-sm font-medium text-primary">{{ project.name }}</span>
+              <svg v-if="selectedBulkProjectId === project.id" class="w-4 h-4 text-accent ml-auto" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clip-rule="evenodd"/></svg>
+            </div>
+            <div 
+              @click="selectedBulkProjectId = null"
+              class="flex items-center gap-3 p-3 rounded-xl border cursor-pointer transition-all"
+              :class="selectedBulkProjectId === null ? 'border-accent bg-accent-subtle shadow-sm' : 'border-border hover:border-accent/30 hover:bg-surface-overlay'"
+            >
+              <div class="w-3 h-3 rounded-full bg-border-strong"></div>
+              <span class="text-sm font-medium text-primary">No Project</span>
+              <svg v-if="selectedBulkProjectId === null" class="w-4 h-4 text-accent ml-auto" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clip-rule="evenodd"/></svg>
+            </div>
+          </div>
+          <div class="flex gap-3">
+            <button @click="showBulkProjectModal = false" class="flex-1 px-4 py-2 bg-surface-overlay text-secondary rounded-xl font-bold text-sm hover:bg-border transition-colors">Cancel</button>
+            <button @click="applyBulkProject" class="flex-1 px-4 py-2 bg-accent text-white rounded-xl font-bold text-sm hover:bg-accent-hover transition-colors shadow-sm">Apply</button>
+          </div>
+        </div>
+      </div>
+
       <div
         v-if="showConfirmModal"
         class="fixed inset-0 z-50 flex items-center justify-center p-4"
@@ -392,33 +449,33 @@ const totalTime = computed(() => {
       >
         <div class="absolute inset-0 bg-black/60 backdrop-blur-sm" />
         
-        <div class="relative bg-white dark:bg-gray-800 rounded-2xl shadow-2xl max-w-md w-full border border-gray-200 dark:border-gray-700 overflow-hidden">
-          <div class="absolute top-0 left-0 right-0 h-1 bg-red-500" />
+        <div class="relative bg-surface-raised rounded-2xl shadow-2xl max-w-md w-full border border-border overflow-hidden animate-scale-in">
+          <div class="absolute top-0 left-0 right-0 h-1 bg-danger" />
           
-          <div class="p-5 sm:p-6">
-            <div class="w-10 h-10 sm:w-12 sm:h-12 rounded-full bg-red-500/10 flex items-center justify-center mb-4 mx-auto">
-              <svg class="w-5 h-5 sm:w-6 sm:h-6 text-red-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <div class="p-6">
+            <div class="w-12 h-12 rounded-full bg-danger/10 flex items-center justify-center mb-4 mx-auto">
+              <svg class="w-6 h-6 text-danger" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"/>
               </svg>
             </div>
 
-            <h3 class="text-lg sm:text-xl font-semibold font-sans text-gray-900 dark:text-white text-center mb-2">
+            <h3 class="text-xl font-bold text-primary text-center mb-2">
               Delete Tasks
             </h3>
-            <p class="text-gray-600 dark:text-gray-400 text-center text-sm sm:text-base mb-6">
+            <p class="text-secondary text-center text-sm mb-6">
               {{ confirmMessage }}
             </p>
 
             <div class="flex gap-3">
               <button
                 @click="confirmNo"
-                class="flex-1 px-4 py-2 sm:py-2.5 bg-gray-100 dark:bg-gray-700 text-gray-700 dark:text-gray-300 rounded-lg font-medium hover:bg-gray-200 dark:hover:bg-gray-600 transition-colors text-sm"
+                class="flex-1 px-4 py-2 bg-surface-overlay text-secondary rounded-xl font-bold text-sm hover:bg-border transition-colors"
               >
                 Cancel
               </button>
               <button
                 @click="confirmYes"
-                class="flex-1 px-4 py-2 sm:py-2.5 bg-red-500 text-white rounded-lg font-medium hover:bg-red-600 transition-colors text-sm"
+                class="flex-1 px-4 py-2 bg-danger text-white rounded-xl font-bold text-sm hover:bg-danger/90 transition-colors shadow-sm"
               >
                 Delete
               </button>
