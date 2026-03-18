@@ -41,7 +41,7 @@ class DatabaseSeeder extends Seeder
         $task1 = Task::factory()->create([
             'user_id' => $user->id,
             'project_id' => $project->id,
-            'name' => 'Implement Reports UI',
+            'title' => 'Implement Reports UI',
             'billable_rate' => 50,
         ]);
         $task1->tags()->attach([$tagFeat->id]);
@@ -49,7 +49,7 @@ class DatabaseSeeder extends Seeder
         $task2 = Task::factory()->create([
             'user_id' => $user->id,
             'project_id' => $project->id,
-            'name' => 'Fix Migration Bug',
+            'title' => 'Fix Migration Bug',
             'billable_rate' => 60,
         ]);
         $task2->tags()->attach([$tagBug->id]);
