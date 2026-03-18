@@ -42,7 +42,7 @@ class DatabaseSeeder extends Seeder
             'user_id' => $user->id,
             'project_id' => $project->id,
             'title' => 'Implement Reports UI',
-            'billable_rate' => 50,
+            'hourly_rate' => 50,
         ]);
         $task1->tags()->attach([$tagFeat->id]);
 
@@ -50,7 +50,7 @@ class DatabaseSeeder extends Seeder
             'user_id' => $user->id,
             'project_id' => $project->id,
             'title' => 'Fix Migration Bug',
-            'billable_rate' => 60,
+            'hourly_rate' => 60,
         ]);
         $task2->tags()->attach([$tagBug->id]);
 
@@ -61,7 +61,6 @@ class DatabaseSeeder extends Seeder
                 'task_id' => $task1->id,
                 'start_time' => Carbon::now()->subDays($i)->setTime(10, 0),
                 'end_time' => Carbon::now()->subDays($i)->setTime(14, 0),
-                'duration' => 14400,
                 'is_billable' => true,
                 'billable_rate' => 50,
             ]);
@@ -71,7 +70,6 @@ class DatabaseSeeder extends Seeder
                 'task_id' => $task2->id,
                 'start_time' => Carbon::now()->subDays($i)->setTime(15, 0),
                 'end_time' => Carbon::now()->subDays($i)->setTime(16, 30),
-                'duration' => 5400,
                 'is_billable' => true,
                 'billable_rate' => 60,
             ]);
