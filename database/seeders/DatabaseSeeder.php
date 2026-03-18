@@ -34,8 +34,8 @@ class DatabaseSeeder extends Seeder
         ]);
 
         // Create Demo Tags
-        $tagBug = Tag::factory()->create(['user_id' => $user->id, 'name' => 'bugfix', 'color' => '#ef4444']);
-        $tagFeat = Tag::factory()->create(['user_id' => $user->id, 'name' => 'feature', 'color' => '#10b981']);
+        $tagBug = Tag::factory()->create(['user_id' => $user->id, 'name' => 'bugfix']);
+        $tagFeat = Tag::factory()->create(['user_id' => $user->id, 'name' => 'feature']);
 
         // Create Demo Tasks
         $task1 = Task::factory()->create([
