@@ -20,10 +20,14 @@ class ReportController extends Controller
         $startDate = $request->get('start_date');
         $endDate = $request->get('end_date');
 
+        $summary = $this->reportService->getSummary($userId, $startDate, $endDate);
+
         return Inertia::render('Reports/Index', [
             'projects' => Project::where('user_id', $userId)->get(),
             'tags' => Tag::where('user_id', $userId)->get(),
-            'summary' => $this->reportService->getSummary($userId, $startDate, $endDate),
+            'projectSummary' => $summary['by_project'],
+            'tagSummary' => $summary['by_tag'],
+            'totalSummary' => $summary, // Zachowujemy dla ogólnych statystyk
             'filters' => $request->only(['project_id', 'tag_id', 'start_date', 'end_date', 'include_billable', 'include_non_billable']),
         ]);
     }

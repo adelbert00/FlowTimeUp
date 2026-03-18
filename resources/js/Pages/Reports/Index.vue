@@ -20,6 +20,13 @@ interface Props {
   tags: any[];
   projectSummary: SummaryData[];
   tagSummary: SummaryData[];
+  totalSummary: {
+    total_time: string;
+    total_seconds: number;
+    total_sessions: number;
+    total_earnings: number;
+    [key: string]: any;
+  };
   filters: {
     project_id: string | number | null;
     tag_id: string | number | null;
@@ -105,10 +112,25 @@ const exportReport = (format: 'csv' | 'pdf') => {
               <Download class="mr-2 h-4 w-4" />
               CSV
             </Button>
-            <Button variant="destructive" @click="exportReport('pdf')">
+            <Button class="bg-red-600 hover:bg-red-700 text-white" @click="exportReport('pdf')">
               <FileText class="mr-2 h-4 w-4" />
               PDF
             </Button>
+          </div>
+        </div>
+
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+          <div class="bg-white dark:bg-gray-800 p-6 rounded-xl border border-gray-200 dark:border-gray-700 shadow-sm">
+            <div class="text-sm font-medium text-muted-foreground mb-1">Total Time</div>
+            <div class="text-2xl font-bold">{{ totalSummary?.total_time || '00:00:00' }}</div>
+          </div>
+          <div class="bg-white dark:bg-gray-800 p-6 rounded-xl border border-gray-200 dark:border-gray-700 shadow-sm">
+            <div class="text-sm font-medium text-muted-foreground mb-1">Total Earnings</div>
+            <div class="text-2xl font-bold">{{ formatCurrency(totalSummary?.total_earnings || 0) }}</div>
+          </div>
+          <div class="bg-white dark:bg-gray-800 p-6 rounded-xl border border-gray-200 dark:border-gray-700 shadow-sm">
+            <div class="text-sm font-medium text-muted-foreground mb-1">Sessions Count</div>
+            <div class="text-2xl font-bold">{{ totalSummary?.total_sessions || 0 }}</div>
           </div>
         </div>
 
