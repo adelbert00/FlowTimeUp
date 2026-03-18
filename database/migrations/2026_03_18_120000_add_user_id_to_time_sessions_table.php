@@ -17,9 +17,13 @@ return new class extends Migration
         });
 
         // Wypełnij user_id na podstawie relacji przez tabelę tasks
-        DB::table('time_sessions')
-            ->join('tasks', 'time_sessions.task_id', '=', 'tasks.id')
-            ->update(['time_sessions.user_id' => DB::raw('tasks.user_id')]);
+        // Poprawka dla PostgreSQL/SQLite: Używamy podzapytania zamiast join w update
+        DB::table('time_sessions')->update([
+            'user_id' => DB::table('tasks')
+                ->whereColumn('tasks.id', 'time_sessions.task_id')
+                ->select('user_id')
+                ->limit(1)
+        ]);
 
         Schema::table('time_sessions', function (Blueprint $table) {
             $table->foreignId('user_id')->nullable(false)->change();
