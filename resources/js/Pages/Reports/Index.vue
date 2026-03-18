@@ -287,7 +287,3 @@ const exportReport = (format: 'csv' | 'pdf') => {
     </div>
   </MainLayout>
 </template>
-      </div>
-    </div>
-  </MainLayout>
-</template>
