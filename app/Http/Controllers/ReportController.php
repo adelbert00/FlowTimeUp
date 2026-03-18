@@ -17,10 +17,14 @@ class ReportController extends Controller
     public function index(Request $request): InertiaResponse
     {
         $userId = $request->user()->id;
+        $startDate = $request->get('start_date');
+        $endDate = $request->get('end_date');
 
         return Inertia::render('Reports/Index', [
             'projects' => Project::where('user_id', $userId)->get(),
             'tags' => Tag::where('user_id', $userId)->get(),
+            'summary' => $this->reportService->getSummary($userId, $startDate, $endDate),
+            'filters' => $request->only(['project_id', 'tag_id', 'start_date', 'end_date', 'include_billable', 'include_non_billable']),
         ]);
     }
 

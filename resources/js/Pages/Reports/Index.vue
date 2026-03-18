@@ -1,8 +1,11 @@
 <script setup lang="ts">
 import { Head, router } from '@inertiajs/vue3';
 import MainLayout from '@/Layouts/MainLayout.vue';
-import { ref, computed } from 'vue';
+import { ref, watch } from 'vue';
 import CustomDatePicker from '@/Components/CustomDatePicker.vue';
+import { Button } from '@/Components/ui/button';
+import { Input } from '@/Components/ui/input';
+import { Label } from '@/Components/ui/label';
 
 interface Project {
   id: number;
@@ -15,30 +18,83 @@ interface Tag {
   name: string;
 }
 
+interface SummaryItem {
+  id?: number;
+  name: string;
+  duration: string;
+  seconds: number;
+  earnings?: number;
+  currency?: string;
+  date?: string;
+}
+
+interface Summary {
+  total_time: string;
+  total_seconds: number;
+  total_sessions: number;
+  billable_time: string;
+  billable_seconds: number;
+  non_billable_time: string;
+  non_billable_seconds: number;
+  total_earnings: number;
+  by_project: SummaryItem[];
+  by_tag: SummaryItem[];
+  by_task: SummaryItem[];
+  by_date: SummaryItem[];
+}
+
 const props = defineProps<{
-  projects?: Project[];
-  tags?: Tag[];
+  projects: Project[];
+  tags: Tag[];
+  summary: Summary;
+  filters: {
+    project_id?: string;
+    tag_id?: string;
+    start_date?: string;
+    end_date?: string;
+    include_billable?: string;
+    include_non_billable?: string;
+  };
 }>();
 
-const projectId = ref<number | null>(null);
-const tagId = ref<number | null>(null);
-const taskId = ref<number | null>(null);
-const startDate = ref<string>('');
-const endDate = ref<string>('');
-const includeBillable = ref(true);
-const includeNonBillable = ref(true);
+const projectId = ref<number | null>(props.filters.project_id ? parseInt(props.filters.project_id) : null);
+const tagId = ref<number | null>(props.filters.tag_id ? parseInt(props.filters.tag_id) : null);
+const startDate = ref<string>(props.filters.start_date || '');
+const endDate = ref<string>(props.filters.end_date || '');
+const includeBillable = ref(props.filters.include_billable !== 'false');
+const includeNonBillable = ref(props.filters.include_non_billable !== 'false');
+const activeTab = ref('projects');
 
-const today = new Date();
-const thirtyDaysAgo = new Date();
-thirtyDaysAgo.setDate(today.getDate() - 30);
-startDate.value = thirtyDaysAgo.toISOString().split('T')[0];
-endDate.value = today.toISOString().split('T')[0];
+if (!startDate.value || !endDate.value) {
+  const today = new Date();
+  const thirtyDaysAgo = new Date();
+  thirtyDaysAgo.setDate(today.getDate() - 30);
+  if (!startDate.value) startDate.value = thirtyDaysAgo.toISOString().split('T')[0];
+  if (!endDate.value) endDate.value = today.toISOString().split('T')[0];
+}
+
+const updateFilters = () => {
+  router.get(route('reports.index'), {
+    project_id: projectId.value,
+    tag_id: tagId.value,
+    start_date: startDate.value,
+    end_date: endDate.value,
+    include_billable: includeBillable.value,
+    include_non_billable: includeNonBillable.value,
+  }, {
+    preserveState: true,
+    replace: true,
+  });
+};
+
+watch([projectId, tagId, startDate, endDate, includeBillable, includeNonBillable], () => {
+  updateFilters();
+});
 
 const exportCsv = () => {
   const params = new URLSearchParams();
   if (projectId.value) params.append('project_id', projectId.value.toString());
   if (tagId.value) params.append('tag_id', tagId.value.toString());
-  if (taskId.value) params.append('task_id', taskId.value.toString());
   if (startDate.value) params.append('start_date', startDate.value);
   if (endDate.value) params.append('end_date', endDate.value);
   params.append('include_billable', includeBillable.value.toString());
@@ -52,7 +108,6 @@ const exportPdf = () => {
   const params = new URLSearchParams();
   if (projectId.value) params.append('project_id', projectId.value.toString());
   if (tagId.value) params.append('tag_id', tagId.value.toString());
-  if (taskId.value) params.append('task_id', taskId.value.toString());
   if (startDate.value) params.append('start_date', startDate.value);
   if (endDate.value) params.append('end_date', endDate.value);
   params.append('include_billable', includeBillable.value.toString());
@@ -67,133 +122,189 @@ const exportPdf = () => {
   <Head title="Reports" />
 
   <MainLayout>
-    <div class="min-h-screen bg-gradient-to-br from-gray-50 via-gray-50 to-gray-100 dark:from-gray-900 dark:via-gray-900 dark:to-gray-800">
-      <div class="container mx-auto px-4 sm:px-6 lg:px-8 py-6 sm:py-8 max-w-6xl pt-20 sm:pt-24 md:pt-28 xl:pt-8">
-        <div class="mb-6 sm:mb-8">
-          <h1 class="text-2xl sm:text-3xl font-bold font-sans text-gray-900 dark:text-white mb-2">Reports</h1>
-          <p class="text-gray-600 dark:text-gray-400 text-sm sm:text-base">Generate and export time tracking reports</p>
-        </div>
-
-        <div class="bg-white dark:bg-gray-800 rounded-xl border border-gray-200 dark:border-gray-700 shadow-sm overflow-hidden mb-6">
-          <div class="p-4 sm:p-6">
-            <h2 class="text-lg font-semibold text-gray-900 dark:text-white mb-4">Filters</h2>
-            
-            <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
-              <div>
-                <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1.5">Project</label>
-                <div class="relative">
-                  <select
-                    v-model="projectId"
-                    class="w-full px-3 sm:px-4 py-2 sm:py-2.5 pr-10 bg-gray-50 dark:bg-gray-700 border border-gray-300 dark:border-gray-600 rounded-lg text-gray-900 dark:text-white focus:outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-500 transition-colors appearance-none cursor-pointer text-sm sm:text-base"
-                  >
-                    <option :value="null">All projects</option>
-                    <option
-                      v-for="project in projects"
-                      :key="project.id"
-                      :value="project.id"
-                    >
-                      {{ project.name }}
-                    </option>
-                  </select>
-                  <div class="absolute inset-y-0 right-0 flex items-center pr-3 pointer-events-none">
-                    <svg class="w-4 h-4 text-gray-400 dark:text-gray-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"/>
-                    </svg>
-                  </div>
-                </div>
-              </div>
-
-              <div>
-                <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1.5">Tag</label>
-                <div class="relative">
-                  <select
-                    v-model="tagId"
-                    class="w-full px-3 sm:px-4 py-2 sm:py-2.5 pr-10 bg-gray-50 dark:bg-gray-700 border border-gray-300 dark:border-gray-600 rounded-lg text-gray-900 dark:text-white focus:outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-500 transition-colors appearance-none cursor-pointer text-sm sm:text-base"
-                  >
-                    <option :value="null">All tags</option>
-                    <option
-                      v-for="tag in tags"
-                      :key="tag.id"
-                      :value="tag.id"
-                    >
-                      #{{ tag.name }}
-                    </option>
-                  </select>
-                  <div class="absolute inset-y-0 right-0 flex items-center pr-3 pointer-events-none">
-                    <svg class="w-4 h-4 text-gray-400 dark:text-gray-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"/>
-                    </svg>
-                  </div>
-                </div>
-              </div>
-
-              <div>
-                <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1.5">Start Date</label>
-                <CustomDatePicker
-                  v-model="startDate"
-                  placeholder="Start date"
-                />
-              </div>
-
-              <div>
-                <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1.5">End Date</label>
-                <CustomDatePicker
-                  v-model="endDate"
-                  placeholder="End date"
-                />
-              </div>
-            </div>
-
-            <div class="flex flex-wrap items-center gap-4 mt-4">
-              <label class="flex items-center gap-2 cursor-pointer">
-                <input
-                  v-model="includeBillable"
-                  type="checkbox"
-                  class="rounded border-gray-300 dark:border-gray-600 text-blue-600 focus:ring-blue-500"
-                />
-                <span class="text-sm text-gray-700 dark:text-gray-300">Include billable</span>
-              </label>
-              <label class="flex items-center gap-2 cursor-pointer">
-                <input
-                  v-model="includeNonBillable"
-                  type="checkbox"
-                  class="rounded border-gray-300 dark:border-gray-600 text-blue-600 focus:ring-blue-500"
-                />
-                <span class="text-sm text-gray-700 dark:text-gray-300">Include non-billable</span>
-              </label>
-            </div>
-
-            <div class="flex gap-3 mt-6">
-              <button
-                @click="exportCsv"
-                class="flex items-center gap-2 px-4 py-2.5 bg-emerald-500 text-white rounded-lg font-medium hover:bg-emerald-600 transition-colors text-sm sm:text-base"
-              >
-                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/>
-                </svg>
-                Export CSV
-              </button>
-              
-              <button
-                @click="exportPdf"
-                class="flex items-center gap-2 px-4 py-2.5 bg-red-500 text-white rounded-lg font-medium hover:bg-red-600 transition-colors text-sm sm:text-base"
-              >
-                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 21h10a2 2 0 002-2V9.414a1 1 0 00-.293-.707l-5.414-5.414A1 1 0 0012.586 3H7a2 2 0 00-2 2v14a2 2 0 002 2z"/>
-                </svg>
-                Export PDF
-              </button>
-            </div>
+    <div class="min-h-screen bg-slate-50 dark:bg-slate-950 py-8 px-4 sm:px-6 lg:px-8">
+      <div class="max-w-7xl mx-auto space-y-8">
+        <div class="flex flex-col md:flex-row md:items-center justify-between gap-4">
+          <div>
+            <h1 class="text-3xl font-bold text-slate-900 dark:text-slate-50">Reports</h1>
+            <p class="text-slate-500 dark:text-slate-400 mt-1">Insight into your productivity and earnings.</p>
+          </div>
+          <div class="flex items-center gap-3">
+            <Button variant="outline" @click="exportCsv" class="bg-white dark:bg-slate-900 border-slate-200 dark:border-slate-800">
+              Export CSV
+            </Button>
+            <Button @click="exportPdf" class="bg-blue-600 hover:bg-blue-700 text-white">
+              Export PDF
+            </Button>
           </div>
         </div>
 
-        <div class="bg-white dark:bg-gray-800 rounded-xl border border-gray-200 dark:border-gray-700 shadow-sm overflow-hidden">
-          <div class="p-4 sm:p-6">
-            <h2 class="text-lg font-semibold text-gray-900 dark:text-white mb-4">Report Preview</h2>
-            <p class="text-gray-600 dark:text-gray-400 text-sm">
-              Use the filters above and click "Export CSV" or "Export PDF" to generate your report.
-              The report will include all time sessions matching your selected filters, including billable hours and earnings.
-            </p>
+        <div class="grid grid-cols-1 lg:grid-cols-4 gap-8">
+          <div class="lg:col-span-1 space-y-6">
+            <div class="bg-white dark:bg-slate-900 rounded-xl border border-slate-200 dark:border-slate-800 p-6 shadow-sm">
+              <h3 class="font-semibold text-slate-900 dark:text-slate-50 mb-4">Filters</h3>
+              <div class="space-y-4">
+                <div class="space-y-2">
+                  <Label>Project</Label>
+                  <select
+                    v-model="projectId"
+                    class="w-full flex h-10 rounded-md border border-slate-200 bg-white px-3 py-2 text-sm ring-offset-white focus:outline-none focus:ring-2 focus:ring-slate-950 focus:ring-offset-2 dark:border-slate-800 dark:bg-slate-950 dark:ring-offset-slate-950 dark:focus:ring-slate-300"
+                  >
+                    <option :value="null">All Projects</option>
+                    <option v-for="p in projects" :key="p.id" :value="p.id">{{ p.name }}</option>
+                  </select>
+                </div>
+
+                <div class="space-y-2">
+                  <Label>Tag</Label>
+                  <select
+                    v-model="tagId"
+                    class="w-full flex h-10 rounded-md border border-slate-200 bg-white px-3 py-2 text-sm ring-offset-white focus:outline-none focus:ring-2 focus:ring-slate-950 focus:ring-offset-2 dark:border-slate-800 dark:bg-slate-950 dark:ring-offset-slate-950 dark:focus:ring-slate-300"
+                  >
+                    <option :value="null">All Tags</option>
+                    <option v-for="t in tags" :key="t.id" :value="t.id">#{{ t.name }}</option>
+                  </select>
+                </div>
+
+                <div class="space-y-2">
+                  <Label>Start Date</Label>
+                  <CustomDatePicker v-model="startDate" />
+                </div>
+
+                <div class="space-y-2">
+                  <Label>End Date</Label>
+                  <CustomDatePicker v-model="endDate" />
+                </div>
+
+                <div class="pt-2 space-y-3">
+                  <div class="flex items-center space-x-2">
+                    <input type="checkbox" id="billable" v-model="includeBillable" class="rounded border-slate-300 text-blue-600 focus:ring-blue-600 dark:bg-slate-950 dark:border-slate-800" />
+                    <Label for="billable" class="cursor-pointer">Include Billable</Label>
+                  </div>
+                  <div class="flex items-center space-x-2">
+                    <input type="checkbox" id="non-billable" v-model="includeNonBillable" class="rounded border-slate-300 text-blue-600 focus:ring-blue-600 dark:bg-slate-950 dark:border-slate-800" />
+                    <Label for="non-billable" class="cursor-pointer">Include Non-Billable</Label>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <div class="lg:col-span-3 space-y-8">
+            <div class="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-4 gap-4">
+              <div class="bg-white dark:bg-slate-900 p-6 rounded-xl border border-slate-200 dark:border-slate-800 shadow-sm">
+                <p class="text-sm font-medium text-slate-500 dark:text-slate-400">Total Time</p>
+                <h4 class="text-2xl font-bold mt-2">{{ summary.total_time }}</h4>
+              </div>
+              <div class="bg-white dark:bg-slate-900 p-6 rounded-xl border border-slate-200 dark:border-slate-800 shadow-sm">
+                <p class="text-sm font-medium text-slate-500 dark:text-slate-400">Billable Time</p>
+                <h4 class="text-2xl font-bold mt-2 text-blue-600">{{ summary.billable_time }}</h4>
+              </div>
+              <div class="bg-white dark:bg-slate-900 p-6 rounded-xl border border-slate-200 dark:border-slate-800 shadow-sm">
+                <p class="text-sm font-medium text-slate-500 dark:text-slate-400">Total Sessions</p>
+                <h4 class="text-2xl font-bold mt-2">{{ summary.total_sessions }}</h4>
+              </div>
+              <div class="bg-white dark:bg-slate-900 p-6 rounded-xl border border-slate-200 dark:border-slate-800 shadow-sm">
+                <p class="text-sm font-medium text-slate-500 dark:text-slate-400">Total Earnings</p>
+                <h4 class="text-2xl font-bold mt-2 text-emerald-600">{{ summary.total_earnings }} {{ summary.by_project[0]?.currency || 'USD' }}</h4>
+              </div>
+            </div>
+
+            <div class="bg-white dark:bg-slate-900 rounded-xl border border-slate-200 dark:border-slate-800 shadow-sm overflow-hidden">
+              <div class="border-b border-slate-200 dark:border-slate-800">
+                <nav class="flex -mb-px px-6 gap-6">
+                  <button 
+                    @click="activeTab = 'projects'"
+                    :class="[activeTab === 'projects' ? 'border-blue-600 text-blue-600' : 'border-transparent text-slate-500 hover:text-slate-700 hover:border-slate-300 dark:text-slate-400 dark:hover:text-slate-300']"
+                    class="py-4 px-1 border-b-2 font-medium text-sm transition-colors"
+                  >
+                    Projects
+                  </button>
+                  <button 
+                    @click="activeTab = 'tags'"
+                    :class="[activeTab === 'tags' ? 'border-blue-600 text-blue-600' : 'border-transparent text-slate-500 hover:text-slate-700 hover:border-slate-300 dark:text-slate-400 dark:hover:text-slate-300']"
+                    class="py-4 px-1 border-b-2 font-medium text-sm transition-colors"
+                  >
+                    Tags
+                  </button>
+                  <button 
+                    @click="activeTab = 'tasks'"
+                    :class="[activeTab === 'tasks' ? 'border-blue-600 text-blue-600' : 'border-transparent text-slate-500 hover:text-slate-700 hover:border-slate-300 dark:text-slate-400 dark:hover:text-slate-300']"
+                    class="py-4 px-1 border-b-2 font-medium text-sm transition-colors"
+                  >
+                    Tasks
+                  </button>
+                </nav>
+              </div>
+
+              <div class="p-6">
+                <div v-if="activeTab === 'projects'" class="overflow-x-auto">
+                  <table class="w-full text-sm text-left">
+                    <thead class="text-xs uppercase text-slate-500 dark:text-slate-400 border-b border-slate-200 dark:border-slate-800">
+                      <tr>
+                        <th class="py-3 font-semibold">Project</th>
+                        <th class="py-3 font-semibold">Duration</th>
+                        <th class="py-3 font-semibold text-right">Earnings</th>
+                      </tr>
+                    </thead>
+                    <tbody class="divide-y divide-slate-100 dark:divide-slate-800">
+                      <tr v-for="p in summary.by_project" :key="p.id || p.name">
+                        <td class="py-4 font-medium text-slate-900 dark:text-slate-50">{{ p.name }}</td>
+                        <td class="py-4">{{ p.duration }}</td>
+                        <td class="py-4 text-right font-semibold text-emerald-600">{{ p.earnings }} {{ p.currency }}</td>
+                      </tr>
+                      <tr v-if="summary.by_project.length === 0">
+                        <td colspan="3" class="py-8 text-center text-slate-500">No project data for this period.</td>
+                      </tr>
+                    </tbody>
+                  </table>
+                </div>
+
+                <div v-if="activeTab === 'tags'" class="overflow-x-auto">
+                  <table class="w-full text-sm text-left">
+                    <thead class="text-xs uppercase text-slate-500 dark:text-slate-400 border-b border-slate-200 dark:border-slate-800">
+                      <tr>
+                        <th class="py-3 font-semibold">Tag</th>
+                        <th class="py-3 font-semibold">Duration</th>
+                      </tr>
+                    </thead>
+                    <tbody class="divide-y divide-slate-100 dark:divide-slate-800">
+                      <tr v-for="t in summary.by_tag" :key="t.id || t.name">
+                        <td class="py-4 font-medium text-slate-900 dark:text-slate-50">
+                          <span class="inline-flex items-center px-2 py-1 rounded-md bg-slate-100 dark:bg-slate-800 text-xs text-slate-600 dark:text-slate-400">
+                            #{{ t.name }}
+                          </span>
+                        </td>
+                        <td class="py-4">{{ t.duration }}</td>
+                      </tr>
+                      <tr v-if="summary.by_tag.length === 0">
+                        <td colspan="2" class="py-8 text-center text-slate-500">No tag data for this period.</td>
+                      </tr>
+                    </tbody>
+                  </table>
+                </div>
+
+                <div v-if="activeTab === 'tasks'" class="overflow-x-auto">
+                  <table class="w-full text-sm text-left">
+                    <thead class="text-xs uppercase text-slate-500 dark:text-slate-400 border-b border-slate-200 dark:border-slate-800">
+                      <tr>
+                        <th class="py-3 font-semibold">Task</th>
+                        <th class="py-3 font-semibold">Duration</th>
+                      </tr>
+                    </thead>
+                    <tbody class="divide-y divide-slate-100 dark:divide-slate-800">
+                      <tr v-for="task in summary.by_task" :key="task.id || task.name">
+                        <td class="py-4 font-medium text-slate-900 dark:text-slate-50">{{ task.name }}</td>
+                        <td class="py-4">{{ task.duration }}</td>
+                      </tr>
+                      <tr v-if="summary.by_task.length === 0">
+                        <td colspan="2" class="py-8 text-center text-slate-500">No task data for this period.</td>
+                      </tr>
+                    </tbody>
+                  </table>
+                </div>
+              </div>
+            </div>
           </div>
         </div>
       </div>
