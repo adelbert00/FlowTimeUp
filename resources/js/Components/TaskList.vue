@@ -188,102 +188,118 @@ const totalTime = computed(() => {
 </script>
 
 <template>
-  <div class="space-y-4">
-    <div class="bg-surface-raised rounded-xl border border-border shadow-sm p-4">
-      <div class="flex flex-col sm:flex-row gap-3">
-        <div class="flex-1 relative">
-          <svg class="w-4 h-4 text-muted absolute left-3 top-1/2 -translate-y-1/2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/>
-          </svg>
-          <input
-            v-model="searchQuery"
-            type="text"
-            placeholder="Search tasks..."
-            class="w-full pl-10 pr-4 py-2 border border-border rounded-lg text-sm bg-surface-overlay text-primary placeholder-muted focus:outline-none focus:ring-2 focus:ring-accent transition-all"
-          />
-        </div>
-        
-        <button
-          @click="showFilters = !showFilters"
-          class="flex items-center justify-center gap-2 px-4 py-2 border border-border rounded-lg text-sm font-bold transition-all"
-          :class="hasActiveFilters ? 'bg-accent/10 border-accent text-accent' : 'text-secondary bg-surface-raised hover:bg-surface-overlay'"
-        >
-          <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 4a1 1 0 011-1h16a1 1 0 011 1v2.586a1 1 0 01-.293.707l-6.414 6.414a1 1 0 00-.293.707V17l-4 4v-6.586a1 1 0 00-.293-.707L3.293 7.293A1 1 0 013 6.586V4z"/>
-          </svg>
-          <span class="hidden sm:inline">Filters</span>
-          <span v-if="hasActiveFilters" class="w-2 h-2 bg-accent rounded-full"></span>
-        </button>
+  <div class="space-y-6">
+    <!-- Search & Filter Bar -->
+    <div class="bg-surface-raised rounded-2xl border border-border shadow-sm p-4 flex flex-col sm:flex-row gap-4 items-center">
+      <div class="flex-1 relative w-full group">
+        <svg class="w-4 h-4 text-muted absolute left-4 top-1/2 -translate-y-1/2 group-focus-within:text-accent transition-colors" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/>
+        </svg>
+        <input
+          v-model="searchQuery"
+          type="text"
+          placeholder="Search sessions..."
+          class="w-full pl-11 pr-4 py-2.5 bg-surface-overlay border border-border rounded-xl text-sm text-primary placeholder-muted focus:outline-none focus:ring-2 focus:ring-accent transition-all"
+        />
       </div>
       
-      <div v-if="showFilters" class="mt-4 pt-4 border-t border-border grid grid-cols-1 sm:grid-cols-3 gap-4 animate-fade-up">
-        <div>
-          <label class="block text-xs font-bold text-muted uppercase tracking-wider mb-1.5">Status</label>
+      <button
+        @click="showFilters = !showFilters"
+        class="flex items-center justify-center gap-2 px-6 py-2.5 border rounded-xl text-[10px] font-black uppercase tracking-[0.2em] transition-all w-full sm:w-auto"
+        :class="hasActiveFilters ? 'bg-accent/10 border-accent text-accent shadow-lg shadow-accent/10' : 'text-secondary bg-surface-overlay border-border hover:text-primary'"
+      >
+        <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M3 4a1 1 0 011-1h16a1 1 0 011 1v2.586a1 1 0 01-.293.707l-6.414 6.414a1 1 0 00-.293.707V17l-4 4v-6.586a1 1 0 00-.293-.707L3.293 7.293A1 1 0 013 6.586V4z"/>
+        </svg>
+        Filters
+        <span v-if="hasActiveFilters" class="w-1.5 h-1.5 bg-accent rounded-full ml-1 animate-pulse"></span>
+      </button>
+    </div>
+    
+    <!-- Collapsible Filters -->
+    <div v-if="showFilters" class="bg-surface-raised rounded-2xl border border-border p-6 shadow-inner grid grid-cols-1 sm:grid-cols-3 gap-6 animate-fade-up">
+      <div class="space-y-2">
+        <label class="block text-[10px] font-black text-secondary uppercase tracking-[0.2em]">Status</label>
+        <div class="relative">
           <select
             v-model="selectedStatus"
             @change="applyFilters"
-            class="w-full px-3 py-2 border border-border rounded-lg text-sm bg-surface-overlay text-primary focus:outline-none focus:ring-2 focus:ring-accent appearance-none cursor-pointer"
+            class="w-full px-4 py-2.5 bg-surface-overlay border border-border rounded-xl text-sm text-primary focus:outline-none focus:ring-2 focus:ring-accent appearance-none cursor-pointer"
           >
-            <option value="">All tasks</option>
-            <option value="active">Active</option>
+            <option value="">All Tasks</option>
+            <option value="active">Active Only</option>
             <option value="completed">Completed</option>
           </select>
+          <div class="absolute inset-y-0 right-0 flex items-center pr-3 pointer-events-none text-muted">
+            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"/></svg>
+          </div>
         </div>
-        
-        <div>
-          <label class="block text-xs font-bold text-muted uppercase tracking-wider mb-1.5">Priority</label>
+      </div>
+      
+      <div class="space-y-2">
+        <label class="block text-[10px] font-black text-secondary uppercase tracking-[0.2em]">Priority</label>
+        <div class="relative">
           <select
             v-model="selectedPriority"
             @change="applyFilters"
-            class="w-full px-3 py-2 border border-border rounded-lg text-sm bg-surface-overlay text-primary focus:outline-none focus:ring-2 focus:ring-accent appearance-none cursor-pointer"
+            class="w-full px-4 py-2.5 bg-surface-overlay border border-border rounded-xl text-sm text-primary focus:outline-none focus:ring-2 focus:ring-accent appearance-none cursor-pointer"
           >
-            <option value="">All priorities</option>
+            <option value="">Any Priority</option>
             <option value="high">High</option>
             <option value="medium">Medium</option>
             <option value="low">Low</option>
           </select>
+          <div class="absolute inset-y-0 right-0 flex items-center pr-3 pointer-events-none text-muted">
+            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"/></svg>
+          </div>
         </div>
-        
-        <div>
-          <label class="block text-xs font-bold text-muted uppercase tracking-wider mb-1.5">Project</label>
+      </div>
+      
+      <div class="space-y-2">
+        <label class="block text-[10px] font-black text-secondary uppercase tracking-[0.2em]">Project</label>
+        <div class="relative">
           <select
             v-model="selectedProject"
             @change="applyFilters"
-            class="w-full px-3 py-2 border border-border rounded-lg text-sm bg-surface-overlay text-primary focus:outline-none focus:ring-2 focus:ring-accent appearance-none cursor-pointer"
+            class="w-full px-4 py-2.5 bg-surface-overlay border border-border rounded-xl text-sm text-primary focus:outline-none focus:ring-2 focus:ring-accent appearance-none cursor-pointer"
           >
-            <option :value="null">All projects</option>
+            <option :value="null">All Projects</option>
             <option v-for="project in projects" :key="project.id" :value="project.id">
               {{ project.name }}
             </option>
           </select>
+          <div class="absolute inset-y-0 right-0 flex items-center pr-3 pointer-events-none text-muted">
+            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"/></svg>
+          </div>
         </div>
       </div>
     </div>
     
-    <div class="flex flex-col sm:flex-row items-center justify-between gap-4 bg-surface-raised p-4 rounded-xl border border-border shadow-sm">
-      <div class="flex items-center gap-4">
-        <div class="flex items-center gap-3">
+    <!-- Toolbar / Selection info -->
+    <div class="flex flex-col sm:flex-row items-center justify-between gap-4 bg-surface-raised p-4 px-6 rounded-2xl border border-border shadow-sm">
+      <div class="flex items-center gap-6">
+        <div class="flex items-center gap-3 group cursor-pointer" @click="selectAll()">
           <CustomCheckbox
             :checked="selectedTaskIds.length === tasks.length && tasks.length > 0"
             :indeterminate="selectedTaskIds.length > 0 && selectedTaskIds.length < tasks.length"
             @change="(checked: boolean) => selectAll(checked)"
           />
-          <span class="text-sm font-bold text-primary cursor-pointer select-none" @click="selectAll()">Select all</span>
+          <span class="text-[10px] font-black text-primary uppercase tracking-[0.1em] group-hover:text-accent transition-colors">Select all sessions</span>
         </div>
       </div>
 
-      <div class="flex items-center gap-6">
-        <div class="flex items-center gap-2">
-          <svg class="w-4 h-4 text-accent" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"/>
+      <div class="flex items-center gap-10">
+        <div class="flex items-center gap-2 bg-surface-overlay px-3 py-1.5 rounded-lg border border-border group">
+          <svg class="w-4 h-4 text-accent group-hover:scale-110 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"/>
           </svg>
-          <div class="text-sm">
-            <span class="text-secondary font-medium">Total:</span>
-            <span class="ml-1 font-mono font-bold text-primary">{{ totalTime }}</span>
+          <div class="flex items-center gap-2">
+            <span class="text-[9px] font-black text-muted uppercase tracking-widest">Selected Total:</span>
+            <span class="font-mono font-bold text-sm text-primary tracking-tighter">{{ totalTime }}</span>
           </div>
         </div>
-        <div class="text-sm text-secondary font-medium">
-          {{ pagination.total }} task{{ pagination.total !== 1 ? 's' : '' }}
+        <div class="text-[10px] font-black text-secondary uppercase tracking-[0.2em] bg-surface-overlay/50 px-3 py-1.5 rounded-lg border border-border/50">
+          {{ pagination.total }} Count
         </div>
       </div>
     </div>

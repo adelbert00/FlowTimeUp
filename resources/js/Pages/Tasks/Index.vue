@@ -81,38 +81,44 @@ const handleBulkUpdate = (payload: { ids: number[], project_id?: number | null, 
   <Head title="Tasks" />
 
   <MainLayout>
-    <div class="space-y-6">
+    <div class="space-y-6 animate-fade-up">
       <div class="flex items-center justify-between">
         <div>
-          <h1 class="text-2xl font-bold font-sans text-primary">Time Tracker</h1>
-          <p class="text-secondary text-sm">Track time and manage your tasks efficiently</p>
+          <h1 class="text-3xl font-black text-primary tracking-tighter uppercase">Time Tracker</h1>
+          <p class="text-secondary text-xs font-bold uppercase tracking-widest mt-1">Focus & Productivity Hub</p>
         </div>
         
         <button
           @click="showMobileForm = !showMobileForm"
-          class="xl:hidden flex items-center gap-2 px-4 py-2 bg-accent text-white rounded-lg text-sm font-semibold hover:bg-accent-hover transition-colors shadow-sm"
+          class="xl:hidden flex items-center gap-2 px-5 py-2.5 bg-accent text-accent-text rounded-xl text-xs font-black uppercase tracking-widest hover:bg-accent-hover transition-all shadow-lg shadow-accent/20 active:scale-95"
         >
-          <svg v-if="!showMobileForm" class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"/>
+          <svg v-if="!showMobileForm" class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M12 4v16m8-8H4"/>
           </svg>
-          <svg v-else class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/>
+          <svg v-else class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M6 18L18 6M6 6l12 12"/>
           </svg>
-          <span class="hidden sm:inline">{{ showMobileForm ? 'Close' : 'New Task' }}</span>
+          <span>{{ showMobileForm ? 'Close' : 'New Task' }}</span>
         </button>
       </div>
 
       <div
         v-if="showMobileForm"
-        class="xl:hidden animate-fade-up"
+        class="xl:hidden animate-scale-in"
       >
-        <TaskForm :projects="projects || []" :tags="tags || []" @submit="showMobileForm = false" />
+        <div class="bg-surface-raised rounded-2xl border border-border p-6 shadow-sm">
+          <TaskForm :projects="projects || []" :tags="tags || []" @submit="showMobileForm = false" />
+        </div>
       </div>
 
-      <div class="grid grid-cols-1 xl:grid-cols-12 gap-6">
+      <div class="grid grid-cols-1 xl:grid-cols-12 gap-8">
         <div class="hidden xl:block xl:col-span-4 2xl:col-span-3">
-          <div class="xl:sticky xl:top-24">
-            <TaskForm :projects="projects || []" :tags="tags || []" :collapsible="true" />
+          <div class="xl:sticky xl:top-20 space-y-6">
+            <div class="bg-surface-raised rounded-2xl border border-border p-6 shadow-sm relative overflow-hidden">
+              <div class="absolute top-0 right-0 w-24 h-24 bg-accent/5 rounded-full -mr-12 -mt-12 blur-2xl"></div>
+              <h3 class="text-[10px] font-black text-secondary uppercase tracking-[0.2em] mb-6">Create Session</h3>
+              <TaskForm :projects="projects || []" :tags="tags || []" :collapsible="false" />
+            </div>
           </div>
         </div>
 
