@@ -61,14 +61,14 @@ class ReportService
                 COALESCE(projects.name, 'No Project') as name,
                 SUM($durationExpr) as seconds,
                 SUM(CASE WHEN time_sessions.is_billable = true THEN ($durationExpr / 3600.0) * COALESCE(time_sessions.billable_rate, tasks.hourly_rate, 0) ELSE 0 END) as earnings,
-                COALESCE(tasks.currency, 'USD') as currency
+                MAX(COALESCE(tasks.currency, 'USD')) as currency
             ")
-            ->groupBy('projects.id', 'projects.name', 'tasks.currency')
+            ->groupBy('projects.id', 'projects.name')
             ->get()
             ->map(fn($row) => [
                 'id' => $row->id,
                 'name' => $row->name,
-                'duration' => $this->formatDuration($row->seconds),
+                'duration' => $this->formatDuration((int) $row->seconds),
                 'seconds' => (int) $row->seconds,
                 'earnings' => round((float) $row->earnings, 2),
                 'currency' => $row->currency,
@@ -187,6 +187,10 @@ class ReportService
             $byProject[$projectName]['seconds'] += $duration;
             if ($session->is_billable) {
                 $byProject[$projectName]['earnings'] += $hours * $hourlyRate;
+            }
+            // Ensure currency is set (might take first available if mixed)
+            if (!$byProject[$projectName]['currency'] && isset($session->task->currency)) {
+                $byProject[$projectName]['currency'] = $session->task->currency;
             }
 
             $byTask[$taskName] = ($byTask[$taskName] ?? 0) + $duration;
