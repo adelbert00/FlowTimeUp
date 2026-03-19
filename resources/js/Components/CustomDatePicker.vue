@@ -176,20 +176,20 @@ onUnmounted(() => {
       type="button"
       @click="toggleCalendar"
       :disabled="disabled"
-      class="w-full px-3 sm:px-4 py-2 sm:py-2.5 bg-gray-50/50 dark:bg-gray-700/50 border border-gray-300 dark:border-gray-600 rounded-lg text-gray-900 dark:text-white placeholder-gray-400 dark:placeholder-gray-500 focus:outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-500 transition-colors text-sm sm:text-base text-left flex items-center justify-between disabled:opacity-50 disabled:cursor-not-allowed"
+      class="w-full px-3 sm:px-4 py-2 sm:py-2.5 bg-surface-raised border border-border rounded-xl text-primary placeholder-muted focus:outline-none focus:border-accent focus:ring-1 focus:ring-accent transition-all text-sm sm:text-base text-left flex items-center justify-between disabled:opacity-50 disabled:cursor-not-allowed"
     >
-      <span>
+      <span class="font-medium">
         {{ formattedValue }}
       </span>
-      <svg class="w-5 h-5 text-gray-600 dark:text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"/>
+      <svg class="w-5 h-5 text-secondary" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"/>
       </svg>
     </button>
 
     <Teleport to="body">
       <div
         v-if="isOpen"
-        class="fixed z-[9999] bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-xl shadow-2xl p-4 w-[300px]"
+        class="fixed z-[9999] bg-surface-overlay border border-border rounded-2xl shadow-2xl p-4 w-[300px] animate-in fade-in zoom-in duration-200"
         :style="calendarPosition"
         data-calendar-dropdown
       >
@@ -197,20 +197,20 @@ onUnmounted(() => {
         <button
           type="button"
           @click="previousMonth"
-          class="p-2 rounded-lg text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors"
+          class="p-2 rounded-xl text-secondary hover:text-accent hover:bg-surface-raised transition-all"
         >
-          <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"/>
+          <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2.5">
+            <path stroke-linecap="round" stroke-linejoin="round" d="M15 19l-7-7 7-7"/>
           </svg>
         </button>
-        <h3 class="text-sm font-semibold text-gray-900 dark:text-white">{{ monthName }}</h3>
+        <h3 class="text-xs font-black text-primary uppercase tracking-tighter">{{ monthName }}</h3>
         <button
           type="button"
           @click="nextMonth"
-          class="p-2 rounded-lg text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors"
+          class="p-2 rounded-xl text-secondary hover:text-accent hover:bg-surface-raised transition-all"
         >
-          <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"/>
+          <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2.5">
+            <path stroke-linecap="round" stroke-linejoin="round" d="M9 5l7 7-7 7"/>
           </svg>
         </button>
       </div>
@@ -219,7 +219,7 @@ onUnmounted(() => {
         <div
           v-for="day in ['Su', 'Mo', 'Tu', 'We', 'Th', 'Fr', 'Sa']"
           :key="day"
-          class="text-xs font-medium text-gray-500 dark:text-gray-400 text-center py-1"
+          class="text-[10px] font-black text-muted uppercase tracking-widest text-center py-1"
         >
           {{ day }}
         </div>
@@ -232,14 +232,14 @@ onUnmounted(() => {
           type="button"
           @click="date && selectDate(date)"
           :disabled="!date"
-          class="aspect-square p-1 rounded-lg text-sm font-medium transition-colors disabled:opacity-0 disabled:cursor-default"
+          class="aspect-square p-1 rounded-xl text-xs font-bold transition-all disabled:opacity-0 disabled:cursor-default"
           :class="
             date
               ? isSelected(date!)
-                ? 'bg-blue-600 text-white'
+                ? 'bg-accent text-accent-text'
                 : isToday(date!)
-                ? 'bg-blue-100 dark:bg-blue-900/30 text-blue-600 dark:text-blue-400 border border-blue-300 dark:border-blue-700'
-                : 'text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700'
+                ? 'bg-accent/10 text-accent border border-accent/20'
+                : 'text-secondary hover:bg-surface-raised hover:text-primary'
               : ''
           "
         >
@@ -247,11 +247,11 @@ onUnmounted(() => {
         </button>
       </div>
 
-      <div class="mt-4 pt-4 border-t border-gray-200 dark:border-gray-700 flex gap-2">
+      <div class="mt-4 pt-4 border-t border-border flex gap-2">
         <button
           type="button"
           @click="selectDate(new Date())"
-          class="flex-1 px-3 py-2 text-sm text-blue-600 dark:text-blue-400 hover:text-blue-600 dark:hover:text-blue-400 hover:bg-blue-600/10 dark:hover:bg-blue-600/20 rounded-lg transition-colors"
+          class="flex-1 px-3 py-2 text-[10px] font-black uppercase tracking-widest text-accent hover:bg-accent/10 rounded-xl transition-all"
         >
           Today
         </button>
@@ -259,7 +259,7 @@ onUnmounted(() => {
           v-if="modelValue"
           type="button"
           @click="emit('update:modelValue', '')"
-          class="flex-1 px-3 py-2 text-sm text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white hover:bg-gray-100 dark:hover:bg-gray-700 rounded-lg transition-colors"
+          class="flex-1 px-3 py-2 text-[10px] font-black uppercase tracking-widest text-muted hover:text-secondary hover:bg-surface-raised rounded-xl transition-all"
         >
           Clear
         </button>
