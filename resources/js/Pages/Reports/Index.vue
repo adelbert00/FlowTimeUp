@@ -404,7 +404,9 @@ const exportReport = (format: 'csv' | 'pdf') => {
                 >
                   <SelectValue placeholder="All Projects" />
                 </SelectTrigger>
-                <SelectContent class="bg-surface-raised border-border text-primary shadow-xl">
+                <SelectContent
+                  class="bg-surface-raised border-border text-primary shadow-xl"
+                >
                   <SelectItem value="all">All Projects</SelectItem>
                   <SelectItem
                     v-for="p in projects"
@@ -428,7 +430,9 @@ const exportReport = (format: 'csv' | 'pdf') => {
                 >
                   <SelectValue placeholder="All Tags" />
                 </SelectTrigger>
-                <SelectContent class="bg-surface-raised border-border text-primary shadow-xl">
+                <SelectContent
+                  class="bg-surface-raised border-border text-primary shadow-xl"
+                >
                   <SelectItem value="all">All Tags</SelectItem>
                   <SelectItem
                     v-for="t in tags"
@@ -513,7 +517,7 @@ const exportReport = (format: 'csv' | 'pdf') => {
             :class="[
               'flex items-center gap-2 px-6 py-2 text-xs font-bold uppercase tracking-widest rounded-lg transition-all',
               activeTab === 'projects'
-                ? 'bg-accent text-accent-text shadow-lg shadow-accent/20'
+                ? 'bg-accent text-white shadow-lg shadow-accent/20'
                 : 'text-secondary hover:text-primary hover:bg-surface-overlay',
             ]"
           >
@@ -525,7 +529,7 @@ const exportReport = (format: 'csv' | 'pdf') => {
             :class="[
               'flex items-center gap-2 px-6 py-2 text-xs font-bold uppercase tracking-widest rounded-lg transition-all',
               activeTab === 'tags'
-                ? 'bg-accent text-accent-text shadow-lg shadow-accent/20'
+                ? 'bg-accent text-white shadow-lg shadow-accent/20'
                 : 'text-secondary hover:text-primary hover:bg-surface-overlay',
             ]"
           >
