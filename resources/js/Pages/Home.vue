@@ -93,7 +93,10 @@ function getStrokeOffset(index: number): number {
   <MainLayout>
     <div class="space-y-6">
       <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
-        <h1 class="text-2xl font-bold font-sans text-primary">Dashboard</h1>
+        <div>
+          <h1 class="text-3xl font-black text-primary tracking-tighter uppercase">Dashboard</h1>
+          <p class="text-secondary text-xs font-bold uppercase tracking-widest mt-1">Activity Overview & Statistics</p>
+        </div>
         
         <div class="flex items-center gap-3">
           <div class="relative">

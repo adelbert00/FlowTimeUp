@@ -145,7 +145,10 @@ function deleteProject(project: Project) {
   <MainLayout>
     <div class="space-y-6 animate-fade-up">
       <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
-        <h1 class="text-2xl font-bold font-sans text-primary">Projects</h1>
+        <div>
+          <h1 class="text-3xl font-black text-primary tracking-tighter uppercase">Projects</h1>
+          <p class="text-secondary text-xs font-bold uppercase tracking-widest mt-1">Project Management Hub</p>
+        </div>
         <button
           @click="openCreateModal"
           class="flex items-center justify-center gap-2 px-6 py-2.5 bg-accent text-white rounded-xl font-bold text-xs uppercase tracking-widest hover:bg-accent-hover transition-all shadow-lg shadow-accent/20 active:scale-95"

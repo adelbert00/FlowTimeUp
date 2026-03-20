@@ -288,11 +288,11 @@ const exportReport = (format: 'csv' | 'pdf') => {
         class="flex flex-col md:flex-row md:items-center justify-between gap-6"
       >
         <div>
-          <h1 class="text-3xl font-bold tracking-tight text-primary">
+          <h1 class="text-3xl font-black text-primary tracking-tighter uppercase">
             Reports
           </h1>
-          <p class="text-secondary mt-1">
-            Analyze your time tracking and earnings across projects and tags.
+          <p class="text-secondary text-xs font-bold uppercase tracking-widest mt-1">
+            Insights & Analytics Hub
           </p>
         </div>
         <div class="flex items-center gap-3">

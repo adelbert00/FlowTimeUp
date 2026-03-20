@@ -105,7 +105,10 @@ function quickAddTag() {
   <MainLayout>
     <div class="space-y-6 animate-fade-up">
       <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
-        <h1 class="text-2xl font-bold font-sans text-primary">Tags</h1>
+        <div>
+          <h1 class="text-3xl font-black text-primary tracking-tighter uppercase">Tags</h1>
+          <p class="text-secondary text-xs font-bold uppercase tracking-widest mt-1">Classification & Organization</p>
+        </div>
         
         <div class="flex items-center gap-2 group">
           <input

@@ -163,16 +163,8 @@ const weekDaysShort = ['M', 'T', 'W', 'T', 'F', 'S', 'S'];
         class="flex flex-col sm:flex-row sm:items-center justify-between gap-4"
       >
         <div>
-          <h1
-            class="text-3xl font-black text-primary uppercase tracking-tighter"
-          >
-            Timeline
-          </h1>
-          <p
-            class="text-secondary text-[10px] font-bold uppercase tracking-widest mt-1"
-          >
-            Calendar & Schedule Analysis
-          </p>
+          <h1 class="text-3xl font-black text-primary tracking-tighter uppercase">Calendar</h1>
+          <p class="text-secondary text-xs font-bold uppercase tracking-widest mt-1">Timeline & Schedule Analysis</p>
         </div>
 
         <div
