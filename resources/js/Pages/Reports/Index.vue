@@ -300,7 +300,7 @@ const CustomTooltip = ({ active, payload }: any) => {
                 <SelectTrigger class="bg-surface-overlay border-border text-primary focus:ring-accent">
                   <SelectValue placeholder="All Projects" />
                 </SelectTrigger>
-                <SelectContent class="bg-surface-raised border-border text-primary">
+                <SelectContent class="bg-surface-raised border-border text-primary shadow-xl">
                   <SelectItem value="all">All Projects</SelectItem>
                   <SelectItem v-for="p in projects" :key="p.id" :value="p.id.toString()">
                     {{ p.name }}
@@ -315,7 +315,7 @@ const CustomTooltip = ({ active, payload }: any) => {
                 <SelectTrigger class="bg-surface-overlay border-border text-primary focus:ring-accent">
                   <SelectValue placeholder="All Tags" />
                 </SelectTrigger>
-                <SelectContent class="bg-surface-raised border-border text-primary">
+                <SelectContent class="bg-surface-raised border-border text-primary shadow-xl">
                   <SelectItem value="all">All Tags</SelectItem>
                   <SelectItem v-for="t in tags" :key="t.id" :value="t.id.toString()">
                     #{{ t.name }}

@@ -259,17 +259,19 @@ const steps = [
     <footer class="relative z-10 border-t border-border bg-surface py-12">
       <div class="container mx-auto px-4 sm:px-6 lg:px-8">
         <div class="flex flex-col sm:flex-row items-center justify-between gap-8">
-          <Link href="/" class="flex items-center gap-2.5">
-            <div class="w-6 h-6 rounded-md bg-accent flex items-center justify-center shrink-0">
-              <div class="w-2 h-2 bg-white rounded-full"></div>
+          <Link href="/" class="flex items-center gap-2.5 group">
+            <div class="w-10 h-10 rounded-lg bg-accent flex items-center justify-center shrink-0 shadow-sm group-hover:shadow-accent/30 transition-shadow">
+              <svg class="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2.2">
+                <path stroke-linecap="round" stroke-linejoin="round" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"/>
+              </svg>
             </div>
-            <span class="text-sm font-bold text-primary tracking-tight">FlowTimeUp</span>
+            <span class="text-xl font-bold tracking-tight text-primary">FlowTimeUp</span>
           </Link>
           
           <div class="flex items-center gap-10">
-            <Link :href="route('pages.privacy-policy')" class="text-[9px] font-bold text-muted hover:text-accent uppercase tracking-widest transition-colors">Security_Protocol</Link>
-            <Link :href="route('pages.terms-of-service')" class="text-[9px] font-bold text-muted hover:text-accent uppercase tracking-widest transition-colors">Terms_of_Service</Link>
-            <span class="text-[9px] font-mono text-muted uppercase tracking-widest opacity-50">© 2026 CLAW_SYSTEMS</span>
+            <Link :href="route('pages.privacy-policy')" class="text-[10px] font-bold text-secondary hover:text-accent uppercase tracking-widest transition-colors">Privacy Policy</Link>
+            <Link :href="route('pages.terms-of-service')" class="text-[10px] font-bold text-secondary hover:text-accent uppercase tracking-widest transition-colors">Terms of Service</Link>
+            <span class="text-[10px] font-bold text-secondary uppercase tracking-widest opacity-50">© 2026 FlowTimeUp</span>
           </div>
         </div>
       </div>
