@@ -90,7 +90,7 @@ const handleBulkUpdate = (payload: { ids: number[], project_id?: number | null, 
         
         <button
           @click="showMobileForm = !showMobileForm"
-          class="xl:hidden flex items-center gap-2 px-5 py-2.5 bg-accent text-accent-text rounded-xl text-xs font-black uppercase tracking-widest hover:bg-accent-hover transition-all shadow-lg shadow-accent/20 active:scale-95"
+          class="xl:hidden flex items-center gap-2 px-5 py-2.5 bg-accent text-white rounded-xl text-xs font-black uppercase tracking-widest hover:bg-accent-hover transition-all shadow-lg shadow-accent/20 active:scale-95"
         >
           <svg v-if="!showMobileForm" class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M12 4v16m8-8H4"/>
@@ -112,7 +112,7 @@ const handleBulkUpdate = (payload: { ids: number[], project_id?: number | null, 
       </div>
 
       <div class="grid grid-cols-1 xl:grid-cols-12 gap-8">
-        <div class="hidden xl:block xl:col-span-4 2xl:col-span-3">
+        <div class="hidden xl:block xl:col-span-5 2xl:col-span-4">
           <div class="xl:sticky xl:top-20 space-y-6">
             <div class="bg-surface-raised rounded-2xl border border-border p-6 shadow-sm relative overflow-hidden">
               <div class="absolute top-0 right-0 w-24 h-24 bg-accent/5 rounded-full -mr-12 -mt-12 blur-2xl"></div>
@@ -122,7 +122,7 @@ const handleBulkUpdate = (payload: { ids: number[], project_id?: number | null, 
           </div>
         </div>
 
-        <div class="xl:col-span-8 2xl:col-span-9">
+        <div class="xl:col-span-7 2xl:col-span-8">
           <TaskList
             :tasks="tasks.data"
             :pagination="{

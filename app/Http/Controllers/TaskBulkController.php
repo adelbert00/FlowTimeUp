@@ -8,24 +8,24 @@ use Illuminate\Http\Request;
 
 class TaskBulkController extends Controller
 {
-    public function destroy(Request ): RedirectResponse
+    public function destroy(Request $request): RedirectResponse
     {
-        ->validate([
+        $request->validate([
             'ids' => 'required|array',
-            'ids.*' => 'exists:tasks,id,user_id,' . ->user()->id,
+            'ids.*' => 'exists:tasks,id,user_id,' . $request->user()->id,
         ]);
 
-        Task::whereIn('id', ->ids)->delete();
+        Task::whereIn('id', $request->ids)->delete();
 
-        return redirect()->back()->with('success', count(->ids) . ' tasks deleted successfully.');
+        return redirect()->back()->with('success', count($request->ids) . ' tasks deleted successfully.');
     }
 
-    public function update(Request ): RedirectResponse
+    public function update(Request $request): RedirectResponse
     {
-        ->validate([
+        $request->validate([
             'ids' => 'required|array',
-            'ids.*' => 'exists:tasks,id,user_id,' . ->user()->id,
-            'project_id' => 'nullable|exists:projects,id,user_id,' . ->user()->id,
+            'ids.*' => 'exists:tasks,id,user_id,' . $request->user()->id,
+            'project_id' => 'nullable|exists:projects,id,user_id,' . $request->user()->id,
             'completed' => 'nullable|boolean',
         ]);
 

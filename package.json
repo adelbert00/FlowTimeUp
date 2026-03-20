@@ -24,16 +24,17 @@
   },
   "dependencies": {
     "@vueuse/core": "^12.5.0",
+    "chart.js": "^4.5.1",
     "class-variance-authority": "^0.7.1",
     "clsx": "^2.1.1",
     "dayjs": "^1.11.13",
     "lucide-vue-next": "^0.474.0",
     "pinia": "^2.3.1",
     "radix-vue": "^1.9.12",
-    "recharts": "^3.8.0",
     "shadcn-vue": "^0.11.3",
     "tailwind-merge": "^2.6.0",
     "tailwindcss-animate": "^1.0.7",
+    "vue-chartjs": "^5.3.3",
     "vuedraggable": "^4.1.0"
   }
 }

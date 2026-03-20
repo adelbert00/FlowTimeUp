@@ -97,7 +97,7 @@ const steps = [
             <Link
               v-if="canRegister"
               :href="route('register')"
-              class="px-6 py-2 bg-accent text-accent-text text-[10px] font-black uppercase tracking-widest hover:bg-accent/90 transition-all border border-accent"
+              class="px-6 py-2 bg-accent text-white text-[10px] font-black uppercase tracking-widest hover:bg-accent/90 transition-all border border-accent"
             >
               Access System
             </Link>
@@ -137,7 +137,7 @@ const steps = [
             <div class="flex flex-col sm:flex-row gap-4">
               <Link
                 :href="canRegister ? route('register') : route('login')"
-                class="px-10 py-4 bg-accent text-accent-text text-[11px] font-black uppercase tracking-widest hover:invert transition-all flex items-center justify-center gap-3"
+                class="px-10 py-4 bg-accent text-white text-[11px] font-black uppercase tracking-widest hover:invert transition-all flex items-center justify-center gap-3"
               >
                 Initialize Account
                 <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="square" stroke-width="2" d="M13 7l5 5m0 0l-5 5m5-5H6"/></svg>
@@ -251,7 +251,7 @@ const steps = [
           <div class="flex flex-col sm:flex-row items-center justify-center gap-6">
             <Link
               :href="canRegister ? route('register') : route('login')"
-              class="w-full sm:w-auto px-12 py-5 bg-accent text-accent-text text-xs font-black uppercase tracking-widest hover:scale-105 transition-transform"
+              class="w-full sm:w-auto px-12 py-5 bg-accent text-white text-xs font-black uppercase tracking-widest hover:scale-105 transition-transform"
             >
               Start Deployment
             </Link>

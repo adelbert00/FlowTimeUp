@@ -74,6 +74,27 @@ function applyBulkProject() {
   selectedTaskIds.value = [];
 }
 
+function bulkMarkCompleted(completed: boolean) {
+  emit('bulk-update', {
+    ids: [...selectedTaskIds.value],
+    completed
+  });
+  selectedTaskIds.value = [];
+}
+
+function clearSelection() {
+  selectedTaskIds.value = [];
+}
+
+function handleSelect(id: number) {
+  const index = selectedTaskIds.value.indexOf(id);
+  if (index > -1) {
+    selectedTaskIds.value.splice(index, 1);
+  } else {
+    selectedTaskIds.value.push(id);
+  }
+}
+
 const showConfirmModal = ref(false);
 const confirmMessage = ref('');
 const showFilters = ref(false);
@@ -175,8 +196,9 @@ const hasActiveFilters = computed(() => {
 
 const totalTime = computed(() => {
   let totalSeconds = 0;
+  const selected = new Set(selectedTaskIds.value);
   props.tasks.forEach(task => {
-    if (task.total_time_seconds) {
+    if (selected.has(task.id) && task.total_time_seconds) {
       totalSeconds += task.total_time_seconds;
     }
   });
@@ -264,7 +286,7 @@ const totalTime = computed(() => {
             class="w-full px-4 py-2.5 bg-surface-overlay border border-border rounded-xl text-sm text-primary focus:outline-none focus:ring-2 focus:ring-accent appearance-none cursor-pointer"
           >
             <option :value="null">All Projects</option>
-            <option v-for="project in projects" :key="project.id" :value="project.id">
+            <option v-for="project in (projects || [])" :key="project.id" :value="project.id">
               {{ project.name }}
             </option>
           </select>
@@ -310,14 +332,7 @@ const totalTime = computed(() => {
         :key="task.id"
         :task="task"
         :selected="selectedTaskIds.includes(task.id)"
-        @select="(id) => {
-          const index = selectedTaskIds.indexOf(id);
-          if (index > -1) {
-            selectedTaskIds.splice(index, 1);
-          } else {
-            selectedTaskIds.push(id);
-          }
-        }"
+        @select="handleSelect"
         @delete="handleDelete"
         @toggle-complete="toggleTaskComplete"
       />
@@ -347,7 +362,7 @@ const totalTime = computed(() => {
     <div v-if="pagination.last_page > 1" class="flex items-center justify-center gap-2 pt-8">
       <button
         :disabled="pagination.current_page === 1"
-        @click="router.get(route('tasks.index'), { ...filters, page: pagination.current_page - 1 })"
+        @click="router.get(route('tasks.index'), { ...(props.filters || {}), page: pagination.current_page - 1 })"
         class="px-4 py-2 rounded-xl text-sm font-bold transition-all disabled:opacity-50 disabled:cursor-not-allowed"
         :class="pagination.current_page === 1 ? 'bg-surface-overlay text-muted' : 'bg-surface-raised text-primary border border-border hover:bg-surface-overlay shadow-sm'"
       >
@@ -362,7 +377,7 @@ const totalTime = computed(() => {
 
       <button
         :disabled="pagination.current_page === pagination.last_page"
-        @click="router.get(route('tasks.index'), { ...filters, page: pagination.current_page + 1 })"
+        @click="router.get(route('tasks.index'), { ...(props.filters || {}), page: pagination.current_page + 1 })"
         class="px-4 py-2 rounded-xl text-sm font-bold transition-all disabled:opacity-50 disabled:cursor-not-allowed"
         :class="pagination.current_page === pagination.last_page ? 'bg-surface-overlay text-muted' : 'bg-surface-raised text-primary border border-border hover:bg-surface-overlay shadow-sm'"
       >
@@ -391,6 +406,7 @@ const totalTime = computed(() => {
               </div>
             </div>
 
+          <div class="flex items-center gap-2">
           <button 
             @click="bulkMarkCompleted(true)"
             class="flex items-center gap-2 px-3 py-2 bg-emerald-500/10 hover:bg-emerald-500/20 text-emerald-400 rounded-xl text-xs font-bold transition-colors border border-emerald-500/10"
@@ -426,7 +442,7 @@ const totalTime = computed(() => {
               <div class="w-px h-6 bg-white/10 mx-1"></div>
 
               <button 
-                @click="selectedTaskIds = []"
+                @click="clearSelection"
                 class="p-2 text-white/40 hover:text-white transition-colors"
               >
                 <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/></svg>
@@ -446,7 +462,7 @@ const totalTime = computed(() => {
           <h3 class="text-lg font-bold text-primary mb-4">Move to Project</h3>
           <div class="space-y-2 mb-6 max-h-[300px] overflow-y-auto pr-1 custom-scrollbar">
             <div 
-              v-for="project in projects" 
+              v-for="project in (projects || [])" 
               :key="project.id"
               @click="selectedBulkProjectId = project.id"
               class="flex items-center gap-3 p-3 rounded-xl border cursor-pointer transition-all"

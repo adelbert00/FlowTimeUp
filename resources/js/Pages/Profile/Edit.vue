@@ -19,7 +19,7 @@ const user = page.props.auth?.user;
 
   <MainLayout>
     <div class="min-h-screen bg-gradient-to-br from-gray-50 via-gray-50 to-gray-100 dark:from-gray-900 dark:via-gray-900 dark:to-gray-800">
-      <div class="container mx-auto px-4 sm:px-6 md:px-10 lg:px-8 py-6 sm:py-8 max-w-4xl pt-20 sm:pt-24 md:pt-28 xl:pt-8">
+      <div class="container mx-auto px-4 sm:px-6 md:px-10 lg:px-8 py-6 sm:py-8 max-w-4xl pt-2 xl:pt-4">
         <!-- Header -->
         <div class="mb-6 sm:mb-8">
           <h1 class="text-2xl sm:text-3xl font-bold text-gray-900 dark:text-white mb-1 sm:mb-2">Profile Settings</h1>

@@ -62,7 +62,7 @@ onMounted(() => {
 
     <TopNavbar />
 
-    <main class="flex-1 overflow-x-hidden overflow-y-auto xl:ml-0 xl:pt-14 w-full animate-fade-up">
+    <main class="flex-1 overflow-x-hidden overflow-y-auto pt-14 w-full animate-fade-up">
       <div class="p-4 sm:p-6 lg:p-8 max-w-[1400px] mx-auto transition-all duration-300">
         <slot />
       </div>

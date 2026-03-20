@@ -167,7 +167,7 @@ const submit = async () => {
       <button
         type="submit"
         :disabled="form.processing"
-        class="w-full py-4 bg-accent text-accent-text rounded-2xl text-[10px] font-black uppercase tracking-[0.2em] hover:bg-accent-hover transition-all shadow-xl shadow-accent/20 active:scale-95 disabled:opacity-50"
+        class="w-full py-4 bg-accent text-white rounded-2xl text-[10px] font-black uppercase tracking-[0.2em] hover:bg-accent-hover transition-all shadow-xl shadow-accent/20 active:scale-95 disabled:opacity-50"
       >
         Initialize Enrollment
       </button>

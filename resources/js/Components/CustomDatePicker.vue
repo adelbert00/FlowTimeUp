@@ -236,7 +236,7 @@ onUnmounted(() => {
           :class="
             date
               ? isSelected(date!)
-                ? 'bg-accent text-accent-text'
+                ? 'bg-accent text-white'
                 : isToday(date!)
                 ? 'bg-accent/10 text-accent border border-accent/20'
                 : 'text-secondary hover:bg-surface-raised hover:text-primary'
