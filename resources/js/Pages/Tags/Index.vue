@@ -118,7 +118,7 @@ function quickAddTag() {
           <button
             @click="quickAddTag"
             :disabled="!quickAddName.trim()"
-            class="px-6 py-2.5 bg-accent text-accent-text rounded-xl font-bold text-xs uppercase tracking-widest hover:bg-accent-hover disabled:opacity-50 disabled:cursor-not-allowed transition-all shadow-lg shadow-accent/20 active:scale-95"
+            class="px-6 py-2.5 bg-accent text-white rounded-xl font-bold text-xs uppercase tracking-widest hover:bg-accent-hover disabled:opacity-50 disabled:cursor-not-allowed transition-all shadow-lg shadow-accent/20 active:scale-95"
           >
             Add
           </button>
@@ -267,7 +267,7 @@ function quickAddTag() {
                   <button
                     type="submit"
                     :disabled="form.processing"
-                    class="flex-1 px-6 py-3.5 bg-accent text-accent-text rounded-xl font-bold text-xs uppercase tracking-widest hover:bg-accent-hover disabled:opacity-50 transition-all shadow-lg shadow-accent/20 active:scale-95"
+                    class="flex-1 px-6 py-3.5 bg-accent text-white rounded-xl font-bold text-xs uppercase tracking-widest hover:bg-accent-hover disabled:opacity-50 transition-all shadow-lg shadow-accent/20 active:scale-95"
                   >
                     {{ editingTag ? 'Save Changes' : 'Create Tag' }}
                   </button>

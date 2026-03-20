@@ -1,16 +1,25 @@
 <script setup lang="ts">
 import { Head, router } from '@inertiajs/vue3';
 import MainLayout from '@/Layouts/MainLayout.vue';
-import { ref, watch } from 'vue';
+import { ref, watch, computed } from 'vue';
 import CustomDatePicker from '@/Components/CustomDatePicker.vue';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/Components/ui/select';
 import { Button } from '@/Components/ui/button';
 import { Download, FileText, BarChart3, Tag as TagIcon, Folder } from 'lucide-vue-next';
-import { 
-  PieChart, Pie, Cell, Tooltip as ChartTooltip, ResponsiveContainer, 
-  BarChart, Bar, XAxis, YAxis, CartesianGrid, Legend 
-} from 'recharts';
-import { computed, h } from 'vue';
+import { Bar, Doughnut } from 'vue-chartjs';
+import {
+  Chart as ChartJS,
+  CategoryScale,
+  LinearScale,
+  BarElement,
+  ArcElement,
+  Title,
+  Tooltip,
+  Legend,
+  Filler,
+} from 'chart.js';
+
+ChartJS.register(CategoryScale, LinearScale, BarElement, ArcElement, Title, Tooltip, Legend, Filler);
 
 interface SummaryData {
   id: number | string;
@@ -55,6 +64,24 @@ const projectChartData = computed(() => {
   }));
 });
 
+const projectBarChartData = computed(() => ({
+  labels: projectChartData.value.map(d => d.name),
+  datasets: [{
+    label: 'Duration',
+    data: projectChartData.value.map(d => d.duration),
+    backgroundColor: projectChartData.value.map(d => d.color),
+  }],
+}));
+
+const projectPieChartData = computed(() => ({
+  labels: projectChartData.value.map(d => d.name),
+  datasets: [{
+    data: projectChartData.value.map(d => d.duration),
+    backgroundColor: projectChartData.value.map(d => d.color),
+    borderWidth: 0,
+  }],
+}));
+
 const tagChartData = computed(() => {
   return props.tagSummary.map(item => ({
     name: item.name,
@@ -62,6 +89,69 @@ const tagChartData = computed(() => {
     earnings: Number(item.earnings) || 0
   }));
 });
+
+const tagBarChartData = computed(() => ({
+  labels: tagChartData.value.map(d => d.name),
+  datasets: [
+    { label: 'Duration', data: tagChartData.value.map(d => d.duration), backgroundColor: '#f43f5e' },
+    { label: 'Earnings', data: tagChartData.value.map(d => d.earnings), backgroundColor: '#10b981' },
+  ],
+}));
+
+const projectBarOptions = computed(() => ({
+  responsive: true,
+  maintainAspectRatio: false,
+  plugins: {
+    legend: { display: false },
+    tooltip: {
+      callbacks: { label: (ctx: any) => formatDuration(Number(ctx.raw)) },
+    },
+  },
+  scales: {
+    x: { grid: { display: false }, ticks: { font: { size: 10 } } },
+    y: {
+      grid: { color: 'rgba(148, 163, 184, 0.1)' },
+      ticks: { callback: (v: unknown) => `${Math.floor(Number(v) / 3600)}h`, font: { size: 10 } },
+    },
+  },
+}));
+
+const projectPieOptions = computed(() => ({
+  responsive: true,
+  maintainAspectRatio: false,
+  cutout: '60%',
+  plugins: {
+    legend: { display: false },
+    tooltip: {
+      callbacks: { label: (ctx: any) => `${ctx.label}: ${formatDuration(Number(ctx.raw))}` },
+    },
+  },
+}));
+
+const tagBarOptions = computed(() => ({
+  responsive: true,
+  maintainAspectRatio: false,
+  indexAxis: 'y' as const,
+  plugins: {
+    legend: {
+      position: 'top' as const,
+      labels: { font: { size: 10 }, usePointStyle: true },
+    },
+    tooltip: {
+      callbacks: {
+        label: (ctx: any) =>
+          ctx.dataset?.label === 'Earnings' ? formatCurrency(Number(ctx.raw)) : formatDuration(Number(ctx.raw)),
+      },
+    },
+  },
+  scales: {
+    x: {
+      grid: { color: 'rgba(148, 163, 184, 0.1)' },
+      ticks: { callback: (v: unknown) => `${Math.floor(Number(v) / 3600)}h`, font: { size: 10 } },
+    },
+    y: { grid: { display: false }, ticks: { font: { size: 10 } } },
+  },
+}));
 
 const filterState = ref({
   project_id: props.filters.project_id?.toString() || 'all',
@@ -122,6 +212,7 @@ const exportReport = (format: 'csv' | 'pdf') => {
     window.open(url, '_blank');
   }
 };
+<<<<<<< HEAD
 
 const CustomTooltip = ({ active, payload }: any) => {
   if (active && payload && payload.length) {
@@ -145,6 +236,8 @@ const CustomTooltip = ({ active, payload }: any) => {
   }
   return null;
 };
+=======
+>>>>>>> 5796fe0264688b2e38393a882d26169a240b8ee0
 </script>
 
 <template>
@@ -268,14 +361,14 @@ const CustomTooltip = ({ active, payload }: any) => {
         <div class="flex bg-surface-raised p-1 rounded-xl border border-border w-fit shadow-sm">
           <button 
             @click="activeTab = 'projects'"
-            :class="['flex items-center gap-2 px-6 py-2 text-xs font-bold uppercase tracking-widest rounded-lg transition-all', activeTab === 'projects' ? 'bg-accent text-accent-text shadow-lg shadow-accent/20' : 'text-secondary hover:text-primary hover:bg-surface-overlay']"
+            :class="['flex items-center gap-2 px-6 py-2 text-xs font-bold uppercase tracking-widest rounded-lg transition-all', activeTab === 'projects' ? 'bg-accent text-white shadow-lg shadow-accent/20' : 'text-secondary hover:text-primary hover:bg-surface-overlay']"
           >
             <Folder class="h-3.5 w-3.5" />
             By Projects
           </button>
           <button 
             @click="activeTab = 'tags'"
-            :class="['flex items-center gap-2 px-6 py-2 text-xs font-bold uppercase tracking-widest rounded-lg transition-all', activeTab === 'tags' ? 'bg-accent text-accent-text shadow-lg shadow-accent/20' : 'text-secondary hover:text-primary hover:bg-surface-overlay']"
+            :class="['flex items-center gap-2 px-6 py-2 text-xs font-bold uppercase tracking-widest rounded-lg transition-all', activeTab === 'tags' ? 'bg-accent text-white shadow-lg shadow-accent/20' : 'text-secondary hover:text-primary hover:bg-surface-overlay']"
           >
             <TagIcon class="h-3.5 w-3.5" />
             By Tags
@@ -287,6 +380,7 @@ const CustomTooltip = ({ active, payload }: any) => {
           <div class="md:col-span-2 bg-surface-raised rounded-2xl border border-border shadow-sm p-6">
             <h4 class="text-xs font-bold text-secondary uppercase tracking-widest mb-6">Duration by Project</h4>
             <div class="h-64 w-full">
+<<<<<<< HEAD
               <ResponsiveContainer width="100%" height="100%">
                 <BarChart :data="projectChartData" :margin="{ top: 0, right: 0, left: -20, bottom: 0 }">
                   <CartesianGrid strokeDasharray="3 3" stroke="rgba(148, 163, 184, 0.1)" :vertical="false" />
@@ -298,11 +392,15 @@ const CustomTooltip = ({ active, payload }: any) => {
                   </Bar>
                 </BarChart>
               </ResponsiveContainer>
+=======
+              <Bar :data="projectBarChartData" :options="projectBarOptions" />
+>>>>>>> 5796fe0264688b2e38393a882d26169a240b8ee0
             </div>
           </div>
           <div class="bg-surface-raised rounded-2xl border border-border shadow-sm p-6 flex flex-col">
             <h4 class="text-xs font-bold text-secondary uppercase tracking-widest mb-6">Time Distribution</h4>
             <div class="h-64 w-full flex-1">
+<<<<<<< HEAD
               <ResponsiveContainer width="100%" height="100%">
                 <PieChart>
                   <Pie
@@ -317,6 +415,9 @@ const CustomTooltip = ({ active, payload }: any) => {
                   <ChartTooltip :content="CustomTooltip" />
                 </PieChart>
               </ResponsiveContainer>
+=======
+              <Doughnut :data="projectPieChartData" :options="projectPieOptions" />
+>>>>>>> 5796fe0264688b2e38393a882d26169a240b8ee0
             </div>
             <div class="mt-4 grid grid-cols-2 gap-2">
               <div v-for="entry in projectChartData.slice(0, 4)" :key="entry.name" class="flex items-center gap-2 overflow-hidden">
@@ -389,17 +490,7 @@ const CustomTooltip = ({ active, payload }: any) => {
         <div v-if="activeTab === 'tags' && tagSummary.length > 0" class="bg-surface-raised rounded-2xl border border-border shadow-sm p-8 animate-scale-in">
           <h4 class="text-xs font-bold text-secondary uppercase tracking-[0.2em] mb-10">Tag Analysis Overview</h4>
           <div class="h-80 w-full overflow-hidden">
-            <ResponsiveContainer width="100%" height="100%">
-              <BarChart :data="tagChartData" :barGap="24" layout="vertical" :margin="{ top: 0, right: 30, left: 40, bottom: 0 }">
-                <CartesianGrid strokeDasharray="3 3" stroke="rgba(148, 163, 184, 0.1)" :horizontal="true" :vertical="false" />
-                <XAxis type="number" stroke="rgba(148, 163, 184, 0.4)" :fontSize="10" :axisLine="false" :tickLine="false" :tickFormatter="(value) => `${Math.floor(value / 3600)}h`" />
-                <YAxis dataKey="name" type="category" stroke="currentColor" :fontSize="10" :axisLine="false" :tickLine="false" :width="100" />
-                <ChartTooltip :cursor="{ fill: 'rgba(148, 163, 184, 0.05)' }" :content="CustomTooltip" />
-                <Bar dataKey="duration" name="Duration" fill="#f43f5e" :radius="[0, 4, 4, 0]" :barSize="20" />
-                <Bar dataKey="earnings" name="Earnings" fill="#10b981" :radius="[0, 4, 4, 0]" :barSize="20" />
-                <Legend iconType="circle" :wrapperStyle="{ paddingTop: '20px', fontSize: '10px', textTransform: 'uppercase', fontWeight: 'bold' }" />
-              </BarChart>
-            </ResponsiveContainer>
+            <Bar :data="tagBarChartData" :options="tagBarOptions" />
           </div>
         </div>
       </div>

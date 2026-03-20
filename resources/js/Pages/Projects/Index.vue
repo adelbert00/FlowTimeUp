@@ -148,7 +148,7 @@ function deleteProject(project: Project) {
         <h1 class="text-2xl font-bold font-sans text-primary">Projects</h1>
         <button
           @click="openCreateModal"
-          class="flex items-center justify-center gap-2 px-6 py-2.5 bg-accent text-accent-text rounded-xl font-bold text-xs uppercase tracking-widest hover:bg-accent-hover transition-all shadow-lg shadow-accent/20 active:scale-95"
+          class="flex items-center justify-center gap-2 px-6 py-2.5 bg-accent text-white rounded-xl font-bold text-xs uppercase tracking-widest hover:bg-accent-hover transition-all shadow-lg shadow-accent/20 active:scale-95"
         >
           <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M12 4v16m8-8H4"/></svg>
           Create Project
@@ -270,7 +270,7 @@ function deleteProject(project: Project) {
           </div>
           <p class="text-primary font-bold text-lg">No projects found</p>
           <p class="text-secondary text-sm mb-8">Create your first project to start tracking your time.</p>
-          <button @click="openCreateModal" class="px-8 py-3 bg-accent text-accent-text rounded-xl font-bold text-xs uppercase tracking-widest hover:bg-accent-hover transition-all shadow-lg shadow-accent/20">
+          <button @click="openCreateModal" class="px-8 py-3 bg-accent text-white rounded-xl font-bold text-xs uppercase tracking-widest hover:bg-accent-hover transition-all shadow-lg shadow-accent/20">
             Add New Project
           </button>
         </div>
@@ -371,7 +371,7 @@ function deleteProject(project: Project) {
                   <button
                     type="submit"
                     :disabled="form.processing"
-                    class="flex-1 px-6 py-3.5 bg-accent text-accent-text rounded-xl font-bold text-xs uppercase tracking-widest hover:bg-accent-hover disabled:opacity-50 transition-all shadow-lg shadow-accent/20 active:scale-95"
+                    class="flex-1 px-6 py-3.5 bg-accent text-white rounded-xl font-bold text-xs uppercase tracking-widest hover:bg-accent-hover disabled:opacity-50 transition-all shadow-lg shadow-accent/20 active:scale-95"
                   >
                     {{ editingProject ? 'Save Changes' : 'Create Project' }}
                   </button>
