@@ -68,7 +68,8 @@ class ReportService
             ->map(fn($row) => [
                 'id' => $row->id,
                 'name' => $row->name,
-                'duration' => $this->formatDuration((int) $row->seconds),
+                'duration' => (int) $row->seconds,
+                'formatted_duration' => $this->formatDuration((int) $row->seconds),
                 'seconds' => (int) $row->seconds,
                 'earnings' => round((float) $row->earnings, 2),
                 'currency' => $row->currency,
@@ -100,7 +101,8 @@ class ReportService
             ->map(fn($row) => [
                 'id' => $row->id,
                 'name' => $row->name,
-                'duration' => $this->formatDuration($row->seconds),
+                'duration' => (int) $row->seconds,
+                'formatted_duration' => $this->formatDuration((int) $row->seconds),
                 'seconds' => (int) $row->seconds,
             ])
             ->sortByDesc('seconds')
@@ -120,7 +122,8 @@ class ReportService
             ->map(fn($row) => [
                 'id' => $row->id,
                 'name' => $row->name,
-                'duration' => $this->formatDuration($row->seconds),
+                'duration' => (int) $row->seconds,
+                'formatted_duration' => $this->formatDuration((int) $row->seconds),
                 'seconds' => (int) $row->seconds,
             ]);
 
@@ -136,7 +139,8 @@ class ReportService
             ->get()
             ->map(fn($row) => [
                 'date' => $row->date,
-                'duration' => $this->formatDuration($row->seconds),
+                'duration' => (int) $row->seconds,
+                'formatted_duration' => $this->formatDuration((int) $row->seconds),
                 'seconds' => (int) $row->seconds,
             ]);
 
@@ -208,19 +212,22 @@ class ReportService
             'total_earnings' => round($totalEarnings, 2),
             'by_project' => collect($byProject)->map(fn($data, $name) => [
                 'name' => $name,
-                'duration' => $this->formatDuration($data['seconds']),
+                'duration' => (int) $data['seconds'],
+                'formatted_duration' => $this->formatDuration($data['seconds']),
                 'seconds' => $data['seconds'],
                 'earnings' => round($data['earnings'], 2),
                 'currency' => $data['currency'],
             ])->values(),
             'by_task' => collect($byTask)->map(fn($seconds, $name) => [
                 'name' => $name,
-                'duration' => $this->formatDuration($seconds),
+                'duration' => (int) $seconds,
+                'formatted_duration' => $this->formatDuration($seconds),
                 'seconds' => $seconds,
             ])->sortByDesc('seconds')->take(10)->values(),
             'by_date' => collect($byDate)->map(fn($seconds, $date) => [
                 'date' => $date,
-                'duration' => $this->formatDuration($seconds),
+                'duration' => (int) $seconds,
+                'formatted_duration' => $this->formatDuration($seconds),
                 'seconds' => $seconds,
             ])->sortByDesc('date')->values(),
         ];

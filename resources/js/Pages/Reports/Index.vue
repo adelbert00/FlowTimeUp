@@ -49,7 +49,8 @@ const activeTab = ref('projects');
 const projectChartData = computed(() => {
   return props.projectSummary.map(item => ({
     name: item.name,
-    value: item.duration,
+    duration: Number(item.duration),
+    earnings: Number(item.earnings),
     color: item.color || '#94a3b8'
   }));
 });
@@ -57,8 +58,8 @@ const projectChartData = computed(() => {
 const tagChartData = computed(() => {
   return props.tagSummary.map(item => ({
     name: item.name,
-    duration: item.duration,
-    earnings: item.earnings
+    duration: Number(item.duration),
+    earnings: Number(item.earnings) || 0
   }));
 });
 
@@ -71,9 +72,13 @@ const filterState = ref({
   include_non_billable: String(props.filters.include_non_billable) === 'true',
 });
 
-const formatDuration = (seconds: number) => {
-  const h = Math.floor(seconds / 3600);
-  const m = Math.floor((seconds % 3600) / 60);
+const formatDuration = (seconds: any) => {
+  if (typeof seconds === 'string' && seconds.includes(':')) return seconds;
+  const totalSeconds = parseInt(seconds);
+  if (isNaN(totalSeconds)) return '0h 0m';
+  
+  const h = Math.floor(totalSeconds / 3600);
+  const m = Math.floor((totalSeconds % 3600) / 60);
   return `${h}h ${m}m`;
 };
 
@@ -129,7 +134,7 @@ const CustomTooltip = ({ active, payload }: any) => {
           h('p', { class: 'text-[10px] text-[rgb(var(--color-text-secondary))] font-medium uppercase tracking-tight' }, [
             `${item.name}: `,
             h('span', { class: 'text-[rgb(var(--color-text-primary))] font-bold' }, 
-              (item.name === 'Duration' || item.dataKey === 'value' || item.dataKey === 'duration')
+              (item.name === 'Duration' || item.dataKey === 'duration')
                 ? formatDuration(item.value)
                 : formatCurrency(item.value)
             )
@@ -288,7 +293,7 @@ const CustomTooltip = ({ active, payload }: any) => {
                   <XAxis dataKey="name" stroke="currentColor" :fontSize="10" :axisLine="false" :tickLine="false" />
                   <YAxis stroke="currentColor" :fontSize="10" :axisLine="false" :tickLine="false" :tickFormatter="(value) => `${Math.floor(value / 3600)}h`" />
                   <ChartTooltip :content="CustomTooltip" :cursor="{ fill: 'rgba(148, 163, 184, 0.05)' }" />
-                  <Bar dataKey="value" name="Duration" :radius="[4, 4, 0, 0]">
+                  <Bar dataKey="duration" name="Duration" :radius="[4, 4, 0, 0]">
                     <Cell v-for="(entry, index) in projectChartData" :key="`cell-${index}`" :fill="entry.color" :fillOpacity="0.8" />
                   </Bar>
                 </BarChart>
@@ -305,7 +310,7 @@ const CustomTooltip = ({ active, payload }: any) => {
                     :innerRadius="60"
                     :outerRadius="80"
                     :paddingAngle="5"
-                    dataKey="value"
+                    dataKey="duration"
                   >
                     <Cell v-for="(entry, index) in projectChartData" :key="`cell-${index}`" :fill="entry.color" />
                   </Pie>

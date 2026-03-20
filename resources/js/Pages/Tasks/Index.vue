@@ -112,7 +112,7 @@ const handleBulkUpdate = (payload: { ids: number[], project_id?: number | null, 
       </div>
 
       <div class="grid grid-cols-1 xl:grid-cols-12 gap-8">
-        <div class="hidden xl:block xl:col-span-4 2xl:col-span-3">
+        <div class="hidden xl:block xl:col-span-3">
           <div class="xl:sticky xl:top-20 space-y-6">
             <div class="bg-surface-raised rounded-2xl border border-border p-6 shadow-sm relative overflow-hidden">
               <div class="absolute top-0 right-0 w-24 h-24 bg-accent/5 rounded-full -mr-12 -mt-12 blur-2xl"></div>
@@ -122,7 +122,7 @@ const handleBulkUpdate = (payload: { ids: number[], project_id?: number | null, 
           </div>
         </div>
 
-        <div class="xl:col-span-8 2xl:col-span-9">
+        <div class="xl:col-span-9">
           <TaskList
             :tasks="tasks.data"
             :pagination="{

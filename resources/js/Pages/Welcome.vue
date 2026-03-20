@@ -39,7 +39,7 @@ const steps = [
   {
     id: '02',
     title: 'Maintain Flow',
-    description: 'Work without interruptions. FTU_CORE handles the telemetry in the background.'
+    description: 'Work without interruptions. FlowTimeUp handles the telemetry in the background.'
   },
   {
     id: '03',
@@ -70,13 +70,14 @@ const steps = [
     <nav class="relative z-10 container mx-auto px-4 sm:px-6 lg:px-8 py-4 sm:py-6">
       <div class="flex items-center justify-between">
         <div class="flex items-center gap-3">
-          <div class="w-10 h-10 border-2 border-accent flex items-center justify-center relative group">
-            <div class="absolute inset-0 bg-accent/10 group-hover:bg-accent/20 transition-colors"></div>
-            <svg class="w-6 h-6 text-accent relative z-10" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path stroke-linecap="square" stroke-linejoin="miter" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"/>
-            </svg>
-          </div>
-          <span class="text-xl font-black text-primary uppercase tracking-[-0.05em]">FlowTimeUp<span class="text-accent">_CORE</span></span>
+          <Link href="/" class="flex items-center gap-2.5 group">
+            <div class="w-10 h-10 rounded-lg bg-accent flex items-center justify-center shrink-0 shadow-sm group-hover:shadow-accent/30 transition-shadow">
+              <svg class="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2.2">
+                <path stroke-linecap="round" stroke-linejoin="round" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"/>
+              </svg>
+            </div>
+            <span class="text-xl font-bold tracking-tight text-primary">FlowTimeUp</span>
+          </Link>
         </div>
 
         <div v-if="canLogin" class="hidden sm:flex items-center gap-8">
@@ -119,11 +120,6 @@ const steps = [
       <!-- Hero Section -->
       <section class="container mx-auto px-4 sm:px-6 lg:px-8 pt-16 sm:pt-24 pb-20">
         <div class="max-w-5xl mx-auto">
-          <div class="inline-flex items-center gap-2 px-3 py-1 border border-accent/30 text-accent text-[9px] font-bold uppercase tracking-[0.3em] mb-12 bg-accent/5">
-            <span class="w-1 h-1 bg-accent" />
-            System Protocol v2.4.0
-          </div>
-
           <h1 class="text-5xl sm:text-7xl lg:text-9xl font-black text-primary mb-8 leading-[0.85] tracking-tighter uppercase italic">
             Precision<br />
             <span class="text-accent">Telemetry.</span>
@@ -263,12 +259,12 @@ const steps = [
     <footer class="relative z-10 border-t border-border bg-surface py-12">
       <div class="container mx-auto px-4 sm:px-6 lg:px-8">
         <div class="flex flex-col sm:flex-row items-center justify-between gap-8">
-          <div class="flex items-center gap-3">
-            <div class="w-6 h-6 border-2 border-accent flex items-center justify-center">
-              <div class="w-2 h-2 bg-accent"></div>
+          <Link href="/" class="flex items-center gap-2.5">
+            <div class="w-6 h-6 rounded-md bg-accent flex items-center justify-center shrink-0">
+              <div class="w-2 h-2 bg-white rounded-full"></div>
             </div>
-            <span class="text-sm font-black text-primary uppercase tracking-tight">FlowTimeUp_CORE</span>
-          </div>
+            <span class="text-sm font-bold text-primary tracking-tight">FlowTimeUp</span>
+          </Link>
           
           <div class="flex items-center gap-10">
             <Link :href="route('pages.privacy-policy')" class="text-[9px] font-bold text-muted hover:text-accent uppercase tracking-widest transition-colors">Security_Protocol</Link>
