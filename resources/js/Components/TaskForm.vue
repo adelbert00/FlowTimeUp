@@ -194,7 +194,8 @@ const colorPresets = [
         <div class="relative">
           <select
             v-model="form.project_id"
-            class="w-full cursor-pointer appearance-none bg-surface-raised px-3 py-2 pr-10 text-sm text-primary [background-image:none] transition-colors focus:border-accent focus:outline-none focus:ring-2 focus:ring-accent/30 sm:px-4 sm:py-2.5 rounded-xl border border-border"
+            class="w-full cursor-pointer appearance-none bg-surface-raised px-3 py-2 pr-10 text-sm [background-image:none] transition-colors focus:border-accent focus:outline-none focus:ring-2 focus:ring-accent/30 sm:px-4 sm:py-2.5 rounded-xl border border-border"
+            :class="form.project_id === null ? 'text-primary/60' : 'text-primary'"
           >
             <option :value="null">No project</option>
             <option v-for="project in projects" :key="project.id" :value="project.id">{{ project.name }}</option>
@@ -304,7 +305,8 @@ const colorPresets = [
               <div class="flex-1 relative">
                 <select
                   v-model="form.recurrence_type"
-                  class="w-full cursor-pointer appearance-none bg-surface-raised px-3 py-2 pr-10 text-sm text-primary [background-image:none] focus:border-accent focus:outline-none focus:ring-2 focus:ring-accent/30 rounded-xl border border-border"
+                  class="w-full cursor-pointer appearance-none bg-surface-raised px-3 py-2 pr-10 text-sm [background-image:none] focus:border-accent focus:outline-none focus:ring-2 focus:ring-accent/30 rounded-xl border border-border"
+                  :class="form.recurrence_type === null ? 'text-primary/60' : 'text-primary'"
                 >
                   <option :value="null">Select...</option>
                   <option value="daily">Day(s)</option>

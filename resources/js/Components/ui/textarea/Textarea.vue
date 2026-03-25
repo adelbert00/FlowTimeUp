@@ -27,7 +27,7 @@ defineOptions({ inheritAttrs: false });
     v-bind="$attrs"
     :class="
       cn(
-        'flex min-h-[80px] w-full rounded-xl border border-border bg-surface-raised px-3 py-2 sm:px-4 sm:py-2.5 text-sm text-primary ring-offset-white placeholder:text-black focus-visible:outline-none focus-visible:border-accent focus-visible:ring-2 focus-visible:ring-accent/30 disabled:cursor-not-allowed disabled:opacity-50 dark:placeholder:text-white/45',
+        'flex min-h-[80px] w-full rounded-xl border border-border bg-surface-raised px-3 py-2 sm:px-4 sm:py-2.5 text-sm text-primary ring-offset-white placeholder:text-primary/60 focus-visible:outline-none focus-visible:border-accent focus-visible:ring-2 focus-visible:ring-accent/30 disabled:cursor-not-allowed disabled:opacity-50',
         props.class
       )
     "

@@ -297,7 +297,8 @@ const totalTime = computed(() => {
           <select
             v-model="selectedStatus"
             @change="applyFilters"
-            class="w-full cursor-pointer appearance-none bg-surface-raised px-4 py-2.5 text-sm text-primary [background-image:none] focus:border-accent focus:outline-none focus:ring-2 focus:ring-accent rounded-xl border border-border"
+            class="w-full cursor-pointer appearance-none bg-surface-raised px-4 py-2.5 text-sm [background-image:none] focus:border-accent focus:outline-none focus:ring-2 focus:ring-accent rounded-xl border border-border"
+            :class="selectedStatus === '' ? 'text-primary/60' : 'text-primary'"
           >
             <option value="">All Tasks</option>
             <option value="active">Active Only</option>
@@ -332,7 +333,8 @@ const totalTime = computed(() => {
           <select
             v-model="selectedPriority"
             @change="applyFilters"
-            class="w-full cursor-pointer appearance-none bg-surface-raised px-4 py-2.5 text-sm text-primary [background-image:none] focus:border-accent focus:outline-none focus:ring-2 focus:ring-accent rounded-xl border border-border"
+            class="w-full cursor-pointer appearance-none bg-surface-raised px-4 py-2.5 text-sm [background-image:none] focus:border-accent focus:outline-none focus:ring-2 focus:ring-accent rounded-xl border border-border"
+            :class="selectedPriority === '' ? 'text-primary/60' : 'text-primary'"
           >
             <option value="">Any Priority</option>
             <option value="high">High</option>
@@ -368,7 +370,8 @@ const totalTime = computed(() => {
           <select
             v-model="selectedProject"
             @change="applyFilters"
-            class="w-full cursor-pointer appearance-none bg-surface-raised px-4 py-2.5 text-sm text-primary [background-image:none] focus:border-accent focus:outline-none focus:ring-2 focus:ring-accent rounded-xl border border-border"
+            class="w-full cursor-pointer appearance-none bg-surface-raised px-4 py-2.5 text-sm [background-image:none] focus:border-accent focus:outline-none focus:ring-2 focus:ring-accent rounded-xl border border-border"
+            :class="selectedProject === null ? 'text-primary/60' : 'text-primary'"
           >
             <option :value="null">All Projects</option>
             <option
