@@ -205,11 +205,7 @@ onUnmounted(() => {
     >
       <span
         class="min-w-0 flex-1 truncate font-normal"
-        :class="
-          showingPlaceholder
-            ? 'text-black dark:text-white/45'
-            : 'text-primary'
-        "
+        :class="showingPlaceholder ? 'text-primary/60' : 'text-primary'"
       >
         {{ formattedValue }}
       </span>

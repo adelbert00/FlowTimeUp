@@ -399,7 +399,7 @@ const exportReport = (format: 'csv' | 'pdf') => {
                 >Project</label
               >
               <Select v-model="filterState.project_id">
-                <SelectTrigger>
+                <SelectTrigger :class="filterState.project_id === 'all' ? '[&>span]:text-primary/60' : ''">
                   <SelectValue placeholder="All Projects" />
                 </SelectTrigger>
                 <SelectContent
@@ -423,7 +423,7 @@ const exportReport = (format: 'csv' | 'pdf') => {
                 >Tag</label
               >
               <Select v-model="filterState.tag_id">
-                <SelectTrigger>
+                <SelectTrigger :class="filterState.tag_id === 'all' ? '[&>span]:text-primary/60' : ''">
                   <SelectValue placeholder="All Tags" />
                 </SelectTrigger>
                 <SelectContent
