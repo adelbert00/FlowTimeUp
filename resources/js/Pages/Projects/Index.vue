@@ -13,6 +13,7 @@ interface Project {
   budget?: number;
   currency?: string;
   access?: string;
+  is_archived?: boolean;
   tracked_time?: string;
   tracked_seconds?: number;
   total_amount?: number;
@@ -20,6 +21,7 @@ interface Project {
 
 const props = defineProps<{
   projects: Project[];
+  statusFilter?: string;
 }>();
 
 const showModal = ref(false);
@@ -27,6 +29,20 @@ const editingProject = ref<Project | null>(null);
 const searchQuery = ref('');
 const sortField = ref<string>('name');
 const sortDirection = ref<'asc' | 'desc'>('asc');
+const currentFilter = ref(props.statusFilter || 'active');
+
+function changeStatusFilter(value: string) {
+  currentFilter.value = value;
+  router.get('/projects', { status: value }, { preserveState: true, preserveScroll: true });
+}
+
+function archiveProject(project: Project) {
+  router.post(route('projects.archive', project.id), {}, { preserveScroll: true });
+}
+
+function restoreProject(project: Project) {
+  router.post(route('projects.restore', project.id), {}, { preserveScroll: true });
+}
 
 const form = useForm({
   name: '',
@@ -166,10 +182,14 @@ function deleteProject(project: Project) {
         </div>
         
         <div class="relative min-w-[140px]">
-          <select class="h-10 w-full cursor-pointer appearance-none rounded-xl border border-border bg-surface-raised py-0 pl-4 pr-10 text-sm font-normal text-primary [background-image:none] transition-all focus:border-accent focus:outline-none focus:ring-2 focus:ring-accent">
-            <option>Active</option>
-            <option>Archived</option>
-            <option>All</option>
+          <select
+            :value="currentFilter"
+            @change="changeStatusFilter(($event.target as HTMLSelectElement).value)"
+            class="h-10 w-full cursor-pointer appearance-none rounded-xl border border-border bg-surface-raised py-0 pl-4 pr-10 text-sm font-normal text-primary [background-image:none] transition-all focus:border-accent focus:outline-none focus:ring-2 focus:ring-accent"
+          >
+            <option value="active">Active</option>
+            <option value="archived">Archived</option>
+            <option value="all">All</option>
           </select>
           <div class="absolute inset-y-0 right-0 flex items-center pr-3 pointer-events-none text-muted">
             <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"/></svg>
@@ -229,6 +249,7 @@ function deleteProject(project: Project) {
                 v-for="project in filteredProjects"
                 :key="project.id"
                 class="hover:bg-border/10 transition-colors group"
+                :class="{ 'opacity-50 grayscale': project.is_archived }"
               >
                 <td class="px-6 py-5">
                   <div class="flex items-center gap-3">
@@ -257,6 +278,14 @@ function deleteProject(project: Project) {
                     <button @click="openEditModal(project)" class="p-2 rounded-lg text-muted hover:text-accent hover:bg-border/15 transition-all" title="Edit">
                       <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"/></svg>
                     </button>
+
+                    <button v-if="!project.is_archived" @click="archiveProject(project)" class="p-2 rounded-lg text-muted hover:text-warning hover:bg-warning/10 transition-all" title="Archive">
+                      <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 8h14M5 8a2 2 0 110-4h14a2 2 0 110 4M5 8v10a2 2 0 002 2h10a2 2 0 002-2V8m-9 4h4"/></svg>
+                    </button>
+                    <button v-else @click="restoreProject(project)" class="p-2 rounded-lg text-muted hover:text-success hover:bg-success/10 transition-all" title="Restore">
+                      <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"/></svg>
+                    </button>
+
                     <button @click="deleteProject(project)" class="p-2 rounded-lg text-muted hover:text-danger hover:bg-danger/10 transition-all" title="Delete">
                       <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"/></svg>
                     </button>

@@ -405,10 +405,7 @@ const totalTime = computed(() => {
       class="flex flex-col sm:flex-row items-center justify-between gap-4 bg-surface-raised p-4 px-6 rounded-2xl border border-border shadow-sm"
     >
       <div class="flex items-center gap-6">
-        <div
-          class="flex items-center gap-3 group cursor-pointer"
-          @click="selectAll()"
-        >
+        <div class="flex items-center gap-3 group">
           <Checkbox
             :checked="
               selectedTaskIds.length === tasks.length && tasks.length > 0
@@ -420,7 +417,8 @@ const totalTime = computed(() => {
             @change="(checked: boolean) => selectAll(checked)"
           />
           <span
-            class="text-[10px] font-black text-primary uppercase tracking-[0.1em] group-hover:text-accent transition-colors"
+            class="cursor-pointer text-[10px] font-black text-primary uppercase tracking-[0.1em] group-hover:text-accent transition-colors"
+            @click="selectAll()"
             >Select all sessions</span
           >
         </div>

@@ -25,7 +25,6 @@ class StoreTimeSessionRequest extends FormRequest
                     }
                 },
             ],
-            'user_id' => 'required|exists:users,id',
             'start_time' => 'required|date',
             'end_time' => 'nullable|date|after_or_equal:start_time',
             'is_billable' => 'boolean',

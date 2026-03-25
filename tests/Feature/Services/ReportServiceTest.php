@@ -21,17 +21,16 @@ test('it calculates project summary correctly', function () {
         'user_id' => $user->id,
         'start_time' => Carbon::now()->subHours(2),
         'end_time' => Carbon::now()->subHour(),
-        'duration' => 3600,
         'is_billable' => true,
         'billable_rate' => 100
     ]);
 
     $service = new ReportService();
-    $summary = $service->getSummary(['project_id' => $project->id], $user->id);
+    $summary = $service->getSummary($user->id);
 
-    expect($summary['projects'])->toHaveCount(1);
-    expect((int)$summary['projects'][0]->duration)->toBe(3600);
-    expect((float)$summary['projects'][0]->earnings)->toBe(100.0);
+    expect($summary['by_project'])->toHaveCount(1);
+    expect((int)$summary['by_project'][0]['duration'])->toBe(3600);
+    expect((float)$summary['by_project'][0]['earnings'])->toBe(100.0);
 });
 
 test('it calculates tag summary correctly', function () {
@@ -45,14 +44,13 @@ test('it calculates tag summary correctly', function () {
         'user_id' => $user->id,
         'start_time' => Carbon::now()->subHours(1),
         'end_time' => Carbon::now(),
-        'duration' => 3600
     ]);
 
     $service = new ReportService();
-    $summary = $service->getSummary(['tag_id' => $tag->id], $user->id);
+    $summary = $service->getSummary($user->id);
 
-    expect($summary['tags'])->toHaveCount(1);
-    expect((int)$summary['tags'][0]->duration)->toBe(3600);
+    expect($summary['by_tag'])->toHaveCount(1);
+    expect((int)$summary['by_tag'][0]['duration'])->toBe(3600);
 });
 
 test('it filters by date range inclusively', function () {
@@ -65,7 +63,6 @@ test('it filters by date range inclusively', function () {
         'user_id' => $user->id,
         'start_time' => '2026-03-18 10:00:00',
         'end_time' => '2026-03-18 11:00:00',
-        'duration' => 3600
     ]);
 
     // Outside range (next day)
@@ -74,14 +71,10 @@ test('it filters by date range inclusively', function () {
         'user_id' => $user->id,
         'start_time' => '2026-03-19 10:00:00',
         'end_time' => '2026-03-19 11:00:00',
-        'duration' => 3600
     ]);
 
     $service = new ReportService();
-    $summary = $service->getSummary([
-        'start_date' => '2026-03-18',
-        'end_date' => '2026-03-18'
-    ], $user->id);
+    $summary = $service->getSummary($user->id, '2026-03-18', '2026-03-18');
 
-    expect((int)$summary['projects'][0]->duration)->toBe(3600);
+    expect((int)$summary['by_project'][0]['duration'])->toBe(3600);
 });

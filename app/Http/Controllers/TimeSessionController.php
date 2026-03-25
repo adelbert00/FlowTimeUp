@@ -31,6 +31,7 @@ class TimeSessionController extends Controller
     {
         $validated = $request->validated();
         $validated['is_billable'] = $validated['is_billable'] ?? true;
+        $validated['user_id'] = $request->user()->id;
 
         TimeSession::create($validated);
 

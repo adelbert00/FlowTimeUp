@@ -163,11 +163,6 @@ function quickAddTag() {
           <table class="w-full text-left">
             <thead>
               <tr class="bg-surface-raised text-xs font-bold uppercase tracking-wider text-secondary">
-                <th class="px-6 py-4 border-b border-border w-12">
-                  <div class="flex justify-center">
-                    <input type="checkbox" class="w-4 h-4 rounded border-border bg-surface-raised text-accent focus:ring-accent" />
-                  </div>
-                </th>
                 <th class="px-6 py-4 border-b border-border">Tag Identity</th>
                 <th class="px-6 py-4 border-b border-border w-32"></th>
               </tr>
@@ -179,11 +174,6 @@ function quickAddTag() {
                 class="hover:bg-border/10 transition-colors group"
                 :class="{ 'opacity-50 grayscale': tag.is_archived }"
               >
-                <td class="px-6 py-5">
-                  <div class="flex justify-center">
-                    <input type="checkbox" class="w-4 h-4 rounded border-border bg-surface-raised text-accent focus:ring-accent" />
-                  </div>
-                </td>
                 <td class="px-6 py-5">
                   <div class="flex items-center gap-3">
                     <div class="p-2 bg-surface-raised rounded-lg border border-border group-hover:border-accent/30 transition-all">

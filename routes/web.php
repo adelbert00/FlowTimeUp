@@ -49,6 +49,8 @@ Route::middleware(['auth', 'verified'])->group(function () {
     Route::delete('/profile', [ProfileController::class, 'destroy'])->name('profile.destroy');
     
     Route::resource('projects', ProjectController::class);
+    Route::post('/projects/{project}/archive', [ProjectController::class, 'archive'])->name('projects.archive');
+    Route::post('/projects/{project}/restore', [ProjectController::class, 'restore'])->name('projects.restore');
     
     Route::resource('tasks', TaskController::class);
     Route::prefix('bulk/tasks')->name('bulk.tasks.')->group(function () {

@@ -21,7 +21,14 @@ class ReportController extends Controller
         $startDate = $request->get('start_date');
         $endDate = $request->get('end_date');
 
-        $summary = $this->reportService->getSummary($userId, $startDate, $endDate);
+        $filters = [
+            'project_id' => $request->get('project_id'),
+            'tag_id' => $request->get('tag_id'),
+            'include_billable' => $request->boolean('include_billable', true),
+            'include_non_billable' => $request->boolean('include_non_billable', true),
+        ];
+
+        $summary = $this->reportService->getSummary($userId, $startDate, $endDate, $filters);
 
         return Inertia::render('Reports/Index', [
             'projects' => Project::where('user_id', $userId)->get(),

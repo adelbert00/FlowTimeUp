@@ -20,11 +20,13 @@ class Project extends Model
         'budget',
         'currency',
         'access',
+        'is_archived',
     ];
 
     protected $casts = [
         'hourly_rate' => 'decimal:2',
         'budget' => 'decimal:2',
+        'is_archived' => 'boolean',
     ];
 
     public function getTotalTrackedSecondsAttribute(): int

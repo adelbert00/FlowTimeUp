@@ -18,11 +18,10 @@ class ReportService
         return sprintf('%02d:%02d:%02d', $hours, $minutes, $secs);
     }
 
-    public function getSummary(int $userId, ?string $startDate = null, ?string $endDate = null): array
+    public function getSummary(int $userId, ?string $startDate = null, ?string $endDate = null, array $filters = []): array
     {
         $connectionType = config('database.default');
 
-        // Define duration expression based on DB driver
         $durationExpr = $connectionType === 'pgsql'
             ? 'EXTRACT(EPOCH FROM (time_sessions.end_time - time_sessions.start_time))'
             : 'TIMESTAMPDIFF(SECOND, time_sessions.start_time, time_sessions.end_time)';
@@ -41,6 +40,28 @@ class ReportService
             $query->where('time_sessions.start_time', '<=', Carbon::parse($endDate)->endOfDay());
         }
 
+        if (!empty($filters['project_id'])) {
+            $query->where('tasks.project_id', $filters['project_id']);
+        }
+
+        if (!empty($filters['tag_id'])) {
+            $query->whereExists(function ($sub) use ($filters) {
+                $sub->select(DB::raw(1))
+                    ->from('tag_task')
+                    ->whereColumn('tag_task.task_id', 'tasks.id')
+                    ->where('tag_task.tag_id', $filters['tag_id']);
+            });
+        }
+
+        $includeBillable = $filters['include_billable'] ?? true;
+        $includeNonBillable = $filters['include_non_billable'] ?? true;
+
+        if (!$includeBillable && $includeNonBillable) {
+            $query->where('time_sessions.is_billable', false);
+        } elseif ($includeBillable && !$includeNonBillable) {
+            $query->where('time_sessions.is_billable', true);
+        }
+
         // Global stats
         $stats = (clone $query)
             ->selectRaw("
@@ -49,6 +70,7 @@ class ReportService
                 SUM(CASE WHEN time_sessions.is_billable = true THEN $durationExpr ELSE 0 END) as billable_seconds,
                 SUM(CASE WHEN time_sessions.is_billable = true THEN ($durationExpr / 3600.0) * COALESCE(time_sessions.billable_rate, tasks.hourly_rate, 0) ELSE 0 END) as total_earnings
             ")
+            ->toBase()
             ->first();
 
         $totalSeconds = (int) ($stats->total_seconds ?? 0);
@@ -64,6 +86,7 @@ class ReportService
                 MAX(COALESCE(tasks.currency, 'USD')) as currency
             ")
             ->groupBy('projects.id', 'projects.name')
+            ->toBase()
             ->get()
             ->map(fn($row) => [
                 'id' => $row->id,
@@ -97,6 +120,7 @@ class ReportService
                 SUM($durationExpr) as seconds
             ")
             ->groupBy('tags.id', 'tags.name')
+            ->toBase()
             ->get()
             ->map(fn($row) => [
                 'id' => $row->id,
@@ -118,6 +142,7 @@ class ReportService
             ->groupBy('tasks.id', 'tasks.title')
             ->orderByDesc('seconds')
             ->limit(10)
+            ->toBase()
             ->get()
             ->map(fn($row) => [
                 'id' => $row->id,
@@ -136,6 +161,7 @@ class ReportService
             ")
             ->groupBy('date')
             ->orderByDesc('date')
+            ->toBase()
             ->get()
             ->map(fn($row) => [
                 'date' => $row->date,

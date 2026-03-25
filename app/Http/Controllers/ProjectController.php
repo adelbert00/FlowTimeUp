@@ -16,12 +16,22 @@ class ProjectController extends Controller
 {
     public function index(Request $request): Response
     {
-        $projects = Project::where('user_id', $request->user()->id)
-            ->withCount('tasks')
-            ->get();
+        $filter = $request->input('status', 'active');
+
+        $query = Project::where('user_id', $request->user()->id)
+            ->withCount('tasks');
+
+        if ($filter === 'active') {
+            $query->where('is_archived', false);
+        } elseif ($filter === 'archived') {
+            $query->where('is_archived', true);
+        }
+
+        $projects = $query->get();
 
         return Inertia::render('Projects/Index', [
             'projects' => ProjectResource::collection($projects)->resolve(),
+            'statusFilter' => $filter,
         ]);
     }
 
@@ -76,5 +86,23 @@ class ProjectController extends Controller
         $project->delete();
 
         return redirect()->back()->with('success', 'Project deleted!');
+    }
+
+    public function archive(Project $project): RedirectResponse
+    {
+        $this->authorize('update', $project);
+
+        $project->update(['is_archived' => true]);
+
+        return redirect()->back()->with('success', 'Project archived!');
+    }
+
+    public function restore(Project $project): RedirectResponse
+    {
+        $this->authorize('update', $project);
+
+        $project->update(['is_archived' => false]);
+
+        return redirect()->back()->with('success', 'Project restored!');
     }
 }

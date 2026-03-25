@@ -19,6 +19,7 @@ class ProjectResource extends JsonResource
             'budget' => $this->budget,
             'currency' => $this->currency ?? 'USD',
             'access' => $this->access ?? 'public',
+            'is_archived' => (bool) $this->is_archived,
             'created_at' => $this->created_at?->format('Y-m-d H:i:s'),
             'updated_at' => $this->updated_at?->format('Y-m-d H:i:s'),
             'tasks_count' => $this->whenCounted('tasks'),

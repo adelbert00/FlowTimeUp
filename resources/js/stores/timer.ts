@@ -38,6 +38,7 @@ export const useTimerStore = defineStore('timer', () => {
         }
       }
     } catch (e) {
+      console.error('[Timer] Failed to load timer from storage:', e);
       clearStorage();
     }
   }
@@ -55,6 +56,7 @@ export const useTimerStore = defineStore('timer', () => {
         clearStorage();
       }
     } catch (e) {
+      console.error('[Timer] Failed to save timer to storage:', e);
     }
   }
 
@@ -122,6 +124,7 @@ export const useTimerStore = defineStore('timer', () => {
         only: ['tasks'],
       });
     } catch (e) {
+      console.error('[Timer] Failed to save time session:', e);
     }
   }
 

@@ -44,7 +44,7 @@ const open = ref(false);
 
 <template>
   <div class="relative">
-    <div @click="open = !open">
+    <div @click.stop="open = !open">
       <slot name="trigger" />
     </div>
 

@@ -24,11 +24,10 @@ test('it can bulk update sessions', function () {
     $data = [
         'ids' => $ids,
         'is_billable' => true,
-        'project_id' => $project->id,
     ];
 
     $response = $this->actingAs($user)
-        ->patchJson(route('time-sessions.bulk-update'), $data);
+        ->patchJson(route('bulk.time-sessions.update'), $data);
 
     $response->assertOk();
 
@@ -52,12 +51,12 @@ test('it can bulk delete sessions', function () {
     $ids = $sessions->pluck('id')->toArray();
 
     $response = $this->actingAs($user)
-        ->deleteJson(route('time-sessions.bulk-destroy'), ['ids' => $ids]);
+        ->deleteJson(route('bulk.time-sessions.destroy'), ['ids' => $ids]);
 
     $response->assertOk();
 
     foreach ($ids as $id) {
-        $this->assertDatabaseMissing('time_sessions', ['id' => $id]);
+        $this->assertSoftDeleted('time_sessions', ['id' => $id]);
     }
 });
 
@@ -74,7 +73,7 @@ test('it prevents unauthorized bulk update', function () {
     $ids = $sessions->pluck('id')->toArray();
 
     $response = $this->actingAs($user)
-        ->patchJson(route('time-sessions.bulk-update'), [
+        ->patchJson(route('bulk.time-sessions.update'), [
             'ids' => $ids,
             'is_billable' => true,
         ]);
