@@ -3,7 +3,7 @@ import { ref, computed, onMounted, onBeforeUnmount, watch } from 'vue';
 import { router, useForm } from '@inertiajs/vue3';
 import dayjs from 'dayjs';
 import duration from 'dayjs/plugin/duration';
-import CustomCheckbox from '@/Components/CustomCheckbox.vue';
+import { Checkbox } from '@/Components/ui/checkbox';
 import { useTimerStore } from '@/stores/timer';
 
 dayjs.extend(duration);
@@ -143,11 +143,11 @@ function formatSessionDate(date: string) { return dayjs(date).format('MMM D'); }
 
 <template>
   <div
-    class="group relative rounded-xl border shadow-sm overflow-hidden transition-all duration-200 bg-white dark:bg-gray-800"
+    class="group relative rounded-2xl border border-border bg-surface-raised shadow-sm overflow-hidden transition-all duration-200"
     :class="{ 
-      'ring-2 ring-blue-500 border-blue-500': selected && !task.completed,
+      'ring-2 ring-accent border-accent': selected && !task.completed,
       'bg-emerald-50/80 dark:bg-emerald-900/20 border-emerald-300/50': task.completed,
-      'border-gray-200 dark:border-gray-700 hover:border-blue-500/50': !selected && !task.completed
+      'hover:border-accent/40': !selected && !task.completed
     }"
     @click="showMobileActions = false"
   >
@@ -157,15 +157,15 @@ function formatSessionDate(date: string) { return dayjs(date).format('MMM D'); }
     <div class="p-3 sm:p-4">
       <div class="flex items-start gap-2 sm:gap-3">
         <div class="mt-0.5 sm:mt-1 flex-shrink-0">
-          <CustomCheckbox :checked="selected" @change="emit('select', task.id)" />
+          <Checkbox :checked="selected" @change="emit('select', task.id)" />
         </div>
 
         <div class="flex-1 min-w-0">
           <div class="flex items-start gap-2 flex-wrap mb-1">
-            <h3 class="text-sm sm:text-base font-medium text-gray-900 dark:text-white break-words" :class="{ 'line-through text-gray-500': task.completed }">{{ task.title }}</h3>
+            <h3 class="text-sm sm:text-base font-bold text-primary break-words" :class="{ 'line-through text-secondary': task.completed }">{{ task.title }}</h3>
           </div>
 
-          <p v-if="task.description" class="text-xs sm:text-sm text-gray-600 dark:text-gray-400 mb-2 line-clamp-2">{{ task.description }}</p>
+          <p v-if="task.description" class="text-xs sm:text-sm text-secondary mb-2 line-clamp-2">{{ task.description }}</p>
 
           <div v-if="task.project" class="mb-2">
             <span class="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-xs font-medium" :style="{ backgroundColor: projectColor + '20', color: projectColor }">
@@ -175,22 +175,22 @@ function formatSessionDate(date: string) { return dayjs(date).format('MMM D'); }
           </div>
 
           <div v-if="task.tags && task.tags.length > 0" class="flex flex-wrap gap-1 mb-2">
-            <span v-for="tag in task.tags.slice(0, 3)" :key="tag.id" class="px-1.5 py-0.5 bg-gray-100 dark:bg-gray-700 text-gray-700 dark:text-gray-300 rounded text-[10px]">#{{ tag.name }}</span>
-            <span v-if="task.tags.length > 3" class="px-1.5 py-0.5 text-gray-500 text-[10px]">+{{ task.tags.length - 3 }}</span>
+            <span v-for="tag in task.tags.slice(0, 3)" :key="tag.id" class="px-1.5 py-0.5 bg-surface-raised border border-border text-primary rounded text-[10px] font-medium">#{{ tag.name }}</span>
+            <span v-if="task.tags.length > 3" class="px-1.5 py-0.5 text-muted text-[10px]">+{{ task.tags.length - 3 }}</span>
           </div>
 
-          <div class="flex items-center gap-2 sm:gap-3 p-2 sm:p-3 bg-gray-50/50 dark:bg-gray-700/30 rounded-lg border border-gray-200/50 dark:border-gray-600/50">
+          <div class="flex items-center gap-2 sm:gap-3 p-2 sm:p-3 rounded-xl border border-border bg-surface-raised">
             <div class="flex-1 min-w-0">
-              <div class="font-mono text-base sm:text-xl font-bold tracking-wider" :class="isRunning ? 'text-emerald-500' : 'text-gray-600 dark:text-gray-300'">{{ formattedTime }}</div>
+              <div class="font-mono text-base sm:text-xl font-bold tracking-wider" :class="isRunning ? 'text-emerald-500' : 'text-primary'">{{ formattedTime }}</div>
               <div class="flex items-center gap-2 mt-0.5 flex-wrap text-xs">
-                <span v-if="isRunning && task.total_time" class="text-gray-500">Total: {{ task.total_time }}</span>
-                <span v-if="task.billable_time && task.billable_time !== task.total_time" class="text-blue-500">Billable: {{ task.billable_time }}</span>
+                <span v-if="isRunning && task.total_time" class="text-secondary">Total: {{ task.total_time }}</span>
+                <span v-if="task.billable_time && task.billable_time !== task.total_time" class="text-accent font-medium">Billable: {{ task.billable_time }}</span>
                 <span v-if="task.earnings" class="text-emerald-600 font-medium">{{ task.currency || 'USD' }} {{ task.earnings.toFixed(2) }}</span>
               </div>
             </div>
 
             <div class="flex items-center gap-1 flex-shrink-0">
-              <button @click.stop="showManualEntry = !showManualEntry" class="p-2 rounded-full text-gray-500 hover:text-blue-600 hover:bg-blue-50 dark:hover:bg-blue-900/30 transition-colors" aria-label="Add manual time entry">
+              <button @click.stop="showManualEntry = !showManualEntry" class="p-2 rounded-full text-secondary hover:text-accent hover:bg-accent/10 transition-colors" aria-label="Add manual time entry">
                 <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"/></svg>
               </button>
               <button @click.stop="isRunning ? stopTimer() : startTimer()" class="relative w-10 h-10 rounded-full flex items-center justify-center transition-all" :class="isRunning ? 'bg-red-500 hover:bg-red-600' : 'bg-emerald-500 hover:bg-emerald-600'" :aria-label="isRunning ? 'Stop timer' : 'Start timer'">
@@ -201,38 +201,38 @@ function formatSessionDate(date: string) { return dayjs(date).format('MMM D'); }
             </div>
           </div>
 
-          <div v-if="showManualEntry" class="mt-3 p-4 bg-white dark:bg-gray-800 rounded-xl border border-gray-200 dark:border-gray-700 shadow-lg">
+          <div v-if="showManualEntry" class="mt-3 p-4 rounded-xl border border-border bg-surface-raised shadow-lg">
             <div class="flex items-center justify-between mb-3">
-              <h4 class="text-sm font-semibold text-gray-900 dark:text-white flex items-center gap-2">
-                <svg class="w-4 h-4 text-blue-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
+              <h4 class="text-sm font-bold text-primary flex items-center gap-2">
+                <svg class="w-4 h-4 text-accent" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
                 Add Time Manually
               </h4>
-              <button @click="showManualEntry = false" class="p-1 text-gray-400 hover:text-gray-600 dark:hover:text-gray-300 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-700" aria-label="Close manual entry form">
+              <button @click="showManualEntry = false" class="p-1 text-muted hover:text-primary rounded-lg hover:bg-accent/10" aria-label="Close manual entry form">
                 <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/></svg>
               </button>
             </div>
             <div class="grid grid-cols-2 gap-3 mb-3">
               <div>
-                <label class="block text-xs font-medium text-gray-600 dark:text-gray-400 mb-1">Start</label>
-                <input v-model="manualForm.start_time" type="datetime-local" class="w-full px-3 py-2 text-sm border border-gray-200 dark:border-gray-600 rounded-lg bg-gray-50 dark:bg-gray-700 text-gray-900 dark:text-white focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all" />
+                <label class="block text-[10px] font-black text-secondary uppercase tracking-wider mb-1">Start</label>
+                <input v-model="manualForm.start_time" type="datetime-local" class="w-full px-3 py-2 text-sm rounded-xl border border-border bg-surface-raised text-primary focus:outline-none focus:border-accent focus:ring-2 focus:ring-accent/30 transition-all" />
               </div>
               <div>
-                <label class="block text-xs font-medium text-gray-600 dark:text-gray-400 mb-1">End</label>
-                <input v-model="manualForm.end_time" type="datetime-local" class="w-full px-3 py-2 text-sm border border-gray-200 dark:border-gray-600 rounded-lg bg-gray-50 dark:bg-gray-700 text-gray-900 dark:text-white focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all" />
+                <label class="block text-[10px] font-black text-secondary uppercase tracking-wider mb-1">End</label>
+                <input v-model="manualForm.end_time" type="datetime-local" class="w-full px-3 py-2 text-sm rounded-xl border border-border bg-surface-raised text-primary focus:outline-none focus:border-accent focus:ring-2 focus:ring-accent/30 transition-all" />
               </div>
             </div>
-            <div class="flex items-center gap-4 mb-3 p-2 bg-gray-50 dark:bg-gray-700/50 rounded-lg">
+            <div class="flex items-center gap-4 mb-3 p-2 rounded-xl border border-border bg-surface-raised">
               <label class="flex items-center gap-2 cursor-pointer">
-                <input type="checkbox" v-model="manualForm.is_billable" class="w-4 h-4 rounded border-gray-300 text-blue-600 focus:ring-blue-500" />
-                <span class="text-sm text-gray-700 dark:text-gray-300">Billable</span>
+                <input type="checkbox" v-model="manualForm.is_billable" class="w-4 h-4 rounded border-border text-accent focus:ring-accent" />
+                <span class="text-sm font-medium text-primary">Billable</span>
               </label>
               <div v-if="manualForm.is_billable" class="flex-1">
-                <input v-model.number="manualForm.billable_rate" type="number" step="0.01" placeholder="Hourly rate (optional)" class="w-full px-3 py-1.5 text-sm border border-gray-200 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-800 text-gray-900 dark:text-white focus:ring-2 focus:ring-blue-500 focus:border-transparent" />
+                <input v-model.number="manualForm.billable_rate" type="number" step="0.01" placeholder="Hourly rate (optional)" class="w-full px-3 py-1.5 text-sm rounded-xl border border-border bg-surface-raised text-primary placeholder:text-primary/70 focus:outline-none focus:border-accent focus:ring-2 focus:ring-accent/30" />
               </div>
             </div>
             <div class="flex gap-2">
-              <button @click="showManualEntry = false" class="flex-1 px-4 py-2 text-sm font-medium bg-gray-100 dark:bg-gray-700 text-gray-700 dark:text-gray-300 rounded-lg hover:bg-gray-200 dark:hover:bg-gray-600 transition-colors">Cancel</button>
-              <button @click="submitManualEntry" :disabled="manualForm.processing" class="flex-1 px-4 py-2 text-sm font-medium bg-blue-600 text-white rounded-lg hover:bg-blue-700 disabled:opacity-50 transition-colors flex items-center justify-center gap-2">
+              <button @click="showManualEntry = false" class="flex-1 px-4 py-2 text-sm font-bold rounded-xl border border-border bg-surface-raised text-primary hover:bg-border/20 transition-colors">Cancel</button>
+              <button @click="submitManualEntry" :disabled="manualForm.processing" class="flex-1 px-4 py-2 text-sm font-bold rounded-xl bg-accent text-white hover:bg-accent-hover disabled:opacity-50 transition-colors flex items-center justify-center gap-2 shadow-lg shadow-accent/20">
                 <svg v-if="manualForm.processing" class="w-4 h-4 animate-spin" fill="none" viewBox="0 0 24 24"><circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"/><path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"/></svg>
                 {{ manualForm.processing ? 'Adding...' : 'Add Entry' }}
               </button>
@@ -241,7 +241,7 @@ function formatSessionDate(date: string) { return dayjs(date).format('MMM D'); }
 
           <div v-if="task.priority || task.due_date" class="flex items-center gap-2 mt-2 flex-wrap">
             <span v-if="task.priority" class="inline-flex px-1.5 py-0.5 rounded-full text-[10px] font-medium" :class="[priorityConfig.bg, priorityConfig.text]">{{ priorityConfig.label }}</span>
-            <div v-if="task.due_date" class="flex items-center gap-1 text-[10px] text-gray-500">
+            <div v-if="task.due_date" class="flex items-center gap-1 text-[10px] text-secondary">
               <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"/></svg>
               {{ dayjs(task.due_date).format('MMM D, YYYY') }}
             </div>
@@ -249,53 +249,53 @@ function formatSessionDate(date: string) { return dayjs(date).format('MMM D'); }
         </div>
 
         <div class="hidden sm:flex items-center gap-1 opacity-0 group-hover:opacity-100 transition-opacity flex-shrink-0">
-          <button @click.stop="emit('toggle-complete', task.id)" class="p-1.5 rounded-lg transition-colors" :class="task.completed ? 'text-emerald-400 bg-emerald-500/10' : 'text-gray-600 hover:text-emerald-400 hover:bg-gray-100 dark:hover:bg-gray-700'">
+          <button @click.stop="emit('toggle-complete', task.id)" class="p-1.5 rounded-lg transition-colors" :class="task.completed ? 'text-emerald-500 bg-emerald-500/10' : 'text-secondary hover:text-emerald-500 hover:bg-accent/10'">
             <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/></svg>
           </button>
-          <button @click.stop="router.visit(route('tasks.edit', task.id))" class="p-1.5 rounded-lg text-gray-600 hover:text-blue-600 hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors">
+          <button @click.stop="router.visit(route('tasks.edit', task.id))" class="p-1.5 rounded-lg text-secondary hover:text-accent hover:bg-accent/10 transition-colors">
             <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"/></svg>
           </button>
-          <button @click.stop="emit('delete', task.id)" class="p-1.5 rounded-lg text-gray-600 hover:text-red-400 hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors">
+          <button @click.stop="emit('delete', task.id)" class="p-1.5 rounded-lg text-secondary hover:text-danger hover:bg-danger/10 transition-colors">
             <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"/></svg>
           </button>
         </div>
 
-        <button @click.stop="showMobileActions = !showMobileActions" class="sm:hidden p-1.5 rounded-lg text-gray-500 hover:bg-gray-100 dark:hover:bg-gray-700 flex-shrink-0">
+        <button @click.stop="showMobileActions = !showMobileActions" class="sm:hidden p-1.5 rounded-lg text-secondary hover:bg-accent/10 flex-shrink-0">
           <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 5v.01M12 12v.01M12 19v.01M12 6a1 1 0 110-2 1 1 0 010 2zm0 7a1 1 0 110-2 1 1 0 010 2zm0 7a1 1 0 110-2 1 1 0 010 2z"/></svg>
         </button>
       </div>
 
-      <div v-if="showMobileActions" class="sm:hidden mt-2 flex items-center gap-2 justify-end border-t border-gray-100 dark:border-gray-700 pt-2">
-        <button @click.stop="emit('toggle-complete', task.id); showMobileActions = false" class="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-medium" :class="task.completed ? 'text-amber-600 bg-amber-50' : 'text-emerald-600 bg-emerald-50'">
+      <div v-if="showMobileActions" class="sm:hidden mt-2 flex items-center gap-2 justify-end border-t border-border pt-2">
+        <button @click.stop="emit('toggle-complete', task.id); showMobileActions = false" class="flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-bold" :class="task.completed ? 'text-amber-600 bg-amber-50' : 'text-emerald-600 bg-emerald-50'">
           <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/></svg>
           {{ task.completed ? 'Undo' : 'Done' }}
         </button>
-        <button @click.stop="router.visit(route('tasks.edit', task.id))" class="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-medium text-blue-600 bg-blue-50">Edit</button>
-        <button @click.stop="emit('delete', task.id); showMobileActions = false" class="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-medium text-red-600 bg-red-50">Delete</button>
+        <button @click.stop="router.visit(route('tasks.edit', task.id))" class="flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-bold text-accent bg-accent-subtle">Edit</button>
+        <button @click.stop="emit('delete', task.id); showMobileActions = false" class="flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-bold text-danger bg-danger-subtle">Delete</button>
       </div>
 
-      <div v-if="task.time_sessions && task.time_sessions.length > 0" class="mt-2 border-t border-gray-200/50 dark:border-gray-700/50 pt-2">
-        <button @click.stop="showSessions = !showSessions" class="flex items-center gap-2 text-xs text-gray-600 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-300 w-full">
+      <div v-if="task.time_sessions && task.time_sessions.length > 0" class="mt-2 border-t border-border pt-2">
+        <button @click.stop="showSessions = !showSessions" class="flex items-center gap-2 text-xs font-medium text-secondary hover:text-primary w-full">
           <svg class="w-3 h-3 transition-transform" :class="{ 'rotate-90': showSessions }" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"/></svg>
           {{ task.time_sessions.length }} time {{ task.time_sessions.length === 1 ? 'entry' : 'entries' }}
         </button>
 
         <div v-if="showSessions" class="mt-2 space-y-1">
-          <div v-for="session in task.time_sessions" :key="session.id" class="flex items-center justify-between py-1.5 px-2 bg-gray-50/50 dark:bg-gray-700/30 rounded-lg text-xs group/session">
+          <div v-for="session in task.time_sessions" :key="session.id" class="flex items-center justify-between py-1.5 px-2 rounded-xl border border-border bg-surface-raised text-xs group/session">
             <div class="flex items-center gap-2 min-w-0">
-              <span v-if="!session.is_billable" class="w-1.5 h-1.5 rounded-full bg-gray-400" title="Non-billable" />
+              <span v-if="!session.is_billable" class="w-1.5 h-1.5 rounded-full bg-muted" title="Non-billable" />
               <span v-else class="w-1.5 h-1.5 rounded-full bg-emerald-500" title="Billable" />
-              <span class="text-gray-500 hidden sm:inline">{{ formatSessionDate(session.start_time) }}</span>
-              <span class="text-gray-600 dark:text-gray-300">{{ formatSessionTime(session.start_time) }} - {{ session.end_time ? formatSessionTime(session.end_time) : 'Running' }}</span>
+              <span class="text-muted hidden sm:inline">{{ formatSessionDate(session.start_time) }}</span>
+              <span class="text-primary">{{ formatSessionTime(session.start_time) }} - {{ session.end_time ? formatSessionTime(session.end_time) : 'Running' }}</span>
               <span v-if="session.earnings" class="text-emerald-600 font-medium">${{ session.earnings.toFixed(2) }}</span>
             </div>
             <div class="flex items-center gap-1">
-              <span class="font-mono text-gray-700 dark:text-gray-300">{{ formatDuration(session.start_time, session.end_time) }}</span>
+              <span class="font-mono text-primary">{{ formatDuration(session.start_time, session.end_time) }}</span>
               <div class="hidden group-hover/session:flex items-center gap-0.5 ml-1">
-                <button @click.stop="startEditSession(session)" class="p-1 text-gray-400 hover:text-blue-500">
+                <button @click.stop="startEditSession(session)" class="p-1 text-muted hover:text-accent">
                   <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"/></svg>
                 </button>
-                <button @click.stop="deleteSession(session.id)" class="p-1 text-gray-400 hover:text-red-500">
+                <button @click.stop="deleteSession(session.id)" class="p-1 text-muted hover:text-danger">
                   <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"/></svg>
                 </button>
               </div>
@@ -308,36 +308,36 @@ function formatSessionDate(date: string) { return dayjs(date).format('MMM D'); }
     <Teleport to="body">
       <div v-if="editingSession" class="fixed inset-0 z-50 flex items-center justify-center p-4" @click.self="editingSession = null">
         <div class="absolute inset-0 bg-black/60 backdrop-blur-sm" />
-        <div class="relative bg-white dark:bg-gray-800 rounded-xl shadow-2xl max-w-md w-full p-6">
-          <h3 class="text-lg font-semibold font-sans text-gray-900 dark:text-white mb-4">Edit Time Entry</h3>
+        <div class="relative bg-surface-raised rounded-2xl border border-border shadow-2xl max-w-md w-full p-6">
+          <h3 class="text-lg font-bold text-primary mb-4">Edit Time Entry</h3>
           <div class="space-y-4">
             <div class="grid grid-cols-2 gap-3">
               <div>
-                <label class="block text-xs font-medium text-gray-600 dark:text-gray-400 mb-1">Start Time</label>
-                <input v-model="editForm.start_time" type="datetime-local" class="w-full px-3 py-2 text-sm border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white" />
+                <label class="block text-[10px] font-black text-secondary uppercase tracking-wider mb-1">Start Time</label>
+                <input v-model="editForm.start_time" type="datetime-local" class="w-full px-3 py-2 text-sm rounded-xl border border-border bg-surface-raised text-primary focus:outline-none focus:border-accent focus:ring-2 focus:ring-accent/30" />
               </div>
               <div>
-                <label class="block text-xs font-medium text-gray-600 dark:text-gray-400 mb-1">End Time</label>
-                <input v-model="editForm.end_time" type="datetime-local" class="w-full px-3 py-2 text-sm border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white" />
+                <label class="block text-[10px] font-black text-secondary uppercase tracking-wider mb-1">End Time</label>
+                <input v-model="editForm.end_time" type="datetime-local" class="w-full px-3 py-2 text-sm rounded-xl border border-border bg-surface-raised text-primary focus:outline-none focus:border-accent focus:ring-2 focus:ring-accent/30" />
               </div>
             </div>
             <div class="flex items-center gap-4">
               <label class="flex items-center gap-2">
-                <input type="checkbox" v-model="editForm.is_billable" class="w-4 h-4 rounded" />
-                <span class="text-sm text-gray-700 dark:text-gray-300">Billable</span>
+                <input type="checkbox" v-model="editForm.is_billable" class="w-4 h-4 rounded border-border text-accent focus:ring-accent" />
+                <span class="text-sm font-medium text-primary">Billable</span>
               </label>
               <div v-if="editForm.is_billable" class="flex-1">
-                <input v-model.number="editForm.billable_rate" type="number" step="0.01" placeholder="Custom rate" class="w-full px-3 py-2 text-sm border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white" />
+                <input v-model.number="editForm.billable_rate" type="number" step="0.01" placeholder="Custom rate" class="w-full px-3 py-2 text-sm rounded-xl border border-border bg-surface-raised text-primary placeholder:text-primary/70 focus:outline-none focus:border-accent focus:ring-2 focus:ring-accent/30" />
               </div>
             </div>
             <div>
-              <label class="block text-xs font-medium text-gray-600 dark:text-gray-400 mb-1">Description</label>
-              <input v-model="editForm.description" type="text" placeholder="What did you work on?" class="w-full px-3 py-2 text-sm border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white" />
+              <label class="block text-[10px] font-black text-secondary uppercase tracking-wider mb-1">Description</label>
+              <input v-model="editForm.description" type="text" placeholder="What did you work on?" class="w-full px-3 py-2 text-sm rounded-xl border border-border bg-surface-raised text-primary placeholder:text-primary/70 focus:outline-none focus:border-accent focus:ring-2 focus:ring-accent/30" />
             </div>
           </div>
           <div class="flex gap-3 mt-6">
-            <button @click="editingSession = null" class="flex-1 px-4 py-2 bg-gray-100 dark:bg-gray-700 text-gray-700 dark:text-gray-300 rounded-lg font-medium hover:bg-gray-200 dark:hover:bg-gray-600">Cancel</button>
-            <button @click="updateSession" :disabled="editForm.processing" class="flex-1 px-4 py-2 bg-blue-600 text-white rounded-lg font-medium hover:bg-blue-700 disabled:opacity-50">Save</button>
+            <button @click="editingSession = null" class="flex-1 px-4 py-2 rounded-xl border border-border bg-surface-raised text-primary font-bold text-xs uppercase tracking-widest hover:bg-border/20">Cancel</button>
+            <button @click="updateSession" :disabled="editForm.processing" class="flex-1 px-4 py-2 rounded-xl bg-accent text-white font-bold text-xs uppercase tracking-widest hover:bg-accent-hover disabled:opacity-50 shadow-lg shadow-accent/20">Save</button>
           </div>
         </div>
       </div>

@@ -2,7 +2,7 @@
 import { ref, computed, watch } from 'vue';
 import { router } from '@inertiajs/vue3';
 import TaskCard from './Tasks/TaskCard.vue';
-import CustomCheckbox from './CustomCheckbox.vue';
+import { Checkbox } from '@/Components/ui/checkbox';
 
 interface Task {
   id: number;
@@ -249,7 +249,7 @@ const totalTime = computed(() => {
           v-model="searchQuery"
           type="text"
           placeholder="Search sessions..."
-          class="w-full pl-11 pr-4 py-2.5 bg-surface-overlay border border-border rounded-xl text-sm text-primary placeholder-muted focus:outline-none focus:ring-2 focus:ring-accent transition-all"
+          class="w-full pl-11 pr-4 py-2.5 bg-surface-raised border border-border rounded-xl text-sm text-primary placeholder:text-primary/70 focus:outline-none focus:ring-2 focus:ring-accent transition-all"
         />
       </div>
 
@@ -259,7 +259,7 @@ const totalTime = computed(() => {
         :class="
           hasActiveFilters
             ? 'bg-accent/10 border-accent text-accent shadow-lg shadow-accent/10'
-            : 'text-secondary bg-surface-overlay border-border hover:text-primary'
+            : 'text-secondary bg-surface-raised border-border hover:text-primary'
         "
       >
         <svg
@@ -297,7 +297,7 @@ const totalTime = computed(() => {
           <select
             v-model="selectedStatus"
             @change="applyFilters"
-            class="w-full px-4 py-2.5 bg-surface-overlay border border-border rounded-xl text-sm text-primary focus:outline-none focus:ring-2 focus:ring-accent appearance-none cursor-pointer"
+            class="w-full cursor-pointer appearance-none bg-surface-raised px-4 py-2.5 text-sm text-primary [background-image:none] focus:border-accent focus:outline-none focus:ring-2 focus:ring-accent rounded-xl border border-border"
           >
             <option value="">All Tasks</option>
             <option value="active">Active Only</option>
@@ -332,7 +332,7 @@ const totalTime = computed(() => {
           <select
             v-model="selectedPriority"
             @change="applyFilters"
-            class="w-full px-4 py-2.5 bg-surface-overlay border border-border rounded-xl text-sm text-primary focus:outline-none focus:ring-2 focus:ring-accent appearance-none cursor-pointer"
+            class="w-full cursor-pointer appearance-none bg-surface-raised px-4 py-2.5 text-sm text-primary [background-image:none] focus:border-accent focus:outline-none focus:ring-2 focus:ring-accent rounded-xl border border-border"
           >
             <option value="">Any Priority</option>
             <option value="high">High</option>
@@ -368,7 +368,7 @@ const totalTime = computed(() => {
           <select
             v-model="selectedProject"
             @change="applyFilters"
-            class="w-full px-4 py-2.5 bg-surface-overlay border border-border rounded-xl text-sm text-primary focus:outline-none focus:ring-2 focus:ring-accent appearance-none cursor-pointer"
+            class="w-full cursor-pointer appearance-none bg-surface-raised px-4 py-2.5 text-sm text-primary [background-image:none] focus:border-accent focus:outline-none focus:ring-2 focus:ring-accent rounded-xl border border-border"
           >
             <option :value="null">All Projects</option>
             <option
@@ -409,7 +409,7 @@ const totalTime = computed(() => {
           class="flex items-center gap-3 group cursor-pointer"
           @click="selectAll()"
         >
-          <CustomCheckbox
+          <Checkbox
             :checked="
               selectedTaskIds.length === tasks.length && tasks.length > 0
             "
@@ -428,7 +428,7 @@ const totalTime = computed(() => {
 
       <div class="flex items-center gap-10">
         <div
-          class="flex items-center gap-2 bg-surface-overlay px-3 py-1.5 rounded-lg border border-border group"
+          class="flex items-center gap-2 bg-surface-raised px-3 py-1.5 rounded-lg border border-border group"
         >
           <svg
             class="w-4 h-4 text-accent group-hover:scale-110 transition-transform"
@@ -455,7 +455,7 @@ const totalTime = computed(() => {
           </div>
         </div>
         <div
-          class="text-[10px] font-black text-secondary uppercase tracking-[0.2em] bg-surface-overlay/50 px-3 py-1.5 rounded-lg border border-border/50"
+          class="text-[10px] font-black text-secondary uppercase tracking-[0.2em] bg-surface-raised px-3 py-1.5 rounded-lg border border-border/50"
         >
           {{ pagination.total }} Count
         </div>
@@ -479,7 +479,7 @@ const totalTime = computed(() => {
       class="flex flex-col items-center justify-center py-16 bg-surface-raised rounded-xl border border-border border-dashed shadow-sm"
     >
       <div
-        class="w-16 h-16 rounded-full bg-surface-overlay flex items-center justify-center mb-4 border border-border"
+        class="w-16 h-16 rounded-full bg-surface-raised flex items-center justify-center mb-4 border border-border"
       >
         <svg
           class="w-8 h-8 text-muted"
@@ -529,8 +529,8 @@ const totalTime = computed(() => {
         class="px-4 py-2 rounded-xl text-sm font-bold transition-all disabled:opacity-50 disabled:cursor-not-allowed"
         :class="
           pagination.current_page === 1
-            ? 'bg-surface-overlay text-muted'
-            : 'bg-surface-raised text-primary border border-border hover:bg-surface-overlay shadow-sm'
+            ? 'bg-surface-raised text-muted border border-border opacity-60'
+            : 'bg-surface-raised text-primary border border-border hover:bg-border/15 shadow-sm'
         "
       >
         Previous
@@ -557,8 +557,8 @@ const totalTime = computed(() => {
         class="px-4 py-2 rounded-xl text-sm font-bold transition-all disabled:opacity-50 disabled:cursor-not-allowed"
         :class="
           pagination.current_page === pagination.last_page
-            ? 'bg-surface-overlay text-muted'
-            : 'bg-surface-raised text-primary border border-border hover:bg-surface-overlay shadow-sm'
+            ? 'bg-surface-raised text-muted border border-border opacity-60'
+            : 'bg-surface-raised text-primary border border-border hover:bg-border/15 shadow-sm'
         "
       >
         Next
@@ -724,7 +724,7 @@ const totalTime = computed(() => {
               :class="
                 selectedBulkProjectId === project.id
                   ? 'border-accent bg-accent-subtle shadow-sm'
-                  : 'border-border hover:border-accent/30 hover:bg-surface-overlay'
+                  : 'border-border hover:border-accent/30 hover:bg-border/15'
               "
             >
               <div
@@ -753,7 +753,7 @@ const totalTime = computed(() => {
               :class="
                 selectedBulkProjectId === null
                   ? 'border-accent bg-accent-subtle shadow-sm'
-                  : 'border-border hover:border-accent/30 hover:bg-surface-overlay'
+                  : 'border-border hover:border-accent/30 hover:bg-border/15'
               "
             >
               <div class="w-3 h-3 rounded-full bg-border-strong"></div>
@@ -775,7 +775,7 @@ const totalTime = computed(() => {
           <div class="flex gap-3">
             <button
               @click="showBulkProjectModal = false"
-              class="flex-1 px-4 py-2 bg-surface-overlay text-secondary rounded-xl font-bold text-sm hover:bg-border transition-colors"
+              class="flex-1 px-4 py-2 bg-surface-raised text-secondary rounded-xl font-bold text-sm border border-border hover:bg-border transition-colors"
             >
               Cancel
             </button>
@@ -830,7 +830,7 @@ const totalTime = computed(() => {
             <div class="flex gap-3">
               <button
                 @click="confirmNo"
-                class="flex-1 px-4 py-2 bg-surface-overlay text-secondary rounded-xl font-bold text-sm hover:bg-border transition-colors"
+                class="flex-1 px-4 py-2 bg-surface-raised text-secondary rounded-xl font-bold text-sm border border-border hover:bg-border transition-colors"
               >
                 Cancel
               </button>

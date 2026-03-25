@@ -299,7 +299,7 @@ const exportReport = (format: 'csv' | 'pdf') => {
           <Button
             variant="outline"
             @click="exportReport('csv')"
-            class="bg-surface-raised border-border text-primary hover:bg-surface-overlay"
+            class="bg-surface-raised border-border text-primary hover:bg-border/15"
           >
             <Download class="mr-2 h-4 w-4 text-accent" />
             CSV
@@ -399,9 +399,7 @@ const exportReport = (format: 'csv' | 'pdf') => {
                 >Project</label
               >
               <Select v-model="filterState.project_id">
-                <SelectTrigger
-                  class="bg-surface-overlay border-border text-primary focus:ring-accent"
-                >
+                <SelectTrigger>
                   <SelectValue placeholder="All Projects" />
                 </SelectTrigger>
                 <SelectContent
@@ -425,9 +423,7 @@ const exportReport = (format: 'csv' | 'pdf') => {
                 >Tag</label
               >
               <Select v-model="filterState.tag_id">
-                <SelectTrigger
-                  class="bg-surface-overlay border-border text-primary focus:ring-accent"
-                >
+                <SelectTrigger>
                   <SelectValue placeholder="All Tags" />
                 </SelectTrigger>
                 <SelectContent
@@ -518,7 +514,7 @@ const exportReport = (format: 'csv' | 'pdf') => {
               'flex items-center gap-2 px-6 py-2 text-xs font-bold uppercase tracking-widest rounded-lg transition-all',
               activeTab === 'projects'
                 ? 'bg-accent text-white shadow-lg shadow-accent/20'
-                : 'text-secondary hover:text-primary hover:bg-surface-overlay',
+                : 'text-secondary hover:text-primary hover:bg-border/15',
             ]"
           >
             <Folder class="h-3.5 w-3.5" />
@@ -530,7 +526,7 @@ const exportReport = (format: 'csv' | 'pdf') => {
               'flex items-center gap-2 px-6 py-2 text-xs font-bold uppercase tracking-widest rounded-lg transition-all',
               activeTab === 'tags'
                 ? 'bg-accent text-white shadow-lg shadow-accent/20'
-                : 'text-secondary hover:text-primary hover:bg-surface-overlay',
+                : 'text-secondary hover:text-primary hover:bg-border/15',
             ]"
           >
             <TagIcon class="h-3.5 w-3.5" />
@@ -592,7 +588,7 @@ const exportReport = (format: 'csv' | 'pdf') => {
           class="bg-surface-raised rounded-2xl border border-border shadow-sm overflow-hidden animate-scale-in"
         >
           <div
-            class="p-6 border-b border-border bg-surface-overlay/30 flex items-center justify-between"
+            class="p-6 border-b border-border bg-surface-raised flex items-center justify-between"
           >
             <h3 class="text-lg font-bold text-primary flex items-center gap-2">
               <BarChart3
@@ -605,7 +601,7 @@ const exportReport = (format: 'csv' | 'pdf') => {
               }}
             </h3>
             <span
-              class="text-[10px] font-bold text-muted uppercase tracking-widest bg-surface-overlay px-2 py-1 rounded border border-border"
+              class="text-[10px] font-bold text-muted uppercase tracking-widest bg-surface-raised px-2 py-1 rounded border border-border"
               >Live Data</span
             >
           </div>
@@ -614,7 +610,7 @@ const exportReport = (format: 'csv' | 'pdf') => {
             <table class="w-full text-left border-collapse">
               <thead>
                 <tr
-                  class="bg-surface-overlay/50 text-[10px] font-black text-secondary uppercase tracking-[0.2em]"
+                  class="bg-surface-raised text-[10px] font-black text-secondary uppercase tracking-[0.2em]"
                 >
                   <th class="px-8 py-5 border-b border-border">
                     {{ activeTab === 'projects' ? 'Project Name' : 'Tag Name' }}
@@ -632,7 +628,7 @@ const exportReport = (format: 'csv' | 'pdf') => {
                   <tr
                     v-for="item in projectSummary"
                     :key="item.id"
-                    class="hover:bg-surface-overlay/30 transition-colors group"
+                    class="hover:bg-border/10 transition-colors group"
                   >
                     <td class="px-8 py-5 font-bold text-primary text-sm">
                       <div class="flex items-center gap-3">
@@ -662,7 +658,7 @@ const exportReport = (format: 'csv' | 'pdf') => {
                   <tr
                     v-for="item in tagSummary"
                     :key="item.id"
-                    class="hover:bg-surface-overlay/30 transition-colors group"
+                    class="hover:bg-border/10 transition-colors group"
                   >
                     <td class="px-8 py-5 font-bold text-primary text-sm">
                       <span class="text-accent mr-1">#</span>
@@ -691,7 +687,7 @@ const exportReport = (format: 'csv' | 'pdf') => {
                   <td colspan="3" class="px-8 py-20 text-center">
                     <div class="flex flex-col items-center gap-3 opacity-50">
                       <div
-                        class="w-12 h-12 bg-surface-overlay rounded-full flex items-center justify-center border border-border"
+                        class="w-12 h-12 bg-surface-raised rounded-full flex items-center justify-center border border-border"
                       >
                         <svg
                           class="w-6 h-6 text-muted"

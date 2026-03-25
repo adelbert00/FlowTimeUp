@@ -43,8 +43,9 @@ function deleteTemplate(templateId: number) {
         </div>
         
         <button
+          type="button"
           @click="router.visit(route('task-templates.create'))"
-          class="flex items-center justify-center gap-2 px-6 py-2.5 bg-accent text-white rounded-xl font-bold text-xs uppercase tracking-widest hover:bg-accent-hover transition-all shadow-lg shadow-accent/20 active:scale-95"
+          class="inline-flex h-10 items-center justify-center gap-2 rounded-xl bg-accent px-6 text-xs font-bold uppercase tracking-widest text-white shadow-lg shadow-accent/20 transition-all hover:bg-accent-hover active:scale-95"
         >
           <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M12 4v16m8-8H4"/></svg>
           New Template
@@ -54,50 +55,51 @@ function deleteTemplate(templateId: number) {
       <div class="bg-surface-raised rounded-2xl border border-border p-6 shadow-sm relative overflow-hidden">
         <div class="absolute top-0 right-0 w-32 h-32 bg-accent/5 rounded-full -mr-16 -mt-16 blur-2xl"></div>
         <div class="flex items-start gap-6 relative z-10">
-          <div class="w-12 h-12 rounded-xl bg-accent/10 flex items-center justify-center flex-shrink-0 border border-accent/20">
+          <div class="w-12 h-12 rounded-xl bg-surface-raised flex items-center justify-center flex-shrink-0 border border-border">
             <svg class="w-6 h-6 text-accent" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/>
             </svg>
           </div>
           <div class="flex-1">
-            <h3 class="text-lg font-black text-primary uppercase tracking-tighter mb-2">What are Task Templates?</h3>
-            <p class="text-secondary text-sm mb-4">
+            <h3 class="mb-2 text-base font-bold text-primary">What are Task Templates?</h3>
+            <p class="mb-4 text-sm text-secondary">
               Task Templates allow you to create reusable task configurations that you can quickly apply when creating new tasks. 
               This is perfect for recurring tasks, standard workflows, or tasks that follow a similar pattern.
             </p>
             <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
-              <div class="flex items-start gap-2 p-3 bg-surface-overlay rounded-xl border border-border">
-                <svg class="w-4 h-4 text-accent flex-shrink-0 mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <div class="flex items-center gap-2 p-3 bg-surface-raised rounded-xl border border-border">
+                <svg class="h-4 w-4 shrink-0 text-accent" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
                   <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M5 13l4 4L19 7"/>
                 </svg>
-                <span class="text-[10px] font-bold text-secondary uppercase tracking-wider"><strong>Save time:</strong> Pre-configure everything</span>
+                <span class="text-xs font-medium leading-snug text-secondary"><strong class="font-semibold text-primary">Save time:</strong> Pre-configure everything</span>
               </div>
-              <div class="flex items-start gap-2 p-3 bg-surface-overlay rounded-xl border border-border">
-                <svg class="w-4 h-4 text-accent flex-shrink-0 mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <div class="flex items-center gap-2 p-3 bg-surface-raised rounded-xl border border-border">
+                <svg class="h-4 w-4 shrink-0 text-accent" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
                   <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M5 13l4 4L19 7"/>
                 </svg>
-                <span class="text-[10px] font-bold text-secondary uppercase tracking-wider"><strong>Consistency:</strong> Uniform structure</span>
+                <span class="text-xs font-medium leading-snug text-secondary"><strong class="font-semibold text-primary">Consistency:</strong> Uniform structure</span>
               </div>
-              <div class="flex items-start gap-2 p-3 bg-surface-overlay rounded-xl border border-border">
-                <svg class="w-4 h-4 text-accent flex-shrink-0 mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <div class="flex items-center gap-2 p-3 bg-surface-raised rounded-xl border border-border">
+                <svg class="h-4 w-4 shrink-0 text-accent" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
                   <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M5 13l4 4L19 7"/>
                 </svg>
-                <span class="text-[10px] font-bold text-secondary uppercase tracking-wider"><strong>Quick creation:</strong> One-click setup</span>
+                <span class="text-xs font-medium leading-snug text-secondary"><strong class="font-semibold text-primary">Quick creation:</strong> One-click setup</span>
               </div>
             </div>
           </div>
         </div>
       </div>
 
-      <div v-if="templates.length === 0" class="flex flex-col items-center justify-center py-20 bg-surface-overlay/10 border border-border border-dashed rounded-2xl">
-        <div class="w-16 h-16 rounded-2xl bg-surface-overlay flex items-center justify-center mb-6 border border-border group">
+      <div v-if="templates.length === 0" class="flex flex-col items-center justify-center py-20 bg-surface-raised border border-border border-dashed rounded-2xl">
+        <div class="w-16 h-16 rounded-2xl bg-surface-raised flex items-center justify-center mb-6 border border-border group">
           <svg class="w-8 h-8 text-muted group-hover:text-accent transition-colors" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10"/></svg>
         </div>
-        <p class="text-primary font-bold text-lg">No templates yet</p>
-        <p class="text-secondary text-sm mb-8">Templates help you automate recurring task creation.</p>
+        <p class="text-base font-bold text-primary">No templates yet</p>
+        <p class="mb-8 text-sm text-secondary">Templates help you automate recurring task creation.</p>
         <button
+          type="button"
           @click="router.visit(route('task-templates.create'))"
-          class="px-8 py-3 bg-accent text-white rounded-xl font-bold text-xs uppercase tracking-widest hover:bg-accent-hover transition-all shadow-lg shadow-accent/20"
+          class="inline-flex h-10 items-center justify-center rounded-xl bg-accent px-8 text-xs font-bold uppercase tracking-widest text-white shadow-lg shadow-accent/20 transition-all hover:bg-accent-hover"
         >
           Create first template
         </button>
@@ -110,11 +112,11 @@ function deleteTemplate(templateId: number) {
           class="bg-surface-raised rounded-2xl border border-border shadow-sm p-6 hover:border-accent/30 transition-all group flex flex-col"
         >
           <div class="flex items-start justify-between mb-4">
-            <h3 class="text-lg font-black text-primary uppercase tracking-tighter group-hover:text-accent transition-colors">{{ template.name }}</h3>
+            <h3 class="text-sm font-bold uppercase tracking-tight text-primary transition-colors group-hover:text-accent">{{ template.name }}</h3>
             <div class="flex gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
               <button
                 @click="router.visit(route('task-templates.edit', template.id))"
-                class="p-2 text-muted hover:text-accent hover:bg-surface-overlay rounded-lg transition-all"
+                class="p-2 text-muted hover:text-accent hover:bg-border/15 rounded-lg transition-all"
               >
                 <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"/>
@@ -132,20 +134,20 @@ function deleteTemplate(templateId: number) {
           </div>
           
           <div class="space-y-2 mb-6 flex-1">
-            <p class="text-sm font-bold text-primary">{{ template.title }}</p>
-            <p v-if="template.description" class="text-xs text-secondary line-clamp-2 leading-relaxed">{{ template.description }}</p>
+            <p class="text-sm font-medium text-primary">{{ template.title }}</p>
+            <p v-if="template.description" class="line-clamp-2 text-xs leading-relaxed text-secondary">{{ template.description }}</p>
           </div>
           
           <div class="flex items-center gap-2 mb-6">
             <span
               v-if="template.project"
-              class="text-[10px] font-black uppercase tracking-widest px-2 py-1 rounded border"
+              class="rounded border px-2 py-1 text-xs font-semibold uppercase tracking-wide"
               :style="{ backgroundColor: template.project.color + '10', color: template.project.color, borderColor: template.project.color + '30' }"
             >
               {{ template.project.name }}
             </span>
             <span
-              class="text-[10px] font-black uppercase tracking-widest px-2 py-1 rounded border"
+              class="rounded border px-2 py-1 text-xs font-semibold uppercase tracking-wide"
               :class="template.priority === 'high' ? 'bg-danger/10 text-danger border-danger/20'
                 : template.priority === 'medium' ? 'bg-warning/10 text-warning border-warning/20'
                 : 'bg-success/10 text-success border-success/20'"
@@ -155,8 +157,9 @@ function deleteTemplate(templateId: number) {
           </div>
           
           <button
+            type="button"
             @click="useTemplate(template.id)"
-            class="w-full px-4 py-3 bg-accent text-white rounded-xl font-bold text-xs uppercase tracking-widest hover:bg-accent-hover transition-all shadow-lg shadow-accent/20 active:scale-95"
+            class="inline-flex h-10 w-full items-center justify-center rounded-xl bg-accent px-4 text-xs font-bold uppercase tracking-widest text-white shadow-lg shadow-accent/20 transition-all hover:bg-accent-hover active:scale-95"
           >
             Use Template
           </button>

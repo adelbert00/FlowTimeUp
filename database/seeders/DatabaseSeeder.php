@@ -23,7 +23,7 @@ class DatabaseSeeder extends Seeder
             'first_name' => 'Demo',
             'last_name' => 'User',
             'email' => 'demo@flowtimeup.com',
-            'password' => Hash::make('password123'),
+            'password' => '12345678',
         ]);
 
         // Create Demo Project

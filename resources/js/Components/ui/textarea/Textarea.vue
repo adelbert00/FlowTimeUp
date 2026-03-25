@@ -22,12 +22,12 @@ defineOptions({ inheritAttrs: false });
 </script>
 
 <template>
-  <input
+  <textarea
     v-model="modelValue"
     v-bind="$attrs"
     :class="
       cn(
-        'flex h-10 w-full rounded-xl border border-border bg-surface-raised px-3 py-2 text-sm text-primary ring-offset-white file:border-0 file:bg-transparent file:text-sm file:font-medium placeholder:text-black placeholder:transition-colors focus-visible:outline-none focus-visible:border-accent focus-visible:ring-2 focus-visible:ring-accent/30 disabled:cursor-not-allowed disabled:opacity-50 dark:placeholder:text-white/45',
+        'flex min-h-[80px] w-full rounded-xl border border-border bg-surface-raised px-3 py-2 sm:px-4 sm:py-2.5 text-sm text-primary ring-offset-white placeholder:text-black focus-visible:outline-none focus-visible:border-accent focus-visible:ring-2 focus-visible:ring-accent/30 disabled:cursor-not-allowed disabled:opacity-50 dark:placeholder:text-white/45',
         props.class
       )
     "

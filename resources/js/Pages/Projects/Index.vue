@@ -160,13 +160,13 @@ function deleteProject(project: Project) {
 
       <!-- Filter Bar -->
       <div class="bg-surface-raised rounded-2xl border border-border p-4 shadow-sm flex flex-wrap items-center gap-4">
-        <div class="flex items-center gap-2 px-3 py-1.5 bg-surface-overlay rounded-lg border border-border">
-          <svg class="w-3.5 h-3.5 text-accent" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M3 4a1 1 0 011-1h16a1 1 0 011 1v2.586a1 1 0 01-.293.707l-6.414 6.414a1 1 0 00-.293.707V17l-4 4v-6.586a1 1 0 00-.293-.707L3.293 7.293A1 1 0 013 6.586V4z"/></svg>
-          <span class="text-[10px] font-black text-secondary uppercase tracking-widest">Filter</span>
+        <div class="flex h-10 items-center gap-2 rounded-lg border border-border bg-surface-raised px-3">
+          <svg class="h-3.5 w-3.5 shrink-0 text-accent" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M3 4a1 1 0 011-1h16a1 1 0 011 1v2.586a1 1 0 01-.293.707l-6.414 6.414a1 1 0 00-.293.707V17l-4 4v-6.586a1 1 0 00-.293-.707L3.293 7.293A1 1 0 013 6.586V4z"/></svg>
+          <span class="text-xs font-bold uppercase tracking-wider text-secondary">Filter</span>
         </div>
         
-        <div class="relative">
-          <select class="pl-4 pr-10 py-2 bg-surface-overlay border border-border rounded-xl text-sm text-primary appearance-none cursor-pointer focus:outline-none focus:ring-2 focus:ring-accent transition-all">
+        <div class="relative min-w-[140px]">
+          <select class="h-10 w-full cursor-pointer appearance-none rounded-xl border border-border bg-surface-raised py-0 pl-4 pr-10 text-sm font-normal text-primary [background-image:none] transition-all focus:border-accent focus:outline-none focus:ring-2 focus:ring-accent">
             <option>Active</option>
             <option>Archived</option>
             <option>All</option>
@@ -185,7 +185,7 @@ function deleteProject(project: Project) {
               v-model="searchQuery"
               type="text"
               placeholder="Search projects..."
-              class="w-full pl-11 pr-4 py-2 bg-surface-overlay border border-border rounded-xl text-sm text-primary placeholder-muted focus:outline-none focus:ring-2 focus:ring-accent transition-all"
+              class="h-10 w-full rounded-xl border border-border bg-surface-raised pl-11 pr-4 text-sm font-normal text-primary placeholder:text-primary/60 focus:border-accent focus:outline-none focus:ring-2 focus:ring-accent/30 transition-all"
             />
           </div>
         </div>
@@ -193,15 +193,15 @@ function deleteProject(project: Project) {
 
       <!-- Table Card -->
       <div class="bg-surface-raised rounded-2xl border border-border shadow-sm overflow-hidden">
-        <div class="bg-surface-overlay/30 px-6 py-4 border-b border-border flex items-center justify-between">
-          <span class="text-xs font-bold text-primary uppercase tracking-widest">Project List</span>
-          <span class="text-[10px] font-black text-muted bg-surface-overlay px-2 py-1 rounded border border-border">{{ filteredProjects.length }} Total</span>
+        <div class="flex items-center justify-between border-b border-border bg-surface-raised px-6 py-4">
+          <span class="text-xs font-bold uppercase tracking-wider text-primary">Project List</span>
+          <span class="rounded border border-border bg-surface-raised px-2 py-1 text-xs font-semibold text-muted">{{ filteredProjects.length }} Total</span>
         </div>
         
         <div class="overflow-x-auto">
           <table class="w-full text-left">
             <thead>
-              <tr class="bg-surface-overlay/50 text-[10px] font-black text-secondary uppercase tracking-[0.2em]">
+              <tr class="bg-surface-raised text-xs font-bold uppercase tracking-wider text-secondary">
                 <th class="px-6 py-4 border-b border-border">
                   <button @click="toggleSort('name')" class="flex items-center gap-1.5 hover:text-primary transition-colors">
                     Name
@@ -228,33 +228,33 @@ function deleteProject(project: Project) {
               <tr 
                 v-for="project in filteredProjects"
                 :key="project.id"
-                class="hover:bg-surface-overlay/30 transition-colors group"
+                class="hover:bg-border/10 transition-colors group"
               >
                 <td class="px-6 py-5">
                   <div class="flex items-center gap-3">
                     <span class="w-2.5 h-2.5 rounded-full ring-2 ring-surface-raised shadow-sm" :style="{ backgroundColor: project.color || '#6366f1' }" />
-                    <span class="font-bold text-primary text-sm group-hover:text-accent transition-colors">{{ project.name }}</span>
+                    <span class="text-sm font-medium text-primary transition-colors group-hover:text-accent">{{ project.name }}</span>
                   </div>
                 </td>
                 <td class="px-6 py-5">
-                  <span class="text-secondary font-mono text-xs font-bold bg-surface-overlay px-2 py-1 rounded border border-border group-hover:text-primary transition-colors">{{ project.tracked_time || '00:00:00' }}</span>
+                  <span class="rounded border border-border bg-surface-raised px-2 py-1 font-mono text-sm font-medium text-secondary transition-colors group-hover:text-primary">{{ project.tracked_time || '00:00:00' }}</span>
                 </td>
                 <td class="px-6 py-5">
-                  <span class="text-primary font-bold text-sm">
+                  <span class="text-sm font-medium tabular-nums text-primary">
                     {{ formatCurrency(project.total_amount || 0, project.currency || 'USD') }}
                   </span>
                 </td>
                 <td class="px-6 py-5">
-                  <span 
-                    class="inline-flex px-2 py-1 text-[10px] font-black uppercase tracking-widest rounded border"
-                    :class="project.access === 'private' ? 'bg-surface-overlay border-border text-muted' : 'bg-accent/10 border-accent/20 text-accent'"
+                  <span
+                    class="inline-flex rounded border px-2 py-1 text-xs font-semibold uppercase tracking-wide"
+                    :class="project.access === 'private' ? 'border-border bg-surface-raised text-secondary' : 'border-accent/20 bg-accent/10 text-accent'"
                   >
                     {{ project.access === 'private' ? 'Private' : 'Public' }}
                   </span>
                 </td>
                 <td class="px-6 py-5">
                   <div class="flex items-center justify-end gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
-                    <button @click="openEditModal(project)" class="p-2 rounded-lg text-muted hover:text-accent hover:bg-surface-overlay transition-all" title="Edit">
+                    <button @click="openEditModal(project)" class="p-2 rounded-lg text-muted hover:text-accent hover:bg-border/15 transition-all" title="Edit">
                       <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"/></svg>
                     </button>
                     <button @click="deleteProject(project)" class="p-2 rounded-lg text-muted hover:text-danger hover:bg-danger/10 transition-all" title="Delete">
@@ -267,8 +267,8 @@ function deleteProject(project: Project) {
           </table>
         </div>
 
-        <div v-if="filteredProjects.length === 0" class="flex flex-col items-center justify-center py-20 bg-surface-overlay/10">
-          <div class="w-16 h-16 rounded-2xl bg-surface-overlay flex items-center justify-center mb-6 border border-border group">
+        <div v-if="filteredProjects.length === 0" class="flex flex-col items-center justify-center py-20 bg-surface-raised">
+          <div class="w-16 h-16 rounded-2xl bg-surface-raised flex items-center justify-center mb-6 border border-border group">
             <svg class="w-8 h-8 text-muted group-hover:text-accent transition-colors" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 7v10a2 2 0 002 2h14a2 2 0 002-2V9a2 2 0 00-2-2h-6l-2-2H5a2 2 0 00-2 2z"/></svg>
           </div>
           <p class="text-primary font-bold text-lg">No projects found</p>
@@ -303,7 +303,7 @@ function deleteProject(project: Project) {
                     v-model="form.name"
                     type="text"
                     placeholder="Enter project name..."
-                    class="w-full px-4 py-3 bg-surface-overlay border border-border rounded-xl text-primary placeholder-muted focus:outline-none focus:ring-2 focus:ring-accent transition-all"
+                    class="w-full px-4 py-3 bg-surface-raised border border-border rounded-xl text-primary placeholder-muted focus:outline-none focus:ring-2 focus:ring-accent transition-all"
                     :class="{ 'border-danger': form.errors.name }"
                   />
                   <p v-if="form.errors.name" class="text-danger text-[10px] font-bold uppercase tracking-wider">{{ form.errors.name }}</p>
@@ -315,7 +315,7 @@ function deleteProject(project: Project) {
                     v-model="form.description"
                     rows="3"
                     placeholder="Brief description of the project..."
-                    class="w-full px-4 py-3 bg-surface-overlay border border-border rounded-xl text-primary placeholder-muted focus:outline-none focus:ring-2 focus:ring-accent transition-all resize-none"
+                    class="w-full px-4 py-3 bg-surface-raised border border-border rounded-xl text-primary placeholder-muted focus:outline-none focus:ring-2 focus:ring-accent transition-all resize-none"
                   />
                 </div>
 
@@ -328,14 +328,14 @@ function deleteProject(project: Project) {
                         type="number"
                         step="0.01"
                         placeholder="0.00"
-                        class="w-full px-4 py-3 bg-surface-overlay border border-border rounded-xl text-primary placeholder-muted focus:outline-none focus:ring-2 focus:ring-accent transition-all"
+                        class="w-full px-4 py-3 bg-surface-raised border border-border rounded-xl text-primary placeholder-muted focus:outline-none focus:ring-2 focus:ring-accent transition-all"
                       />
                     </div>
                   </div>
                   <div class="space-y-2">
                     <label class="text-[10px] font-black text-secondary uppercase tracking-[0.2em]">Currency</label>
                     <div class="relative">
-                      <select v-model="form.currency" class="w-full px-4 py-3 pr-10 bg-surface-overlay border border-border rounded-xl text-primary appearance-none focus:outline-none focus:ring-2 focus:ring-accent transition-all">
+                      <select v-model="form.currency" class="w-full appearance-none bg-surface-raised px-4 py-3 pr-10 text-primary [background-image:none] transition-all focus:border-accent focus:outline-none focus:ring-2 focus:ring-accent rounded-xl border border-border">
                         <option value="USD">USD</option>
                         <option value="EUR">EUR</option>
                         <option value="PLN">PLN</option>
@@ -367,7 +367,7 @@ function deleteProject(project: Project) {
                   <button
                     type="button"
                     @click="showModal = false"
-                    class="flex-1 px-6 py-3.5 bg-surface-overlay text-primary border border-border rounded-xl font-bold text-xs uppercase tracking-widest hover:bg-border transition-all"
+                    class="flex-1 px-6 py-3.5 bg-surface-raised text-primary border border-border rounded-xl font-bold text-xs uppercase tracking-widest hover:bg-border transition-all"
                   >
                     Cancel
                   </button>

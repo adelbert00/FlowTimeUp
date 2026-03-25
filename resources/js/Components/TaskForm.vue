@@ -1,7 +1,11 @@
 <script setup lang="ts">
-import { ref, computed, watch } from 'vue';
+import { ref, watch } from 'vue';
 import { useForm, router } from '@inertiajs/vue3';
 import CustomDatePicker from '@/Components/CustomDatePicker.vue';
+import { Button } from '@/Components/ui/button';
+import { Input } from '@/Components/ui/input';
+import { Label } from '@/Components/ui/label';
+import { Textarea } from '@/Components/ui/textarea';
 
 interface Project {
   id: number;
@@ -115,33 +119,36 @@ const colorPresets = [
 </script>
 
 <template>
-  <div class="bg-white dark:bg-gray-800 rounded-xl border border-gray-200 dark:border-gray-700 shadow-sm overflow-hidden">
-    <div 
-      class="px-4 sm:px-6 py-3 sm:py-4 border-b border-gray-200/50 dark:border-gray-700/50 flex items-center justify-between cursor-pointer hover:bg-gray-50 dark:hover:bg-gray-700/50 transition-colors"
+  <div class="rounded-2xl border border-border bg-surface-raised shadow-sm overflow-hidden">
+    <div
+      v-if="collapsible !== false"
+      class="px-4 sm:px-6 py-3 sm:py-4 border-b border-border flex items-center justify-between cursor-pointer hover:bg-accent/5 transition-colors"
       :class="{ 'border-b-0': isCollapsed }"
       @click="isCollapsed = !isCollapsed"
     >
-      <h2 class="text-lg font-semibold font-sans text-gray-900 dark:text-white flex items-center gap-2">
-        <svg class="w-5 h-5 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+      <h2 class="text-lg font-bold text-primary tracking-tight flex items-center gap-2">
+        <svg class="w-5 h-5 text-accent shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
           <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"/>
         </svg>
         New Task
       </h2>
-      <button 
+      <Button
         type="button"
-        class="p-1.5 rounded-lg text-gray-500 hover:text-gray-700 dark:hover:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-600 transition-colors"
+        variant="ghost"
+        size="icon"
+        class="text-secondary hover:text-primary hover:bg-accent/10"
         @click.stop="isCollapsed = !isCollapsed"
       >
-        <svg 
-          class="w-5 h-5 transition-transform duration-200" 
+        <svg
+          class="w-5 h-5 transition-transform duration-200"
           :class="{ 'rotate-180': !isCollapsed }"
-          fill="none" 
-          stroke="currentColor" 
+          fill="none"
+          stroke="currentColor"
           viewBox="0 0 24 24"
         >
           <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 15l7-7 7 7"/>
         </svg>
-      </button>
+      </Button>
     </div>
 
     <Transition
@@ -153,114 +160,122 @@ const colorPresets = [
       leave-to-class="max-h-0 opacity-0"
     >
       <form v-show="!isCollapsed" @submit.prevent="submitTask" class="p-4 sm:p-6 space-y-4 sm:space-y-5 overflow-hidden">
-      <div>
-        <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1.5">
-          Task name <span class="text-red-400">*</span>
-        </label>
-        <input
+      <div class="space-y-1.5">
+        <Label class="block text-[10px] font-black text-secondary uppercase tracking-[0.2em]">
+          Task name <span class="text-danger">*</span>
+        </Label>
+        <Input
           v-model="form.title"
           type="text"
           placeholder="What are you working on?"
-          class="w-full px-3 sm:px-4 py-2 sm:py-2.5 bg-gray-50/50 dark:bg-gray-700/50 border border-gray-300 dark:border-gray-600 rounded-lg text-gray-900 dark:text-white placeholder-gray-400 dark:placeholder-gray-500 focus:outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-500 transition-colors text-sm sm:text-base"
-          :class="{ 'border-red-500': form.errors.title }"
+          class="h-auto min-h-0 py-2.5 sm:py-3"
+          :class="{ 'border-danger': form.errors.title }"
         />
-        <p v-if="form.errors.title" class="text-red-400 text-sm mt-1">{{ form.errors.title }}</p>
+        <p v-if="form.errors.title" class="text-danger text-xs font-medium">{{ form.errors.title }}</p>
       </div>
 
-      <div>
-        <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1.5">Description</label>
-        <textarea
+      <div class="space-y-1.5">
+        <Label class="block text-[10px] font-black text-secondary uppercase tracking-[0.2em]">Description</Label>
+        <Textarea
           v-model="form.description"
           rows="2"
           placeholder="Add more details..."
-          class="w-full px-3 sm:px-4 py-2 sm:py-2.5 bg-gray-50/50 dark:bg-gray-700/50 border border-gray-300 dark:border-gray-600 rounded-lg text-gray-900 dark:text-white placeholder-gray-400 dark:placeholder-gray-500 focus:outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-500 transition-colors resize-none text-sm sm:text-base"
+          class="min-h-[72px] resize-none py-2.5 sm:py-3"
         />
       </div>
 
       <div>
         <div class="flex items-center justify-between mb-1.5">
-          <label class="text-sm font-medium text-gray-700 dark:text-gray-300">Project</label>
-          <button type="button" @click="showProjectModal = true" class="text-xs text-blue-600 hover:text-blue-700 font-medium">+ New project</button>
+          <Label class="text-[10px] font-black text-secondary uppercase tracking-[0.2em]">Project</Label>
+          <Button type="button" variant="link" class="h-auto p-0 text-xs font-bold text-accent" @click="showProjectModal = true">
+            + New project
+          </Button>
         </div>
         <div class="relative">
           <select
             v-model="form.project_id"
-            class="w-full px-3 sm:px-4 py-2 sm:py-2.5 pr-10 bg-gray-50/50 dark:bg-gray-700/50 border border-gray-300 dark:border-gray-600 rounded-lg text-gray-900 dark:text-white focus:outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-500 transition-colors appearance-none cursor-pointer text-sm sm:text-base"
+            class="w-full cursor-pointer appearance-none bg-surface-raised px-3 py-2 pr-10 text-sm text-primary [background-image:none] transition-colors focus:border-accent focus:outline-none focus:ring-2 focus:ring-accent/30 sm:px-4 sm:py-2.5 rounded-xl border border-border"
           >
             <option :value="null">No project</option>
             <option v-for="project in projects" :key="project.id" :value="project.id">{{ project.name }}</option>
           </select>
-          <div class="absolute inset-y-0 right-0 flex items-center pr-3 pointer-events-none">
-            <svg class="w-5 h-5 text-gray-400 dark:text-gray-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <div class="absolute inset-y-0 right-0 flex items-center pr-3 pointer-events-none text-muted">
+            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"/>
             </svg>
           </div>
         </div>
       </div>
 
-      <div>
-        <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1.5">Due date</label>
+      <div class="space-y-1.5">
+        <Label class="block text-[10px] font-black text-secondary uppercase tracking-[0.2em]">Due date</Label>
         <CustomDatePicker v-model="form.due_date" placeholder="Select date" />
       </div>
 
-      <div>
-        <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1.5">Priority</label>
+      <div class="space-y-1.5">
+        <Label class="block text-[10px] font-black text-secondary uppercase tracking-[0.2em]">Priority</Label>
         <div class="flex gap-1">
           <button
             v-for="p in ['low', 'medium', 'high'] as const"
             :key="p"
             type="button"
             @click="form.priority = p"
-            class="flex-1 px-2 py-2 rounded-lg text-xs font-medium capitalize transition-colors"
+            class="flex-1 px-2 py-2 rounded-xl text-xs font-bold capitalize transition-colors"
             :class="form.priority === p
               ? p === 'high' ? 'bg-red-500 text-white'
                 : p === 'medium' ? 'bg-amber-500 text-white'
                 : 'bg-emerald-500 text-white'
-              : 'bg-gray-100 dark:bg-gray-700 text-gray-600 dark:text-gray-300 hover:bg-gray-200 dark:hover:bg-gray-600'"
+              : 'bg-surface-raised text-primary border border-border hover:bg-accent/5'"
           >
             {{ p[0].toUpperCase() }}
           </button>
         </div>
       </div>
 
-      <button
+      <Button
         type="button"
+        variant="ghost"
+        class="h-auto w-full justify-start gap-2 px-0 text-sm font-medium text-secondary hover:bg-transparent hover:text-primary"
         @click="showAdvanced = !showAdvanced"
-        class="flex items-center gap-2 text-sm text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white transition-colors"
       >
-        <svg class="w-4 h-4 transition-transform" :class="{ 'rotate-90': showAdvanced }" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+        <svg class="w-4 h-4 transition-transform shrink-0" :class="{ 'rotate-90': showAdvanced }" fill="none" stroke="currentColor" viewBox="0 0 24 24">
           <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"/>
         </svg>
         Advanced options
-      </button>
+      </Button>
 
-      <div v-if="showAdvanced" class="space-y-4 pt-2 border-t border-gray-200 dark:border-gray-700">
-        <div>
-          <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1.5">Hourly Rate</label>
+      <div v-if="showAdvanced" class="space-y-4 pt-2 border-t border-border">
+        <div class="space-y-1.5">
+          <Label class="block text-[10px] font-black text-secondary uppercase tracking-[0.2em]">Hourly Rate</Label>
           <div class="flex gap-2">
-            <div class="flex-1 relative">
-              <span class="absolute left-3 top-1/2 -translate-y-1/2 text-gray-500 text-sm">$</span>
-              <input
-                v-model.number="form.hourly_rate"
+            <div class="relative flex-1">
+              <span class="pointer-events-none absolute left-3 top-1/2 z-[1] -translate-y-1/2 text-sm font-medium text-secondary">$</span>
+              <Input
+                :model-value="form.hourly_rate ?? ''"
                 type="number"
                 step="0.01"
                 min="0"
                 placeholder="0.00"
-                class="w-full pl-7 pr-4 py-2 bg-gray-50/50 dark:bg-gray-700/50 border border-gray-300 dark:border-gray-600 rounded-lg text-gray-900 dark:text-white placeholder-gray-400 focus:outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-500 transition-colors text-sm"
+                class="pl-7"
+                @update:model-value="
+                  (v) =>
+                    (form.hourly_rate =
+                      v === '' || v === null ? null : Number(v))
+                "
               />
             </div>
             <div class="relative">
               <select
                 v-model="form.currency"
-                class="w-full px-3 py-2 pr-10 bg-gray-50/50 dark:bg-gray-700/50 border border-gray-300 dark:border-gray-600 rounded-lg text-gray-900 dark:text-white focus:outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-500 transition-colors text-sm appearance-none cursor-pointer"
+                class="w-full cursor-pointer appearance-none bg-surface-raised px-3 py-2 pr-10 text-sm text-primary [background-image:none] transition-colors focus:border-accent focus:outline-none focus:ring-2 focus:ring-accent/30 rounded-xl border border-border"
               >
                 <option value="USD">USD</option>
                 <option value="EUR">EUR</option>
                 <option value="GBP">GBP</option>
                 <option value="PLN">PLN</option>
               </select>
-              <div class="absolute inset-y-0 right-0 flex items-center pr-3 pointer-events-none">
-                <svg class="w-4 h-4 text-gray-400 dark:text-gray-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <div class="absolute inset-y-0 right-0 flex items-center pr-3 pointer-events-none text-muted">
+                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"/>
                 </svg>
               </div>
@@ -270,77 +285,74 @@ const colorPresets = [
 
         <div>
           <label class="flex items-center gap-3 cursor-pointer">
-            <input type="checkbox" v-model="form.is_recurring" class="w-4 h-4 rounded border-gray-300 dark:border-gray-600 text-blue-600 focus:ring-blue-500" />
-            <span class="text-sm font-medium text-gray-700 dark:text-gray-300">Recurring task</span>
+            <input type="checkbox" v-model="form.is_recurring" class="w-4 h-4 rounded border-border text-accent focus:ring-accent" />
+            <span class="text-sm font-medium text-primary">Recurring task</span>
           </label>
         </div>
 
-        <div v-if="form.is_recurring" class="space-y-4 p-4 bg-gray-50 dark:bg-gray-700/50 rounded-lg border border-gray-200 dark:border-gray-600">
-          <div>
-            <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Repeat every</label>
+        <div v-if="form.is_recurring" class="space-y-4 rounded-xl border border-border bg-surface-raised p-4">
+          <div class="space-y-2">
+            <Label class="block text-[10px] font-black text-secondary uppercase tracking-[0.2em]">Repeat every</Label>
             <div class="flex gap-2">
-              <input
+              <Input
                 v-model.number="form.recurrence_interval"
                 type="number"
                 min="1"
                 max="365"
-                class="w-20 px-3 py-2 bg-white dark:bg-gray-800 border border-gray-300 dark:border-gray-600 rounded-lg text-sm text-gray-900 dark:text-white focus:outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-500"
+                class="w-20"
               />
               <div class="flex-1 relative">
                 <select
                   v-model="form.recurrence_type"
-                  class="w-full px-3 py-2 pr-10 bg-white dark:bg-gray-800 border border-gray-300 dark:border-gray-600 rounded-lg text-sm text-gray-900 dark:text-white focus:outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-500 appearance-none cursor-pointer"
+                  class="w-full cursor-pointer appearance-none bg-surface-raised px-3 py-2 pr-10 text-sm text-primary [background-image:none] focus:border-accent focus:outline-none focus:ring-2 focus:ring-accent/30 rounded-xl border border-border"
                 >
                   <option :value="null">Select...</option>
                   <option value="daily">Day(s)</option>
                   <option value="weekly">Week(s)</option>
                   <option value="monthly">Month(s)</option>
                 </select>
-                <div class="absolute inset-y-0 right-0 flex items-center pr-3 pointer-events-none">
-                  <svg class="w-4 h-4 text-gray-400 dark:text-gray-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"/>
-                  </svg>
-                </div>
-                <div class="absolute inset-y-0 right-0 flex items-center pr-2 pointer-events-none">
-                  <svg class="w-4 h-4 text-gray-400 dark:text-gray-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <div class="absolute inset-y-0 right-0 flex items-center pr-3 pointer-events-none text-muted">
+                  <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"/>
                   </svg>
                 </div>
               </div>
             </div>
           </div>
-          <div>
-            <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Ends on</label>
+          <div class="space-y-1.5">
+            <Label class="block text-[10px] font-black text-secondary uppercase tracking-[0.2em]">Ends on</Label>
             <CustomDatePicker v-model="form.recurrence_ends_at" placeholder="Never" />
           </div>
         </div>
       </div>
 
       <div>
-        <div class="flex items-center justify-between mb-1.5">
-          <label class="text-sm font-medium text-gray-700 dark:text-gray-300">Tags</label>
-          <button type="button" @click="showTagModal = true" class="text-xs text-blue-600 hover:text-blue-700 font-medium">+ New tag</button>
+        <div class="mb-1.5 flex items-center justify-between">
+          <Label class="text-[10px] font-black text-secondary uppercase tracking-[0.2em]">Tags</Label>
+          <Button type="button" variant="link" class="h-auto p-0 text-xs font-bold text-accent" @click="showTagModal = true">
+            + New tag
+          </Button>
         </div>
         <div v-if="tags && tags.length > 0" class="flex flex-wrap gap-2">
           <label
             v-for="tag in tags"
             :key="tag.id"
-            class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg cursor-pointer transition-colors text-sm"
+            class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl cursor-pointer transition-colors text-sm font-medium"
             :class="form.tag_ids.includes(tag.id)
-              ? 'bg-blue-100 dark:bg-blue-900/50 text-blue-700 dark:text-blue-300 border border-blue-300 dark:border-blue-700'
-              : 'bg-gray-100 dark:bg-gray-700 text-gray-700 dark:text-gray-300 border border-gray-200 dark:border-gray-600 hover:border-gray-300 dark:hover:border-gray-500'"
+              ? 'bg-accent-subtle text-accent-text border border-accent/30'
+              : 'bg-surface-raised text-primary border border-border hover:border-accent/40'"
           >
             <input type="checkbox" :value="tag.id" v-model="form.tag_ids" class="sr-only" />
             #{{ tag.name }}
           </label>
         </div>
-        <p v-else class="text-sm text-gray-500 dark:text-gray-400">No tags yet</p>
+        <p v-else class="text-sm text-secondary">No tags yet</p>
       </div>
 
-      <button
+      <Button
         type="submit"
         :disabled="form.processing"
-        class="w-full py-2.5 bg-blue-600 text-white rounded-lg font-medium hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 disabled:opacity-50 disabled:cursor-not-allowed transition-colors text-sm"
+        class="h-auto w-full rounded-xl py-3 text-xs font-bold uppercase tracking-widest shadow-lg shadow-accent/20"
       >
         <span v-if="form.processing" class="flex items-center justify-center gap-2">
           <svg class="w-4 h-4 animate-spin" fill="none" viewBox="0 0 24 24">
@@ -350,31 +362,31 @@ const colorPresets = [
           Creating...
         </span>
         <span v-else>Create Task</span>
-      </button>
+      </Button>
     </form>
     </Transition>
 
     <Teleport to="body">
       <div v-if="showProjectModal" class="fixed inset-0 z-50 flex items-center justify-center p-4" @click.self="showProjectModal = false">
         <div class="absolute inset-0 bg-black/60 backdrop-blur-sm" />
-        <div class="relative bg-white dark:bg-gray-800 rounded-2xl shadow-2xl max-w-md w-full border border-gray-200 dark:border-gray-700 overflow-hidden">
+        <div class="relative bg-surface-raised rounded-2xl shadow-2xl max-w-md w-full border border-border overflow-hidden">
           <div class="absolute top-0 left-0 right-0 h-1" :style="{ backgroundColor: projectForm.color }" />
           <div class="p-6">
-            <h3 class="text-xl font-semibold font-sans text-gray-900 dark:text-white mb-4">New Project</h3>
+            <h3 class="text-xl font-bold text-primary mb-4">New Project</h3>
             <div class="space-y-4">
-              <div>
-                <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1.5">Project name</label>
-                <input
+              <div class="space-y-1.5">
+                <Label class="block text-[10px] font-black text-secondary uppercase tracking-[0.2em]">Project name</Label>
+                <Input
                   v-model="projectForm.name"
                   type="text"
                   placeholder="e.g., Work, Personal"
-                  class="w-full px-4 py-2.5 bg-gray-50/50 dark:bg-gray-700/50 border border-gray-300 dark:border-gray-600 rounded-lg text-gray-900 dark:text-white placeholder-gray-400 focus:outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-500"
-                  :class="{ 'border-red-500': projectForm.errors.name }"
+                  class="h-auto py-2.5"
+                  :class="{ 'border-danger': projectForm.errors.name }"
                 />
-                <p v-if="projectForm.errors.name" class="text-red-400 text-sm mt-1">{{ projectForm.errors.name }}</p>
+                <p v-if="projectForm.errors.name" class="text-danger text-xs">{{ projectForm.errors.name }}</p>
               </div>
               <div>
-                <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1.5">Color</label>
+                <Label class="mb-1.5 block text-[10px] font-black text-secondary uppercase tracking-[0.2em]">Color</Label>
                 <div class="flex flex-wrap gap-2">
                   <button
                     v-for="color in colorPresets"
@@ -382,15 +394,19 @@ const colorPresets = [
                     type="button"
                     @click="projectForm.color = color"
                     class="w-8 h-8 rounded-lg transition-transform hover:scale-110"
-                    :class="projectForm.color === color ? 'ring-2 ring-white ring-offset-2' : ''"
+                    :class="projectForm.color === color ? 'ring-2 ring-white ring-offset-2 ring-offset-surface-raised' : ''"
                     :style="{ backgroundColor: color }"
                   />
                 </div>
               </div>
             </div>
-            <div class="flex gap-3 mt-6">
-              <button type="button" @click="showProjectModal = false" class="flex-1 px-4 py-2.5 bg-gray-100 dark:bg-gray-700 text-gray-700 dark:text-gray-300 rounded-lg font-medium hover:bg-gray-200 dark:hover:bg-gray-600 transition-colors">Cancel</button>
-              <button type="button" @click="createProject" :disabled="projectForm.processing" class="flex-1 px-4 py-2.5 bg-blue-600 text-white rounded-lg font-medium hover:bg-blue-700 disabled:opacity-50 transition-colors">Create</button>
+            <div class="mt-6 flex gap-3">
+              <Button type="button" variant="outline" class="flex-1 rounded-xl py-2.5 text-xs font-bold uppercase tracking-widest" @click="showProjectModal = false">
+                Cancel
+              </Button>
+              <Button type="button" :disabled="projectForm.processing" class="flex-1 rounded-xl py-2.5 text-xs font-bold uppercase tracking-widest shadow-lg shadow-accent/20" @click="createProject">
+                Create
+              </Button>
             </div>
           </div>
         </div>
@@ -400,24 +416,28 @@ const colorPresets = [
     <Teleport to="body">
       <div v-if="showTagModal" class="fixed inset-0 z-50 flex items-center justify-center p-4" @click.self="showTagModal = false">
         <div class="absolute inset-0 bg-black/60 backdrop-blur-sm" />
-        <div class="relative bg-white dark:bg-gray-800 rounded-2xl shadow-2xl max-w-md w-full border border-gray-200 dark:border-gray-700 overflow-hidden">
-          <div class="absolute top-0 left-0 right-0 h-1 bg-blue-600" />
+        <div class="relative bg-surface-raised rounded-2xl shadow-2xl max-w-md w-full border border-border overflow-hidden">
+          <div class="absolute top-0 left-0 right-0 h-1 bg-accent" />
           <div class="p-6">
-            <h3 class="text-xl font-semibold font-sans text-gray-900 dark:text-white mb-4">New Tag</h3>
-            <div>
-              <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1.5">Tag name</label>
-              <input
+            <h3 class="text-xl font-bold text-primary mb-4">New Tag</h3>
+            <div class="space-y-1.5">
+              <Label class="block text-[10px] font-black text-secondary uppercase tracking-[0.2em]">Tag name</Label>
+              <Input
                 v-model="tagForm.name"
                 type="text"
                 placeholder="e.g., urgent, design"
-                class="w-full px-4 py-2.5 bg-gray-50/50 dark:bg-gray-700/50 border border-gray-300 dark:border-gray-600 rounded-lg text-gray-900 dark:text-white placeholder-gray-400 focus:outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-500"
-                :class="{ 'border-red-500': tagForm.errors.name }"
+                class="h-auto py-2.5"
+                :class="{ 'border-danger': tagForm.errors.name }"
               />
-              <p v-if="tagForm.errors.name" class="text-red-400 text-sm mt-1">{{ tagForm.errors.name }}</p>
+              <p v-if="tagForm.errors.name" class="text-danger text-xs">{{ tagForm.errors.name }}</p>
             </div>
-            <div class="flex gap-3 mt-6">
-              <button type="button" @click="showTagModal = false" class="flex-1 px-4 py-2.5 bg-gray-100 dark:bg-gray-700 text-gray-700 dark:text-gray-300 rounded-lg font-medium hover:bg-gray-200 dark:hover:bg-gray-600 transition-colors">Cancel</button>
-              <button type="button" @click="createTag" :disabled="tagForm.processing" class="flex-1 px-4 py-2.5 bg-blue-600 text-white rounded-lg font-medium hover:bg-blue-700 disabled:opacity-50 transition-colors">Create</button>
+            <div class="mt-6 flex gap-3">
+              <Button type="button" variant="outline" class="flex-1 rounded-xl py-2.5 text-xs font-bold uppercase tracking-widest" @click="showTagModal = false">
+                Cancel
+              </Button>
+              <Button type="button" :disabled="tagForm.processing" class="flex-1 rounded-xl py-2.5 text-xs font-bold uppercase tracking-widest shadow-lg shadow-accent/20" @click="createTag">
+                Create
+              </Button>
             </div>
           </div>
         </div>
